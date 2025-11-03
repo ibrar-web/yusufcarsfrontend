@@ -59,5 +59,9 @@
       hmr: {
         overlay: true,
       },
+      watch: {
+        usePolling: true,
+        ignored: ['**/node_modules/**', '**/.git/**']
+      }
     },
   });

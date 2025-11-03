@@ -56,5 +56,8 @@
     server: {
       port: 3000,
       open: true,
+      hmr: {
+        overlay: true,
+      },
     },
   });

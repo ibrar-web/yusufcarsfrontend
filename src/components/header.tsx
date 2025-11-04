@@ -31,7 +31,6 @@ import {
 import { AdminSignupDialog } from "./admin-signup-dialog";
 import { SupplierSignupDialog } from "./supplier-signup-dialog";
 import { RoleSelectionDialog } from "./role-selection-dialog";
-import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner@2.0.3";
 

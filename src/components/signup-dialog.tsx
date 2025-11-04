@@ -11,7 +11,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { User, Mail, Phone, CheckCircle, Lock, MapPin, Eye, EyeOff, Check, X } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface SignupDialogProps {
   open: boolean;

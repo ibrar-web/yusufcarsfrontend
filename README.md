@@ -1,7 +1,7 @@
 
-  # Design Minimalist Car Parts App
+  # Design Minimalist Car Parts App (dev)
 
-  This is a code bundle for Design Minimalist Car Parts App. The original project is available at https://www.figma.com/design/rPumm8RQoB050HMpf9rmK8/Design-Minimalist-Car-Parts-App.
+  This is a code bundle for Design Minimalist Car Parts App (dev). The original project is available at https://www.figma.com/design/DnrFFG3r4tVZ3gMoX57dyy/Design-Minimalist-Car-Parts-App--dev-.
 
   ## Running the code
 

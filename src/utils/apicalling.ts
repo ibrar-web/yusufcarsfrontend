@@ -3,14 +3,19 @@
  * Centralized HTTP client with request/response interceptors
  */
 
-import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 
 // Create axios instance with default config
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -21,16 +26,16 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add authentication token if available
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token');
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("auth_token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
 
     // Log request in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 API Request:', {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🚀 API Request:", {
         method: config.method?.toUpperCase(),
         url: config.url,
         data: config.data,
@@ -40,7 +45,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error('❌ Request Error:', error);
+    console.error("❌ Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -52,8 +57,8 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log response in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ API Response:', {
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ API Response:", {
         status: response.status,
         url: response.config.url,
         data: response.data,
@@ -69,7 +74,7 @@ apiClient.interceptors.response.use(
       const status = error.response.status;
       const data = error.response.data as any;
 
-      console.error('❌ API Error Response:', {
+      console.error("❌ API Error Response:", {
         status,
         url: error.config?.url,
         message: data?.message || error.message,
@@ -78,45 +83,45 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - clear auth and redirect to login
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user_role');
-            window.location.href = '/auth';
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("user_role");
+            window.location.href = "/auth";
           }
           break;
 
         case 403:
           // Forbidden - user doesn't have permission
-          console.error('Access denied');
+          console.error("Access denied");
           break;
 
         case 404:
           // Not found
-          console.error('Resource not found');
+          console.error("Resource not found");
           break;
 
         case 422:
           // Validation error
-          console.error('Validation error:', data?.errors);
+          console.error("Validation error:", data?.errors);
           break;
 
         case 500:
           // Server error
-          console.error('Server error');
+          console.error("Server error");
           break;
 
         default:
-          console.error('Unexpected error:', status);
+          console.error("Unexpected error:", status);
       }
     } else if (error.request) {
       // Request made but no response received
-      console.error('❌ Network Error:', {
-        message: 'No response from server',
+      console.error("❌ Network Error:", {
+        message: "No response from server",
         url: error.config?.url,
       });
     } else {
       // Error in request configuration
-      console.error('❌ Request Configuration Error:', error.message);
+      console.error("❌ Request Configuration Error:", error.message);
     }
 
     return Promise.reject(error);
@@ -135,7 +140,9 @@ export const handleApiSuccess = <T>(response: AxiosResponse<T>): T => {
  * API Error Handler
  * Standardized error handler with user-friendly messages
  */
-export const handleApiError = (error: AxiosError): {
+export const handleApiError = (
+  error: AxiosError
+): {
   message: string;
   status?: number;
   errors?: any;
@@ -143,17 +150,17 @@ export const handleApiError = (error: AxiosError): {
   if (error.response) {
     const data = error.response.data as any;
     return {
-      message: data?.message || 'An error occurred',
+      message: data?.message || "An error occurred",
       status: error.response.status,
       errors: data?.errors,
     };
   } else if (error.request) {
     return {
-      message: 'Network error. Please check your connection.',
+      message: "Network error. Please check your connection.",
     };
   } else {
     return {
-      message: error.message || 'An unexpected error occurred',
+      message: error.message || "An unexpected error occurred",
     };
   }
 };
@@ -162,28 +169,31 @@ export const handleApiError = (error: AxiosError): {
  * Typed API request wrapper with error handling
  */
 export const apiRequest = async <T>(
-  method: 'get' | 'post' | 'put' | 'patch' | 'delete',
+  method: "get" | "post" | "put" | "patch" | "delete",
   url: string,
   data?: any,
   config?: any
-): Promise<{ data?: T; error?: { message: string; status?: number; errors?: any } }> => {
+): Promise<{
+  data?: T;
+  error?: { message: string; status?: number; errors?: any };
+}> => {
   try {
     let response: AxiosResponse<T>;
 
     switch (method) {
-      case 'get':
+      case "get":
         response = await apiClient.get<T>(url, config);
         break;
-      case 'post':
+      case "post":
         response = await apiClient.post<T>(url, data, config);
         break;
-      case 'put':
+      case "put":
         response = await apiClient.put<T>(url, data, config);
         break;
-      case 'patch':
+      case "patch":
         response = await apiClient.patch<T>(url, data, config);
         break;
-      case 'delete':
+      case "delete":
         response = await apiClient.delete<T>(url, config);
         break;
     }

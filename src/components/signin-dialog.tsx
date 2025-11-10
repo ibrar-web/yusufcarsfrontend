@@ -11,12 +11,13 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
+import type { UserRole } from "@/utils/api";
 
 interface SignInDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignUpClick?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (role?: UserRole) => void;
 }
 
 export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: SignInDialogProps) {
@@ -35,7 +36,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
       setIsSubmitting(false);
       toast.success("Signed in successfully!");
       onOpenChange(false);
-      onSuccess?.();
+      onSuccess?.("user");
       // Reset form
       setFormData({
         email: "",
@@ -50,7 +51,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
     setTimeout(() => {
       toast.success("Signed in with Google!");
       onOpenChange(false);
-      onSuccess?.();
+      onSuccess?.("user");
     }, 1500);
   };
 

@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import type { UserRole } from "@/utils/api";
 import { SignupDialog } from "@/components/signup-dialog";
 import { SignInDialog } from "@/components/signin-dialog";
 import { ProfileDialog } from "@/components/profile-dialog";
@@ -67,6 +68,9 @@ type QuoteNotificationsPayload = {
 
 type QuoteNotificationsState = QuoteNotificationsPayload | null;
 
+const AUTH_COOKIE = "partsquote_authenticated";
+const ROLE_COOKIE = "partsquote_role";
+
 interface AppStateContextValue {
   handleNavigate: (
     page: string,
@@ -88,7 +92,7 @@ interface AppStateContextValue {
   setQuoteNotifications: (data: QuoteNotificationsPayload | null) => void;
   isAuthenticated: boolean;
   handleSignOut: () => void;
-  handleAuthSuccess: () => void;
+  handleAuthSuccess: (role?: UserRole) => void;
   selectedSupplierId: string | null;
   selectedQuoteId: string | null;
   vehicleData: VehicleData;
@@ -132,6 +136,13 @@ function pageToPath(page: Page) {
   return PAGE_PATHS[page] ?? "/";
 }
 
+const getInitialAuthState = () => {
+  if (typeof document === "undefined") {
+    return false;
+  }
+  return document.cookie.split(";").some((cookie) => cookie.trim().startsWith(`${AUTH_COOKIE}=true`));
+};
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
@@ -144,7 +155,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [orderConfirmationDialogOpen, setOrderConfirmationDialogOpen] =
     useState(false);
   const [trackOrderDialogOpen, setTrackOrderDialogOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getInitialAuthState);
   const [confirmedOrderDetails, setConfirmedOrderDetails] =
     useState<OrderDetails | null>(null);
   const [vehicleData, setVehicleData] = useState<VehicleData>(null);
@@ -153,7 +164,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [quoteNotifications, setQuoteNotifications] =
     useState<QuoteNotificationsState>(null);
 
-  const handleAuthSuccess = useCallback(() => {
+  const handleAuthSuccess = useCallback((role?: UserRole) => {
+    if (typeof document !== "undefined") {
+      document.cookie = `${AUTH_COOKIE}=true; path=/; max-age=86400`;
+      if (role) {
+        document.cookie = `${ROLE_COOKIE}=${role}; path=/; max-age=86400`;
+      }
+    }
     setIsAuthenticated(true);
   }, []);
 
@@ -162,6 +179,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setSelectedSupplierId(null);
     setSelectedQuoteId(null);
     setConfirmedOrderDetails(null);
+    if (typeof document !== "undefined") {
+      document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
+      document.cookie = `${ROLE_COOKIE}=; path=/; max-age=0`;
+    }
     router.push("/");
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });

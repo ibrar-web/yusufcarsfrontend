@@ -12,12 +12,13 @@ import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { User, Mail, Phone, CheckCircle, Lock, MapPin, Eye, EyeOff, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { authApi, type UserRole } from "@/utils/api";
 
 interface SignupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignInClick?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (role?: UserRole) => void;
 }
 
 export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: SignupDialogProps) {
@@ -35,6 +36,7 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
   const [acceptMarketing, setAcceptMarketing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountType, setAccountType] = useState<UserRole>("user");
 
   // Password strength checker
   const getPasswordStrength = (password: string) => {
@@ -83,7 +85,22 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      postcode: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setAcceptTerms(false);
+    setAcceptMarketing(false);
+    setErrors({});
+    setAccountType("user");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -93,25 +110,26 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await authApi.signup({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        postcode: formData.postcode.trim().toUpperCase(),
+        password: formData.password,
+        role: accountType,
+        marketingOptIn: acceptMarketing,
+      });
       toast.success("Account created successfully! Welcome to PartsQuote.");
       onOpenChange(false);
-      onSuccess?.();
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        postcode: "",
-        password: "",
-        confirmPassword: "",
-      });
-      setAcceptTerms(false);
-      setAcceptMarketing(false);
-      setErrors({});
-    }, 1500);
+      onSuccess?.(accountType);
+      resetForm();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create your account right now.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -120,7 +138,7 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
     setTimeout(() => {
       toast.success("Account created with Google!");
       onOpenChange(false);
-      onSuccess?.();
+      onSuccess?.(accountType);
     }, 1500);
   };
 
@@ -175,6 +193,29 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
               <span className="bg-white px-4 font-['Roboto'] text-[#94A3B8]" style={{ fontSize: "14px", lineHeight: "1.5" }}>
                 OR
               </span>
+            </div>
+          </div>
+
+          {/* Account Type */}
+          <div className="space-y-2">
+            <Label className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px", lineHeight: "1.5" }}>
+              Account Type
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              {(["user", "supplier"] as Array<UserRole>).map((role) => (
+                <button
+                  type="button"
+                  key={role}
+                  onClick={() => setAccountType(role)}
+                  className={`rounded-xl border-2 px-4 py-3 text-sm font-['Roboto'] transition-all ${
+                    accountType === role
+                      ? "border-[#F02801] bg-[#FFF1ED] text-[#0F172A]"
+                      : "border-[#E5E7EB] text-[#64748B] hover:border-[#F02801]"
+                  }`}
+                >
+                  {role === "user" ? "Customer" : "Supplier"}
+                </button>
+              ))}
             </div>
           </div>
 

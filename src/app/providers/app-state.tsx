@@ -107,7 +107,7 @@ const PAGE_PATHS: Record<Page, string> = {
   quotes: "/quotes",
   chat: "/chat",
   "supplier-profile": "/supplier-profile",
-  "supplier-onboarding": "/supplier-onboarding",
+  "supplier-onboarding": "/auth/supplier-onboarding",
   "supplier-dashboard": "/supplier/requests",
   "admin-dashboard": "/admin/overview",
   auth: "/auth",

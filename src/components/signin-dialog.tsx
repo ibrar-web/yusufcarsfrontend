@@ -20,28 +20,30 @@ interface SignInDialogProps {
   onSuccess?: (role?: UserRole) => void;
 }
 
-export function SignInDialog({
-  open,
-  onOpenChange,
-  onSignUpClick,
-  onSuccess,
-}: SignInDialogProps) {
+export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: SignInDialogProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accountType, setAccountType] = useState<UserRole>("user");
 
   const loginUser = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       setIsSubmitting(true);
       console.log("user Clicked", formData);
-      e.preventDefault();
-      const response = await authApi.login(formData);
+      const response = await authApi.login({ ...formData, role: accountType });
       console.log("response :", response);
+      toast.success("Signed in successfully!");
+      setFormData({ email: "", password: "" });
       onOpenChange(false);
-      onSuccess?.("user");
+      onSuccess?.(response.role ?? accountType);
     } catch (error) {
+      console.error(error);
+      const message =
+        error instanceof Error ? error.message : "Unable to sign you in right now.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -53,7 +55,7 @@ export function SignInDialog({
     setTimeout(() => {
       toast.success("Signed in with Google!");
       onOpenChange(false);
-      onSuccess?.("user");
+      onSuccess?.(accountType);
     }, 1500);
   };
 
@@ -116,6 +118,29 @@ export function SignInDialog({
               >
                 OR
               </span>
+            </div>
+          </div>
+
+          {/* Account Type */}
+          <div className="space-y-2">
+            <Label className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+              Account Type
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              {(["user", "supplier"] as Array<UserRole>).map((role) => (
+                <button
+                  type="button"
+                  key={role}
+                  onClick={() => setAccountType(role)}
+                  className={`rounded-xl border-2 px-4 py-3 text-sm font-['Roboto'] transition-all ${
+                    accountType === role
+                      ? "border-[#F02801] bg-[#FFF1ED] text-[#0F172A]"
+                      : "border-[#E5E7EB] text-[#64748B] hover:border-[#F02801]"
+                  }`}
+                >
+                  {role === "user" ? "Customer" : "Supplier"}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -2,10 +2,27 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 import { isPublicPath, requiredRoleForPath } from "@/utils/apiroutes";
 
-const AUTH_COOKIE = "partsquote_authenticated";
-const ROLE_COOKIE = "partsquote_role";
+const COOKIE_NAME = process.env.COOKIE_NAME ?? "access_token";
+const JOSE_SECRET = process.env.JOSE_SECRET ?? "super_secret_key_here_change_me";
+
+const encoder = new TextEncoder();
+const secret = encoder.encode(JOSE_SECRET);
+
+async function extractRoleFromToken(token?: string) {
+  if (!token) {
+    return null;
+  }
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    const role = typeof payload.role === "string" ? payload.role : null;
+    return role;
+  } catch {
+    return null;
+  }
+}
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,11 +39,11 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isAuthenticated = request.cookies.get(AUTH_COOKIE)?.value === "true";
-  const role = request.cookies.get(ROLE_COOKIE)?.value;
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const role = await extractRoleFromToken(token);
   const requiredRole = requiredRoleForPath(pathname);
 
-  if (!isAuthenticated || (requiredRole && role !== requiredRole)) {
+  if (!role || (requiredRole && role !== requiredRole)) {
     const url = new URL("/auth", request.url);
     url.searchParams.set("redirect", pathname);
     if (requiredRole) {

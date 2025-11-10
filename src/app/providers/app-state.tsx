@@ -68,9 +68,6 @@ type QuoteNotificationsPayload = {
 
 type QuoteNotificationsState = QuoteNotificationsPayload | null;
 
-const AUTH_COOKIE = "partsquote_authenticated";
-const ROLE_COOKIE = "partsquote_role";
-
 interface AppStateContextValue {
   handleNavigate: (
     page: string,
@@ -78,7 +75,7 @@ interface AppStateContextValue {
     vehicleInfo?: VehicleData,
     partData?: PartData,
     category?: string,
-    quoteData?: QuoteNotifications,
+    quoteData?: QuoteNotificationsPayload,
   ) => void;
   handleBack: () => void;
   handleStartChat: (quoteId: string, supplierId: string) => void;
@@ -136,13 +133,6 @@ function pageToPath(page: Page) {
   return PAGE_PATHS[page] ?? "/";
 }
 
-const getInitialAuthState = () => {
-  if (typeof document === "undefined") {
-    return false;
-  }
-  return document.cookie.split(";").some((cookie) => cookie.trim().startsWith(`${AUTH_COOKIE}=true`));
-};
-
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
@@ -155,7 +145,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [orderConfirmationDialogOpen, setOrderConfirmationDialogOpen] =
     useState(false);
   const [trackOrderDialogOpen, setTrackOrderDialogOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getInitialAuthState);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [confirmedOrderDetails, setConfirmedOrderDetails] =
     useState<OrderDetails | null>(null);
   const [vehicleData, setVehicleData] = useState<VehicleData>(null);
@@ -164,13 +154,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [quoteNotifications, setQuoteNotifications] =
     useState<QuoteNotificationsState>(null);
 
-  const handleAuthSuccess = useCallback((role?: UserRole) => {
-    if (typeof document !== "undefined") {
-      document.cookie = `${AUTH_COOKIE}=true; path=/; max-age=86400`;
-      if (role) {
-        document.cookie = `${ROLE_COOKIE}=${role}; path=/; max-age=86400`;
-      }
-    }
+  const handleAuthSuccess = useCallback((_role?: UserRole) => {
     setIsAuthenticated(true);
   }, []);
 
@@ -179,10 +163,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setSelectedSupplierId(null);
     setSelectedQuoteId(null);
     setConfirmedOrderDetails(null);
-    if (typeof document !== "undefined") {
-      document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
-      document.cookie = `${ROLE_COOKIE}=; path=/; max-age=0`;
-    }
     router.push("/");
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });

@@ -111,7 +111,7 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
     setIsSubmitting(true);
 
     try {
-      await authApi.signup({
+      const response = await authApi.signup({
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
@@ -122,9 +122,10 @@ export function SignupDialog({ open, onOpenChange, onSignInClick, onSuccess }: S
       });
       toast.success("Account created successfully! Welcome to PartsQuote.");
       onOpenChange(false);
-      onSuccess?.(accountType);
+      onSuccess?.(response.role ?? accountType);
       resetForm();
     } catch (error) {
+      console.error(error);
       const message = error instanceof Error ? error.message : "Unable to create your account right now.";
       toast.error(message);
     } finally {

@@ -14,13 +14,27 @@ export interface SignupPayload {
 }
 
 export interface SignupResponse {
-  message: string;
-  userId?: string;
+  id: string;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface LoginPayload {
   email: string;
   password: string;
+  role?: UserRole;
+}
+
+export interface LoginResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export const authApi = {
@@ -28,6 +42,6 @@ export const authApi = {
     return apiPost<SignupResponse>(apiRoutes.auth.signup, payload);
   },
   async login(payload: LoginPayload) {
-    return apiPost(apiRoutes.auth.login, payload);
+    return apiPost<LoginResponse>(apiRoutes.auth.login, payload);
   },
 };

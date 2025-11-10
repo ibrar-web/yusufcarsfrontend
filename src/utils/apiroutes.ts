@@ -59,3 +59,30 @@ export function requiredRoleForPath(pathname: string): AppRouteGroup | null {
 export function isPublicPath(pathname: string) {
   return matchRoute(pathname, publicRoutes as RouteTuple);
 }
+
+export const apiRoutes = {
+  auth: {
+    login: "/auth/login",
+    signup: "/auth/register",
+    logout: "/auth/logout",
+    profile: "/auth/profile",
+  },
+  user: {
+    notifications: "/user/notifications",
+    orders: "/user/orders",
+    requests: "/user/requests",
+  },
+  supplier: {
+    enquiries: "/supplier/enquiries",
+    dashboard: "/supplier/dashboard",
+    profile: "/supplier/profile",
+  },
+  admin: {
+    overview: "/admin/dashboard/overview",
+    suppliers: "/admin/suppliers",
+    users: "/admin/users",
+  },
+  website: {
+    heroContent: "/website/content/hero",
+  },
+} as const;

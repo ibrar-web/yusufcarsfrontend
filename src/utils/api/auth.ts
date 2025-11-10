@@ -1,4 +1,5 @@
-import { apiClient, authEndpoints } from "./axios-instance";
+import { apiPost } from "./axios-instance";
+import { apiRoutes } from "@/utils/apiroutes";
 
 export type UserRole = "user" | "supplier" | "admin";
 
@@ -24,11 +25,9 @@ export interface LoginPayload {
 
 export const authApi = {
   async signup(payload: SignupPayload) {
-    const { data } = await apiClient.post<SignupResponse>(authEndpoints.signup, payload);
-    return data;
+    return apiPost<SignupResponse>(apiRoutes.auth.signup, payload);
   },
   async login(payload: LoginPayload) {
-    const { data } = await apiClient.post(authEndpoints.login, payload);
-    return data;
+    return apiPost(apiRoutes.auth.login, payload);
   },
 };

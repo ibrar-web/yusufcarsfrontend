@@ -1,7 +1,8 @@
-import { apiClient } from "./axios-instance";
+import { apiGet } from "./axios-instance";
+import { apiRoutes } from "@/utils/apiroutes";
 
 export const adminApi = {
   getDashboardOverview() {
-    return apiClient.get("/admin/dashboard/overview");
+    return apiGet(apiRoutes.admin.overview);
   },
 };

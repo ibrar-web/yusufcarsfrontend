@@ -11,7 +11,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
-import type { UserRole } from "@/utils/api";
+import { authApi, type UserRole } from "@/utils/api";
 
 interface SignInDialogProps {
   open: boolean;
@@ -20,29 +20,31 @@ interface SignInDialogProps {
   onSuccess?: (role?: UserRole) => void;
 }
 
-export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: SignInDialogProps) {
+export function SignInDialog({
+  open,
+  onOpenChange,
+  onSignUpClick,
+  onSuccess,
+}: SignInDialogProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Signed in successfully!");
+  const loginUser = async (e: React.FormEvent) => {
+    try {
+      setIsSubmitting(true);
+      console.log("user Clicked", formData);
+      e.preventDefault();
+      const response = await authApi.login(formData);
+      console.log("response :", response);
       onOpenChange(false);
       onSuccess?.("user");
-      // Reset form
-      setFormData({
-        email: "",
-        password: "",
-      });
-    }, 1500);
+    } catch (error) {
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -59,10 +61,16 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle className="font-['Inter'] text-[#0F172A]" style={{ fontSize: "28px" }}>
+          <DialogTitle
+            className="font-['Inter'] text-[#0F172A]"
+            style={{ fontSize: "28px" }}
+          >
             Welcome Back
           </DialogTitle>
-          <DialogDescription className="font-['Roboto'] text-[#64748B]" style={{ fontSize: "15px" }}>
+          <DialogDescription
+            className="font-['Roboto'] text-[#64748B]"
+            style={{ fontSize: "15px" }}
+          >
             Sign in to your PartsQuote account
           </DialogDescription>
         </DialogHeader>
@@ -102,17 +110,24 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
               <div className="w-full border-t border-[#E5E7EB]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 font-['Roboto'] text-[#94A3B8]" style={{ fontSize: "13px" }}>
+              <span
+                className="bg-white px-4 font-['Roboto'] text-[#94A3B8]"
+                style={{ fontSize: "13px" }}
+              >
                 OR
               </span>
             </div>
           </div>
 
           {/* Sign In Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={loginUser} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="signin-email" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+              <Label
+                htmlFor="signin-email"
+                className="font-['Roboto'] text-[#0F172A]"
+                style={{ fontSize: "14px" }}
+              >
                 Email Address
               </Label>
               <div className="relative">
@@ -122,7 +137,9 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
                   type="email"
                   placeholder="john@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                   required
                 />
@@ -132,14 +149,22 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
             {/* Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="signin-password" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+                <Label
+                  htmlFor="signin-password"
+                  className="font-['Roboto'] text-[#0F172A]"
+                  style={{ fontSize: "14px" }}
+                >
                   Password
                 </Label>
                 <button
                   type="button"
                   className="font-['Roboto'] text-[#F02801] hover:underline"
                   style={{ fontSize: "13px" }}
-                  onClick={() => toast.info("Password reset link would be sent to your email")}
+                  onClick={() =>
+                    toast.info(
+                      "Password reset link would be sent to your email"
+                    )
+                  }
                 >
                   Forgot password?
                 </button>
@@ -151,7 +176,9 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
                   type="password"
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                   required
                 />
@@ -180,7 +207,10 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
 
             {/* Sign Up Link */}
             <div className="text-center pt-4 border-t border-[#E5E7EB]">
-              <p className="font-['Roboto'] text-[#64748B]" style={{ fontSize: "14px" }}>
+              <p
+                className="font-['Roboto'] text-[#64748B]"
+                style={{ fontSize: "14px" }}
+              >
                 Don't have an account?{" "}
                 <button
                   type="button"

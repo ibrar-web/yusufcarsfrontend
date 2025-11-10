@@ -19,6 +19,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { Car, ArrowLeft, Shield, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSignupDialog } from "../components/admin-signup-dialog";
+import { authApi } from "@/utils/api";
 
 interface AuthPageProps {
   onNavigate: (page: string) => void;
@@ -42,12 +43,15 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
 
   const [showAdminSignup, setShowAdminSignup] = useState(false);
 
-  const handleSignIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Signed in successfully!");
-    setTimeout(() => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      console.log("signInData: ", signInData);
+      const res = await authApi.login(signInData);
+      console.log("response: ", res);
+      toast.success("Signed in successfully!");
       onNavigate("quotes");
-    }, 1000);
+    } catch (error) {}
   };
 
   const handleSignUp = (e: React.FormEvent) => {

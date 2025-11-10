@@ -43,14 +43,14 @@ export default async function proxy(request: NextRequest) {
   const role = await extractRoleFromToken(token);
   const requiredRole = requiredRoleForPath(pathname);
 
-  if (!role || (requiredRole && role !== requiredRole)) {
-    const url = new URL("/auth", request.url);
-    url.searchParams.set("redirect", pathname);
-    if (requiredRole) {
-      url.searchParams.set("role", requiredRole);
-    }
-    return NextResponse.redirect(url);
-  }
+  // if (!role || (requiredRole && role !== requiredRole)) {
+  //   const url = new URL("/auth", request.url);
+  //   url.searchParams.set("redirect", pathname);
+  //   if (requiredRole) {
+  //     url.searchParams.set("role", requiredRole);
+  //   }
+  //   return NextResponse.redirect(url);
+  // }
 
   return NextResponse.next();
 }

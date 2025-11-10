@@ -66,7 +66,7 @@ import {
   adminSuppliers,
   adminUsers,
   adminWeeklyData,
-} from "@/page-components/admin-dashboard-data";
+} from "@/page-components/admin-dashboard/data";
 
 interface AdminDashboardPageProps {
   onNavigate: (page: string) => void;

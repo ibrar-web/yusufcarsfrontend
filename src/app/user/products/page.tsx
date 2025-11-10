@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductsPage } from "@/page-components/products";
+import { ProductsPage } from "./ProductsPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function Products() {

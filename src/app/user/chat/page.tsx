@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatPage } from "@/page-components/chat";
+import { ChatPage } from "./ChatPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function Chat() {
@@ -16,8 +16,8 @@ export default function Chat() {
     <ChatPage
       onNavigate={handleNavigate}
       onBack={handleBack}
-      supplierId={selectedSupplierId ?? undefined}
-      quoteId={selectedQuoteId ?? undefined}
+      supplierId={selectedSupplierId ?? null}
+      quoteId={selectedQuoteId ?? null}
       onSignupClick={openSignupDialog}
     />
   );

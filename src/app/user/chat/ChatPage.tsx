@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Header } from "../components/header";
-import { BackButton } from "../components/back-button";
-import { ChatBubble, TypingIndicator } from "../components/chat-bubble";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
-import { Card } from "../components/ui/card";
-import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { Header } from "@/components/header";
+import { BackButton } from "@/components/back-button";
+import { ChatBubble, TypingIndicator } from "@/components/chat-bubble";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Send,
   Paperclip,
@@ -18,9 +18,9 @@ import {
   ChevronRight,
   Info,
 } from "lucide-react";
-import { cn } from "../components/ui/utils";
-import { SupplierContactDialog } from "../components/supplier-contact-dialog";
-import { RatingDialog } from "../components/rating-dialog";
+import { cn } from "@/components/ui/utils";
+import { SupplierContactDialog } from "@/components/supplier-contact-dialog";
+import { RatingDialog } from "@/components/rating-dialog";
 
 interface ChatPageProps {
   onNavigate: (page: string, supplierId?: string) => void;

@@ -1,6 +1,6 @@
 "use client";
 
-import { HistoryPage } from "@/page-components/history";
+import { HistoryPage } from "./HistoryPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function History() {

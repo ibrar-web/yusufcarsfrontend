@@ -1,6 +1,6 @@
 "use client";
 
-import { NotificationsPage } from "@/page-components/notifications";
+import { NotificationsPage } from "./NotificationsPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function Notifications() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { QuotesPage } from "@/page-components/quotes";
+import { QuotesPage } from "./QuotesPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function Quotes() {

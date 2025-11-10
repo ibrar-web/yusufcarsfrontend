@@ -1,25 +1,25 @@
 import { useState } from "react";
-import { Header } from "../components/header";
-import { QuoteCard } from "../components/quote-card";
-import { OrderPlacedDialog } from "../components/order-placed-dialog";
-import { SupplierDetailsDialog } from "../components/supplier-details-dialog";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
+import { Header } from "@/components/header";
+import { QuoteCard } from "@/components/quote-card";
+import { OrderPlacedDialog } from "@/components/order-placed-dialog";
+import { SupplierDetailsDialog } from "@/components/supplier-details-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../components/ui/sheet";
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "@/components/ui/table";
 import { Grid, List, Search, X, Check, Star, MapPin, Clock, Shield } from "lucide-react";
 
 interface QuotesPageProps {

@@ -10,7 +10,7 @@ import {
   adminInquiries,
   adminPendingSuppliers,
   adminStats,
-} from "@/page-components/admin-dashboard-data";
+} from "@/page-components/admin-dashboard/data";
 import {
   Building2,
   FileWarning,

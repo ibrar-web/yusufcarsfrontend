@@ -1,6 +1,6 @@
 "use client";
 
-import { SuppliersListPage } from "@/page-components/suppliers-list";
+import { SuppliersListPage } from "./SuppliersListPage";
 import { useAppState } from "@/app/providers/app-state";
 
 export default function SuppliersList() {

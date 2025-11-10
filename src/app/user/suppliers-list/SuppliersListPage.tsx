@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Header } from "../components/header";
-import { Footer } from "../components/footer";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "../components/ui/dialog";
+} from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
   CheckCircle, 

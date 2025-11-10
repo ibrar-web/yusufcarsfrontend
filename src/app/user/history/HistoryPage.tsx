@@ -1,9 +1,9 @@
-import { Header } from "../components/header";
-import { Footer } from "../components/footer";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
-import { OrderDetailsDialog } from "../components/order-details-dialog";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { OrderDetailsDialog } from "@/components/order-details-dialog";
 import { 
   Search, 
   Filter, 
@@ -24,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "@/components/ui/select";
 
 interface HistoryPageProps {
   onNavigate: (page: string) => void;

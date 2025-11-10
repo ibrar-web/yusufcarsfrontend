@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { Header } from "../components/header";
-import { Footer } from "../components/footer";
-import { BackButton } from "../components/back-button";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { BackButton } from "@/components/back-button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
   DialogDescription 
-} from "../components/ui/dialog";
+} from "@/components/ui/dialog";
 import { Search, ShoppingCart, ArrowLeft, Package, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 

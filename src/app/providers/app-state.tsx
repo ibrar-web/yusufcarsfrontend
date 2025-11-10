@@ -109,7 +109,7 @@ const PAGE_PATHS: Record<Page, string> = {
   "supplier-profile": "/supplier-profile",
   "supplier-onboarding": "/supplier-onboarding",
   "supplier-dashboard": "/supplier/requests",
-  "admin-dashboard": "/admin-dashboard",
+  "admin-dashboard": "/admin/overview",
   auth: "/auth",
   "how-it-works": "/how-it-works",
   suppliers: "/suppliers",

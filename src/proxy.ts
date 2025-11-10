@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isPublicPath, requiredRoleForPath } from "@/utils/routes";
+import { isPublicPath, requiredRoleForPath } from "@/utils/apiroutes";
 
 const AUTH_COOKIE = "partsquote_authenticated";
 const ROLE_COOKIE = "partsquote_role";

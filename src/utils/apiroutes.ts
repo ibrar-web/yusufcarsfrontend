@@ -23,7 +23,15 @@ export const userRoutes = [
   "/suppliers-list",
 ] as const;
 
-export const supplierRoutes = ["/supplier-dashboard", "/supplier-onboarding"] as const;
+export const supplierRoutes = [
+  "/supplier",
+  "/supplier/onboarding",
+  "/supplier/requests",
+  "/supplier/quotes",
+  "/supplier/analytics",
+  "/supplier/messages",
+  "/supplier/profile",
+] as const;
 
 export const adminRoutes = ["/admin-dashboard"] as const;
 

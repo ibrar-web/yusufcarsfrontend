@@ -48,11 +48,12 @@ import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner";
 import { SignInDialog } from "./signin-dialog";
+import { useAppState } from "@/app/providers/app-state";
 
 interface HeaderProps {
-  onNavigate: (page: string) => void;
   currentPage?: string;
   sticky?: boolean;
+  onNavigate?: (page: string) => void;
   onSignupClick?: () => void;
   isAuthenticated?: boolean;
   onSignOut?: () => void;
@@ -62,16 +63,33 @@ interface HeaderProps {
 }
 
 export function Header({
-  onNavigate,
   currentPage,
   sticky = true,
+  onNavigate,
   onSignupClick,
-  isAuthenticated = false,
+  isAuthenticated,
   onSignOut,
   onProfileClick,
   onNotificationClick,
   onTrackOrderClick,
 }: HeaderProps) {
+  const {
+    handleNavigate,
+    openSignupDialog,
+    isAuthenticated: appIsAuthenticated,
+    handleSignOut,
+    openProfileDialog,
+    openNotificationDialog,
+    openTrackOrderDialog,
+  } = useAppState();
+
+  const navigate = onNavigate ?? handleNavigate;
+  const handleSignup = onSignupClick ?? openSignupDialog;
+  const authenticated = isAuthenticated ?? appIsAuthenticated;
+  const signOut = onSignOut ?? handleSignOut;
+  const profileClick = onProfileClick ?? openProfileDialog;
+  const notificationClick = onNotificationClick ?? openNotificationDialog;
+  const trackOrderClick = onTrackOrderClick ?? openTrackOrderDialog;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignup] = useState(false);
@@ -129,7 +147,7 @@ export function Header({
       }
     }
     setShowRegistrationDialog(false);
-    onNavigate("request-flow");
+    navigate("request-flow");
     if (entryMethod === "plate") {
       toast.success(`Vehicle ${registrationNumber} found`);
     } else {
@@ -144,8 +162,20 @@ export function Header({
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
-      setSelectedRole(role);
-      setShowSignIn(true);
+      console.log("role :", role);
+      // setSelectedRole(role);
+      // setShowSignIn(true);
+      if (role === "user") {
+        if (handleSignup) {
+          handleSignup();
+        } else {
+          navigate("auth");
+        }
+      } else if (role === "supplier") {
+        setShowSignIn(true);
+      } else if (role === "admin") {
+        setShowAdminSignup(true);
+      }
     } catch (error) {}
   };
 
@@ -178,7 +208,7 @@ export function Header({
         >
           {/* Logo */}
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("home")}
             className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group"
           >
             <div
@@ -205,7 +235,7 @@ export function Header({
               {navLinks.map((link) => (
                 <button
                   key={link.id}
-                  onClick={() => onNavigate(link.page)}
+                onClick={() => navigate(link.page)}
                   className={cn(
                     "font-['Roboto'] text-primary hover:text-subtle-ink transition-all duration-200 font-medium",
                     currentPage === link.page && "text-subtle-ink"
@@ -220,13 +250,13 @@ export function Header({
           {/* Desktop Actions - Hidden on portal pages */}
           {!isPortalPage && (
             <div className="hidden lg:flex items-center gap-3">
-              {!isAuthenticated ? (
+              {!authenticated ? (
                 <Button
                   variant="outline"
                   onClick={() => setShowRoleSelection(true)}
                   className="rounded-full"
                 >
-                  Sign In
+                  Sign Up
                 </Button>
               ) : (
                 <DropdownMenu>
@@ -246,7 +276,7 @@ export function Header({
                     {/* Notifications Header */}
                     <div
                       className="px-3 py-2 border-b border-[#E5E7EB] cursor-pointer hover:bg-[#F1F5F9] transition-colors"
-                      onClick={() => onNavigate("quotes")}
+                      onClick={() => navigate("quotes")}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -271,12 +301,12 @@ export function Header({
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={() => onTrackOrderClick?.()}>
+                    <DropdownMenuItem onClick={() => trackOrderClick?.()}>
                       <Package className="mr-2 h-4 w-4" />
                       Track Order
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => onNavigate("chat")}
+                      onClick={() => navigate("chat")}
                       className="relative"
                     >
                       <MessageSquare className="mr-2 h-4 w-4" />
@@ -289,14 +319,14 @@ export function Header({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        onNavigate("history");
+                        navigate("history");
                         toast.success("Viewing order history");
                       }}
                     >
                       <History className="mr-2 h-4 w-4" />
                       History
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onProfileClick}>
+                    <DropdownMenuItem onClick={profileClick}>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
@@ -610,7 +640,7 @@ export function Header({
                 <button
                   key={link.id}
                   onClick={() => {
-                    onNavigate(link.page);
+                    navigate(link.page);
                     setMobileMenuOpen(false);
                   }}
                   className={cn(
@@ -622,7 +652,7 @@ export function Header({
                 </button>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                {!isAuthenticated ? (
+                {!authenticated ? (
                   <Button
                     variant="outline"
                     className="w-full"
@@ -631,7 +661,7 @@ export function Header({
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Sign In
+                    Sign Up
                   </Button>
                 ) : (
                   <>
@@ -644,7 +674,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        onNavigate("vehicle-confirmation");
+                        navigate("vehicle-confirmation");
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -655,7 +685,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        onTrackOrderClick?.();
+                        trackOrderClick?.();
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -666,7 +696,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        onNavigate("chat");
+                        navigate("chat");
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -677,7 +707,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        onProfileClick?.();
+                        profileClick?.();
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -700,7 +730,7 @@ export function Header({
                 <Button
                   className="w-full"
                   onClick={() => {
-                    onNavigate("request-flow");
+                    navigate("request-flow");
                     setMobileMenuOpen(false);
                   }}
                 >
@@ -722,7 +752,7 @@ export function Header({
           );
           // Navigate to admin dashboard after successful signup
           setTimeout(() => {
-            onNavigate("admin-dashboard");
+            navigate("admin-dashboard");
           }, 1500);
         }}
       />
@@ -732,14 +762,14 @@ export function Header({
         open={showRoleSelection}
         onOpenChange={setShowRoleSelection}
         onSelectRole={handleRoleSelection}
-        onNavigate={onNavigate}
+        onNavigate={navigate}
       />
       <SignInDialog
         open={showSignIn}
         onOpenChange={setShowSignIn}
         onSuccess={() => {
           // After successful sign in, navigate to supplier dashboard
-          onNavigate?.("supplier-dashboard");
+          navigate("supplier-dashboard");
         }}
       />
       {/* Sign Out Confirmation Dialog */}
@@ -747,8 +777,8 @@ export function Header({
         open={showSignOutDialog}
         onOpenChange={setShowSignOutDialog}
         onConfirm={() => {
-          if (onSignOut) {
-            onSignOut();
+          if (signOut) {
+            signOut();
           }
         }}
       />

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import { Footer } from "@/components/footer";
 import { NumberPlateInput } from "@/components/number-plate-input";

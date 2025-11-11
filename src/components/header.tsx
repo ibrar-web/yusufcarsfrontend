@@ -43,11 +43,11 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { AdminSignupDialog } from "./admin-signup-dialog";
-import { SupplierSignupDialog } from "./supplier-signup-dialog";
 import { RoleSelectionDialog } from "./role-selection-dialog";
 import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner";
+import { SignInDialog } from "./signin-dialog";
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
@@ -75,7 +75,8 @@ export function Header({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignup] = useState(false);
-  const [showSupplierSignup, setShowSupplierSignup] = useState(false);
+  const [selectedrole, setSelectedRole] = useState("");
+  const [showSignIn, setShowSignIn] = useState(false);
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -142,18 +143,10 @@ export function Header({
   };
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
-    console.log("role :", role);
-    if (role === "user") {
-      if (onSignupClick) {
-        onSignupClick();
-      } else {
-        onNavigate("auth");
-      }
-    } else if (role === "supplier") {
-      setShowSupplierSignup(true);
-    } else if (role === "admin") {
-      setShowAdminSignup(true);
-    }
+    try {
+      setSelectedRole(role);
+      setShowSignIn(true);
+    } catch (error) {}
   };
 
   const navLinks = [
@@ -233,7 +226,7 @@ export function Header({
                   onClick={() => setShowRoleSelection(true)}
                   className="rounded-full"
                 >
-                  Sign Up
+                  Sign In
                 </Button>
               ) : (
                 <DropdownMenu>
@@ -638,7 +631,7 @@ export function Header({
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Sign Up
+                    Sign In
                   </Button>
                 ) : (
                   <>
@@ -734,21 +727,6 @@ export function Header({
         }}
       />
 
-      {/* Supplier Signup Dialog */}
-      <SupplierSignupDialog
-        open={showSupplierSignup}
-        onOpenChange={setShowSupplierSignup}
-        onSuccess={() => {
-          toast.success(
-            "Supplier registration submitted successfully! We'll contact you within 2-3 business days."
-          );
-          // Navigate to supplier dashboard after successful signup
-          setTimeout(() => {
-            onNavigate("supplier-dashboard");
-          }, 1500);
-        }}
-      />
-
       {/* Role Selection Dialog */}
       <RoleSelectionDialog
         open={showRoleSelection}
@@ -756,7 +734,14 @@ export function Header({
         onSelectRole={handleRoleSelection}
         onNavigate={onNavigate}
       />
-
+      <SignInDialog
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
+        onSuccess={() => {
+          // After successful sign in, navigate to supplier dashboard
+          onNavigate?.("supplier-dashboard");
+        }}
+      />
       {/* Sign Out Confirmation Dialog */}
       <SignOutDialog
         open={showSignOutDialog}

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 import { supplierQuotes, type SupplierQuote } from "@/page-components/supplier-dashboard/data";
 import { Calendar, CheckCircle, Clock, DollarSign, Hash, MessageSquare, User, Wrench, XCircle } from "lucide-react";
 import { toast } from "sonner";

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 import {
   adminAbuseReports,
   adminInquiries,

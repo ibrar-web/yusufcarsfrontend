@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 import { supplierMessages } from "@/page-components/supplier-dashboard/data";
 import { MessageSquare } from "lucide-react";
 

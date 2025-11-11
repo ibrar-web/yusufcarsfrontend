@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { CheckCircle, Upload, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function SupplierOnboardingPage() {
   const { handleNavigate } = useAppState();

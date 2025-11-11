@@ -1,7 +1,7 @@
 "use client";
 
 import { SuppliersListPage } from "./SuppliersListPage";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function SuppliersList() {
   const {

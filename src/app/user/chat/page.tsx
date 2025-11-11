@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatPage } from "./ChatPage";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function Chat() {
   const {

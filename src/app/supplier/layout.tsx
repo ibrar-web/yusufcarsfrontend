@@ -8,7 +8,7 @@ import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings } from "luc
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 import { supplierMessages, supplierQuotes, supplierRequests } from "@/page-components/supplier-dashboard/data";
 
 interface SupplierLayoutProps {

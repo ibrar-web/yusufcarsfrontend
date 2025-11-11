@@ -1,7 +1,7 @@
 "use client";
 
 import { NotificationsPage } from "./NotificationsPage";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function Notifications() {
   const {

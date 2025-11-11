@@ -1,7 +1,7 @@
 "use client";
 
 import { PartsSelectionPage } from "@/page-components/parts-selection";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function PartsSelection() {
   const { handleNavigate, openSignupDialog, vehicleData } = useAppState();

@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthPage } from "@/page-components/auth";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function Auth() {
   const { handleNavigate } = useAppState();

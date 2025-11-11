@@ -50,8 +50,14 @@ import { RoleSelectionDialog } from "./role-selection-dialog";
 import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner";
-import { SignInDialog } from "./signin-dialog";
-import { useAppState } from "@/app/providers/app-state";
+import { SignInDialog } from "@/components/signin-dialog";
+import { SignupDialog } from "@/components/signup-dialog";
+import { ProfileDialog } from "@/components/profile-dialog";
+import { NotificationDialog } from "@/components/notification-dialog";
+import { OrderConfirmationDialog } from "@/components/order-confirmation-dialog";
+import { TrackOrderDialog } from "@/components/track-order-dialog";
+import { useAppStore } from "@/stores/app-store";
+import { useAppState } from "@/hooks/use-app-state";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -86,10 +92,26 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     openProfileDialog,
     openNotificationDialog,
     openTrackOrderDialog,
+    handleAuthSuccess,
   } = useAppState();
   const pathname = usePathname() ?? "/";
   const currentPage = resolveCurrentPage(pathname);
-
+  const {
+    signupDialogOpen,
+    setSignupDialogOpen,
+    signinDialogOpen,
+    setSigninDialogOpen,
+    profileDialogOpen,
+    setProfileDialogOpen,
+    notificationDialogOpen,
+    setNotificationDialogOpen,
+    orderConfirmationDialogOpen,
+    setOrderConfirmationDialogOpen,
+    trackOrderDialogOpen,
+    setTrackOrderDialogOpen,
+    quoteNotifications,
+    confirmedOrderDetails,
+  } = useAppStore();
   const navigate = handleNavigate;
   const handleSignup = openSignupDialog;
   const authenticated = appIsAuthenticated;
@@ -97,7 +119,6 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignup] = useState(false);
   const [selectedrole, setSelectedRole] = useState("");
-  const [showSignIn, setShowSignIn] = useState(false);
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -166,8 +187,8 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
       console.log("role :", role);
-      // setSelectedRole(role);
-      // setShowSignIn(true);
+      setSelectedRole(role);
+      setShowSignIn(true);
       if (role === "user") {
         if (handleSignup) {
           handleSignup();
@@ -175,7 +196,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           navigate("auth");
         }
       } else if (role === "supplier") {
-        setShowSignIn(true);
+        setSigninDialogOpen(true);
       } else if (role === "admin") {
         setShowAdminSignup(true);
       }
@@ -767,14 +788,57 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         onSelectRole={handleRoleSelection}
         onNavigate={navigate}
       />
+
+      <SignupDialog
+        open={signupDialogOpen}
+        onOpenChange={setSignupDialogOpen}
+        onSignInClick={() => {
+          setSignupDialogOpen(false);
+          setSigninDialogOpen(true);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
+
       <SignInDialog
-        open={showSignIn}
-        onOpenChange={setShowSignIn}
-        onSuccess={() => {
-          // After successful sign in, navigate to supplier dashboard
-          navigate("supplier-dashboard");
+        open={signinDialogOpen}
+        onOpenChange={setSigninDialogOpen}
+        onSignUpClick={() => {
+          setSigninDialogOpen(false);
+          setSignupDialogOpen(true);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
+
+      <ProfileDialog
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
+
+      <NotificationDialog
+        open={notificationDialogOpen}
+        onOpenChange={setNotificationDialogOpen}
+        quoteNotifications={quoteNotifications}
+        onNavigate={navigate}
+      />
+
+      <OrderConfirmationDialog
+        open={orderConfirmationDialogOpen}
+        onOpenChange={setOrderConfirmationDialogOpen}
+        orderDetails={confirmedOrderDetails}
+        onNavigate={navigate}
+        onTrackOrder={() => {
+          setOrderConfirmationDialogOpen(false);
+          setTrackOrderDialogOpen(true);
         }}
       />
+
+      <TrackOrderDialog
+        open={trackOrderDialogOpen}
+        onOpenChange={setTrackOrderDialogOpen}
+        orderDetails={confirmedOrderDetails}
+        onNavigate={navigate}
+      />
+
       {/* Sign Out Confirmation Dialog */}
       <SignOutDialog
         open={showSignOutDialog}

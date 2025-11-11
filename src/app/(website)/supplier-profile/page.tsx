@@ -1,7 +1,7 @@
 "use client";
 
 import { SupplierProfilePage } from "@/page-components/supplier-profile";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 export default function SupplierProfile() {
   const { handleNavigate, openSignupDialog, selectedSupplierId } =

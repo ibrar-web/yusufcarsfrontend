@@ -43,7 +43,7 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useAppState } from "@/app/providers/app-state";
+import { useAppState } from "@/hooks/use-app-state";
 
 type ActiveSupplier = (typeof adminSuppliers)[number];
 type PendingSupplier = (typeof adminPendingSuppliers)[number];

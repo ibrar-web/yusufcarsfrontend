@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Roboto } from "next/font/google";
 import "@/index.css";
 import "@/styles/globals.css";
-import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,7 +30,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <Providers>{children}</Providers>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

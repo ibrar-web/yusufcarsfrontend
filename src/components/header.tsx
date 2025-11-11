@@ -14,12 +14,9 @@ import {
   Bell,
   Package,
   History,
-  MapPin,
-  Filter,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import {
@@ -57,6 +54,7 @@ import { OrderConfirmationDialog } from "@/components/order/order-confirmation-d
 import { TrackOrderDialog } from "@/components/order/track-order-dialog";
 import { useAppStore } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
+import { UserRole } from "@/utils/api";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -126,7 +124,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignin] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
-  const [selectedrole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("");
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -212,8 +210,8 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const handleSignupClick = () => {
     try {
       console.log("sing up cliked :");
-      if (selectedrole == "user") setSignupDialogOpen(true);
-      else if (selectedrole == "supplier") navigate("supplier-onboarding");
+      if (selectedRole == "user") setSignupDialogOpen(true);
+      else if (selectedRole == "supplier") navigate("supplier-onboarding");
     } catch (error) {}
   };
   const navLinks = [
@@ -817,7 +815,8 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         onOpenChange={setShowSignIn}
         onSignUpClick={handleSignupClick}
         onSuccess={handleAuthSuccess}
-
+        selectedRole={selectedRole}
+        setSelectedRole={setSelectedRole}
       />
 
       <ProfileDialog

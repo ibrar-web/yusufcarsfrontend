@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,31 +18,41 @@ interface SignInDialogProps {
   onOpenChange: (open: boolean) => void;
   onSignUpClick?: () => void;
   onSuccess?: (role?: UserRole) => void;
+  selectedRole: UserRole;
+  setSelectedRole: Dispatch<SetStateAction<UserRole>>;
 }
 
-export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: SignInDialogProps) {
+export function SignInDialog({
+  open,
+  onOpenChange,
+  onSignUpClick,
+  onSuccess,
+  selectedRole,
+  setSelectedRole,
+}: SignInDialogProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [accountType, setAccountType] = useState<UserRole>("user");
 
   const loginUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
       console.log("user Clicked", formData);
-      const response = await authApi.login({ ...formData, role: accountType });
+      const response = await authApi.login({ ...formData });
       console.log("response :", response);
       toast.success("Signed in successfully!");
       setFormData({ email: "", password: "" });
       onOpenChange(false);
-      onSuccess?.(response.role ?? accountType);
+      onSuccess?.(response.role ?? selectedRole);
     } catch (error) {
       console.error(error);
       const message =
-        error instanceof Error ? error.message : "Unable to sign you in right now.";
+        error instanceof Error
+          ? error.message
+          : "Unable to sign you in right now.";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -55,7 +65,7 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
     setTimeout(() => {
       toast.success("Signed in with Google!");
       onOpenChange(false);
-      onSuccess?.(accountType);
+      onSuccess?.(selectedRole);
     }, 1500);
   };
 
@@ -123,7 +133,10 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
 
           {/* Account Type */}
           <div className="space-y-2">
-            <Label className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+            <Label
+              className="font-['Roboto'] text-[#0F172A]"
+              style={{ fontSize: "14px" }}
+            >
               Account Type
             </Label>
             <div className="grid grid-cols-2 gap-3">
@@ -131,9 +144,9 @@ export function SignInDialog({ open, onOpenChange, onSignUpClick, onSuccess }: S
                 <button
                   type="button"
                   key={role}
-                  onClick={() => setAccountType(role)}
+                  onClick={() => setSelectedRole(role)}
                   className={`rounded-xl border-2 px-4 py-3 text-sm font-['Roboto'] transition-all ${
-                    accountType === role
+                    selectedRole === role
                       ? "border-[#F02801] bg-[#FFF1ED] text-[#0F172A]"
                       : "border-[#E5E7EB] text-[#64748B] hover:border-[#F02801]"
                   }`}

@@ -1,7 +1,7 @@
 import { apiPost } from "./axios-instance";
 import { apiRoutes } from "@/utils/apiroutes";
 
-export type UserRole = "user" | "supplier" | "admin";
+export type UserRole = "user" | "supplier" | "admin" | "";
 
 export interface SignupPayload {
   name: string;

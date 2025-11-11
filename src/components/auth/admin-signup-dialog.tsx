@@ -5,13 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Separator } from "./ui/separator";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Separator } from "../ui/separator";
 import { Shield, Mail, Lock, Key } from "lucide-react";
-import { cn } from "./ui/utils";
+import { cn } from "../ui/utils";
 
 // Google Icon SVG Component
 const GoogleIcon = () => (
@@ -29,7 +29,7 @@ interface AdminSignupDialogProps {
   onSuccess?: () => void;
 }
 
-export function AdminSignupDialog({
+export function AdminSignInDialog({
   open,
   onOpenChange,
   onSuccess,

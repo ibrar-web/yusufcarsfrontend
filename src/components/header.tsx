@@ -45,9 +45,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { AdminSignupDialog } from "./admin-signup-dialog";
+import { AdminSignInDialog } from "./auth/admin-signup-dialog";
 import { RoleSelectionDialog } from "./auth/role-selection-dialog";
-import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner";
 import { SignInDialog } from "@/components/auth/signin-dialog";
@@ -125,7 +124,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const authenticated = appIsAuthenticated;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showAdminSignup, setShowAdminSignup] = useState(false);
+  const [showAdminSignup, setShowAdminSignin] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [selectedrole, setSelectedRole] = useState("");
   const [showRoleSelection, setShowRoleSelection] = useState(false);
@@ -195,13 +194,21 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
+      console.log("role :", role);
       setSelectedRole(role);
-      if (role == "user" || "supplier") setShowSignIn(true);
-      if (role === "admin") {
-        setShowAdminSignup(true);
+
+      if (role === "user" || role === "supplier") {
+        setShowSignIn(true);
       }
-    } catch (error) {}
+
+      if (role === "admin") {
+        setShowAdminSignin(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   const handleSignupClick = () => {
     try {
       console.log("sing up cliked :");
@@ -773,9 +780,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
       </div>
 
       {/* Admin Signup Dialog */}
-      <AdminSignupDialog
+      <AdminSignInDialog
         open={showAdminSignup}
-        onOpenChange={setShowAdminSignup}
+        onOpenChange={setShowAdminSignin}
         onSuccess={() => {
           toast.success(
             "Admin access request submitted successfully! You'll receive an email once approved."
@@ -810,6 +817,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         onOpenChange={setShowSignIn}
         onSignUpClick={handleSignupClick}
         onSuccess={handleAuthSuccess}
+
       />
 
       <ProfileDialog

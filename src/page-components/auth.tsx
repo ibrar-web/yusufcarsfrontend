@@ -18,7 +18,7 @@ import {
 import { Checkbox } from "../components/ui/checkbox";
 import { Car, ArrowLeft, Shield, X } from "lucide-react";
 import { toast } from "sonner";
-import { AdminSignupDialog } from "../components/admin-signup-dialog";
+import { AdminSignupDialog } from "../components/auth/admin-signup-dialog";
 import { authApi } from "@/utils/api";
 
 interface AuthPageProps {

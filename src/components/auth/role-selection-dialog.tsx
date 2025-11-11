@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import { User, Building2, Shield } from "lucide-react";
 interface RoleSelectionDialogProps {
   open: boolean;

@@ -4,9 +4,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import { CheckCircle, Truck, Calendar, ArrowRight } from "lucide-react";
 
 interface OrderConfirmationDialogProps {

@@ -100,8 +100,6 @@ interface AppStore {
   setIsAuthenticated: (value: boolean) => void;
   signupDialogOpen: boolean;
   setSignupDialogOpen: (open: boolean) => void;
-  signinDialogOpen: boolean;
-  setSigninDialogOpen: (open: boolean) => void;
   profileDialogOpen: boolean;
   setProfileDialogOpen: (open: boolean) => void;
   notificationDialogOpen: boolean;
@@ -132,8 +130,6 @@ export const useAppStore = create<AppStore>()((set) => ({
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   signupDialogOpen: false,
   setSignupDialogOpen: (signupDialogOpen) => set({ signupDialogOpen }),
-  signinDialogOpen: false,
-  setSigninDialogOpen: (signinDialogOpen) => set({ signinDialogOpen }),
   profileDialogOpen: false,
   setProfileDialogOpen: (profileDialogOpen) => set({ profileDialogOpen }),
   notificationDialogOpen: false,

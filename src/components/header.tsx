@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "./ui/button";
 import { cn } from "./ui/utils";
@@ -46,16 +46,16 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { AdminSignupDialog } from "./admin-signup-dialog";
-import { RoleSelectionDialog } from "./role-selection-dialog";
+import { RoleSelectionDialog } from "./auth/role-selection-dialog";
 import { NumberPlateInput } from "./number-plate-input";
 import { SignOutDialog } from "./signout-dialog";
 import { toast } from "sonner";
-import { SignInDialog } from "@/components/signin-dialog";
-import { SignupDialog } from "@/components/signup-dialog";
+import { SignInDialog } from "@/components/auth/signin-dialog";
+import { SignupDialog } from "@/components/auth/signup-dialog";
 import { ProfileDialog } from "@/components/profile-dialog";
 import { NotificationDialog } from "@/components/notification-dialog";
-import { OrderConfirmationDialog } from "@/components/order-confirmation-dialog";
-import { TrackOrderDialog } from "@/components/track-order-dialog";
+import { OrderConfirmationDialog } from "@/components/order/order-confirmation-dialog";
+import { TrackOrderDialog } from "@/components/order/track-order-dialog";
 import { useAppStore } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
 
@@ -63,13 +63,26 @@ type HeaderProps = {
   sticky?: boolean;
 };
 
-const PATH_TO_PAGE: Array<{ match: (pathname: string) => boolean; page: string }> = [
+const PATH_TO_PAGE: Array<{
+  match: (pathname: string) => boolean;
+  page: string;
+}> = [
   { match: (path) => path === "/", page: "home" },
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
-  { match: (path) => path.startsWith("/suppliers" ) && !path.startsWith("/supplier"), page: "suppliers" },
-  { match: (path) => path.startsWith("/parts-selection"), page: "parts-selection" },
+  {
+    match: (path) =>
+      path.startsWith("/suppliers") && !path.startsWith("/supplier"),
+    page: "suppliers",
+  },
+  {
+    match: (path) => path.startsWith("/parts-selection"),
+    page: "parts-selection",
+  },
   { match: (path) => path.startsWith("/request-flow"), page: "request-flow" },
-  { match: (path) => path.startsWith("/vehicle-confirmation"), page: "vehicle-confirmation" },
+  {
+    match: (path) => path.startsWith("/vehicle-confirmation"),
+    page: "vehicle-confirmation",
+  },
   { match: (path) => path.startsWith("/contact"), page: "contact" },
   { match: (path) => path.startsWith("/about"), page: "about" },
   { match: (path) => path.startsWith("/products"), page: "products" },
@@ -99,8 +112,6 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const {
     signupDialogOpen,
     setSignupDialogOpen,
-    signinDialogOpen,
-    setSigninDialogOpen,
     profileDialogOpen,
     setProfileDialogOpen,
     notificationDialogOpen,
@@ -118,6 +129,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignup] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [selectedrole, setSelectedRole] = useState("");
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
@@ -196,7 +208,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           navigate("auth");
         }
       } else if (role === "supplier") {
-        setSigninDialogOpen(true);
+        // setSigninDialogOpen(true);
       } else if (role === "admin") {
         setShowAdminSignup(true);
       }
@@ -259,7 +271,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
               {navLinks.map((link) => (
                 <button
                   key={link.id}
-                onClick={() => navigate(link.page)}
+                  onClick={() => navigate(link.page)}
                   className={cn(
                     "font-['Roboto'] text-primary hover:text-subtle-ink transition-all duration-200 font-medium",
                     currentPage === link.page && "text-subtle-ink"
@@ -794,16 +806,16 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         onOpenChange={setSignupDialogOpen}
         onSignInClick={() => {
           setSignupDialogOpen(false);
-          setSigninDialogOpen(true);
+          setShowSignIn(true);
         }}
         onSuccess={handleAuthSuccess}
       />
 
       <SignInDialog
-        open={signinDialogOpen}
-        onOpenChange={setSigninDialogOpen}
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
         onSignUpClick={() => {
-          setSigninDialogOpen(false);
+          setShowSignIn(false);
           setSignupDialogOpen(true);
         }}
         onSuccess={handleAuthSuccess}

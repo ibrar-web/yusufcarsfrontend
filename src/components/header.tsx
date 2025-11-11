@@ -206,7 +206,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     try {
       console.log("sing up cliked :");
       if (selectedrole == "user") setSignupDialogOpen(true);
-      else if (selectedrole == "supplier") onNavigate("supplier-onboarding");
+      else if (selectedrole == "supplier") navigate("supplier-onboarding");
     } catch (error) {}
   };
   const navLinks = [

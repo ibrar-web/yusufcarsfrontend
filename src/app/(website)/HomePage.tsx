@@ -1,23 +1,22 @@
 import { useState, useEffect } from "react";
-import { Header } from "../components/header";
-import { Footer } from "../components/footer";
-import { NumberPlateInput } from "../components/number-plate-input";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
-import { CurvedDivider } from "../components/curved-divider";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
+import { Footer } from "@/components/footer";
+import { NumberPlateInput } from "@/components/number-plate-input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { CurvedDivider } from "@/components/curved-divider";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "../components/ui/dialog";
-import { Switch } from "../components/ui/switch";
-import { Label } from "../components/ui/label";
-import { RoleSelectionDialog } from "../components/role-selection-dialog";
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RoleSelectionDialog } from "@/components/role-selection-dialog";
 import {
   Search,
   FileText,
@@ -39,14 +38,14 @@ import {
   ShoppingCart,
   X,
 } from "lucide-react";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface HomePageProps {
@@ -389,16 +388,6 @@ export function HomePage({ onNavigate, onSignupClick, isAuthenticated, onSignOut
 
   return (
     <div className="min-h-screen">
-      <Header 
-        onNavigate={onNavigate} 
-        currentPage="home" 
-        onSignupClick={onSignupClick}
-        isAuthenticated={isAuthenticated}
-        onSignOut={onSignOut}
-        onProfileClick={onProfileClick}
-        onNotificationClick={onNotificationClick}
-        onTrackOrderClick={onTrackOrderClick}
-      />
 
       {/* Quote Notifications Banner */}
       {quoteNotifications && (

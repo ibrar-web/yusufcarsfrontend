@@ -192,8 +192,6 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
 
   return (
     <div className="min-h-screen">
-      <Header onNavigate={onNavigate} currentPage="about" />
-
       {/* Hero Section */}
       <section className="relative pt-24 pb-24 md:pt-28 md:pb-28 lg:pt-32 lg:pb-32 overflow-hidden">
         {/* Background Image */}

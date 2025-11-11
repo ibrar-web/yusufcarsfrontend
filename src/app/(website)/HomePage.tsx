@@ -70,18 +70,7 @@ interface HomePageProps {
   onDismissNotifications?: () => void;
 }
 
-export function HomePage({
-  onNavigate,
-  onSignupClick,
-  isAuthenticated,
-  onSignOut,
-  onProfileClick,
-  onNotificationClick,
-  onTrackOrderClick,
-  quoteNotifications,
-  onDismissNotifications,
-}: HomePageProps) {
-  const [numberPlate, setNumberPlate] = useState("");
+export function HomePage({ onNavigate }: HomePageProps) {
   const [scrollY, setScrollY] = useState(0);
 
   // Dual input system state
@@ -247,8 +236,6 @@ export function HomePage({
       inStock: true,
     },
   ];
-
-
 
   const handleLookup = () => {
     if (inputMode === "registration" && registrationNumber.length >= 6) {

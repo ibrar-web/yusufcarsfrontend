@@ -99,11 +99,9 @@ function resolveCurrentPage(pathname: string) {
 export function Header({ sticky = true }: HeaderProps = {}) {
   const {
     handleNavigate,
-    openSignupDialog,
     isAuthenticated: appIsAuthenticated,
     handleSignOut,
     openProfileDialog,
-    openNotificationDialog,
     openTrackOrderDialog,
     handleAuthSuccess,
   } = useAppState();
@@ -124,7 +122,6 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     confirmedOrderDetails,
   } = useAppStore();
   const navigate = handleNavigate;
-  const handleSignup = openSignupDialog;
   const authenticated = appIsAuthenticated;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -198,23 +195,20 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
-      console.log("role :", role);
       setSelectedRole(role);
-      setShowSignIn(true);
-      if (role === "user") {
-        if (handleSignup) {
-          handleSignup();
-        } else {
-          navigate("auth");
-        }
-      } else if (role === "supplier") {
-        // setSigninDialogOpen(true);
-      } else if (role === "admin") {
+      if (role == "user" || "supplier") setShowSignIn(true);
+      if (role === "admin") {
         setShowAdminSignup(true);
       }
     } catch (error) {}
   };
-
+  const handleSignupClick = () => {
+    try {
+      console.log("sing up cliked :");
+      if (selectedrole == "user") setSignupDialogOpen(true);
+      else if (selectedrole == "supplier") onNavigate("supplier-onboarding");
+    } catch (error) {}
+  };
   const navLinks = [
     { id: "nav-home", label: "Home", page: "home" },
     { id: "nav-how-it-works", label: "How It Works", page: "how-it-works" },
@@ -814,10 +808,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
       <SignInDialog
         open={showSignIn}
         onOpenChange={setShowSignIn}
-        onSignUpClick={() => {
-          setShowSignIn(false);
-          setSignupDialogOpen(true);
-        }}
+        onSignUpClick={handleSignupClick}
         onSuccess={handleAuthSuccess}
       />
 

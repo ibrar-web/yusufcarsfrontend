@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,10 @@ import {
 } from "@/components/ui/select";
 import { CheckCircle, Upload, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useAppState } from "@/app/providers/app-state";
 
-interface SupplierOnboardingPageProps {
-  onNavigate: (page: string) => void;
-}
-
-export default function SupplierOnboardingPage({ onNavigate }: SupplierOnboardingPageProps) {
+export default function SupplierOnboardingPage() {
+  const { handleNavigate } = useAppState();
   const [currentStep, setCurrentStep] = useState(0);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -130,7 +128,7 @@ export default function SupplierOnboardingPage({ onNavigate }: SupplierOnboardin
   const handleSubmit = () => {
     toast.success("Application submitted successfully! We'll review your details within 2-3 business days.");
     setTimeout(() => {
-      onNavigate("supplier-dashboard");
+      handleNavigate("supplier-dashboard");
     }, 2000);
   };
 
@@ -138,7 +136,7 @@ export default function SupplierOnboardingPage({ onNavigate }: SupplierOnboardin
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <Header onNavigate={onNavigate} />
+      <Header currentPage="supplier-onboarding" />
 
       <div className="max-w-[800px] mx-auto px-6 py-12">
         {/* Progress Header */}

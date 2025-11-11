@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from "./ui/button";
 import { cn } from "./ui/utils";
 import {
@@ -16,6 +18,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
@@ -50,29 +53,31 @@ import { toast } from "sonner";
 import { SignInDialog } from "./signin-dialog";
 import { useAppState } from "@/app/providers/app-state";
 
-interface HeaderProps {
-  currentPage?: string;
+type HeaderProps = {
   sticky?: boolean;
-  onNavigate?: (page: string) => void;
-  onSignupClick?: () => void;
-  isAuthenticated?: boolean;
-  onSignOut?: () => void;
-  onProfileClick?: () => void;
-  onNotificationClick?: () => void;
-  onTrackOrderClick?: () => void;
+};
+
+const PATH_TO_PAGE: Array<{ match: (pathname: string) => boolean; page: string }> = [
+  { match: (path) => path === "/", page: "home" },
+  { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
+  { match: (path) => path.startsWith("/suppliers" ) && !path.startsWith("/supplier"), page: "suppliers" },
+  { match: (path) => path.startsWith("/parts-selection"), page: "parts-selection" },
+  { match: (path) => path.startsWith("/request-flow"), page: "request-flow" },
+  { match: (path) => path.startsWith("/vehicle-confirmation"), page: "vehicle-confirmation" },
+  { match: (path) => path.startsWith("/contact"), page: "contact" },
+  { match: (path) => path.startsWith("/about"), page: "about" },
+  { match: (path) => path.startsWith("/products"), page: "products" },
+  { match: (path) => path.startsWith("/admin"), page: "admin-dashboard" },
+  { match: (path) => path.startsWith("/supplier"), page: "supplier-dashboard" },
+  { match: (path) => path.startsWith("/user"), page: "user-portal" },
+];
+
+function resolveCurrentPage(pathname: string) {
+  const entry = PATH_TO_PAGE.find(({ match }) => match(pathname));
+  return entry?.page;
 }
 
-export function Header({
-  currentPage,
-  sticky = true,
-  onNavigate,
-  onSignupClick,
-  isAuthenticated,
-  onSignOut,
-  onProfileClick,
-  onNotificationClick,
-  onTrackOrderClick,
-}: HeaderProps) {
+export function Header({ sticky = true }: HeaderProps = {}) {
   const {
     handleNavigate,
     openSignupDialog,
@@ -82,14 +87,12 @@ export function Header({
     openNotificationDialog,
     openTrackOrderDialog,
   } = useAppState();
+  const pathname = usePathname() ?? "/";
+  const currentPage = resolveCurrentPage(pathname);
 
-  const navigate = onNavigate ?? handleNavigate;
-  const handleSignup = onSignupClick ?? openSignupDialog;
-  const authenticated = isAuthenticated ?? appIsAuthenticated;
-  const signOut = onSignOut ?? handleSignOut;
-  const profileClick = onProfileClick ?? openProfileDialog;
-  const notificationClick = onNotificationClick ?? openNotificationDialog;
-  const trackOrderClick = onTrackOrderClick ?? openTrackOrderDialog;
+  const navigate = handleNavigate;
+  const handleSignup = openSignupDialog;
+  const authenticated = appIsAuthenticated;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showAdminSignup, setShowAdminSignup] = useState(false);
@@ -301,7 +304,7 @@ export function Header({
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={() => trackOrderClick?.()}>
+                    <DropdownMenuItem onClick={() => openTrackOrderDialog()}>
                       <Package className="mr-2 h-4 w-4" />
                       Track Order
                     </DropdownMenuItem>
@@ -326,7 +329,7 @@ export function Header({
                       <History className="mr-2 h-4 w-4" />
                       History
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={profileClick}>
+                    <DropdownMenuItem onClick={openProfileDialog}>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
@@ -685,7 +688,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        trackOrderClick?.();
+                        openTrackOrderDialog();
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -707,7 +710,7 @@ export function Header({
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        profileClick?.();
+                        openProfileDialog();
                         setMobileMenuOpen(false);
                       }}
                     >
@@ -776,11 +779,7 @@ export function Header({
       <SignOutDialog
         open={showSignOutDialog}
         onOpenChange={setShowSignOutDialog}
-        onConfirm={() => {
-          if (signOut) {
-            signOut();
-          }
-        }}
+        onConfirm={handleSignOut}
       />
     </header>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Header } from "../components/header";
+import { Header } from "@/components/header";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
@@ -205,7 +205,7 @@ export function PartsSelectionPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <Header onNavigate={onNavigate} currentPage="parts-selection" />
+      <Header />
 
       <div className="max-w-[1200px] mx-auto px-12 sm:px-16 lg:px-24 py-8 sm:py-12">
         {/* Breadcrumb */}

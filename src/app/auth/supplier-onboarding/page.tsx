@@ -41,6 +41,8 @@ export default function SupplierOnboardingPage() {
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [formData, setFormData] = useState({
     role: "supplier" as const,
+    firstName: "",
+    marketingOptIn: false,
     email: "",
     phone: "",
     contactPostcode: "",
@@ -147,11 +149,49 @@ export default function SupplierOnboardingPage() {
     }
 
     try {
-      const { confirmPassword, ...rest } = formData;
-      const response = await authApi.signup({
-        ...rest,
-        fullName: formData.businessName,
-      });
+      const formDataToSend = new FormData();
+
+      const appendIfValue = (key: string, value: unknown) => {
+        if (value === undefined || value === null) return;
+        if (value instanceof File) {
+          formDataToSend.append(key, value);
+          return;
+        }
+        formDataToSend.append(key, String(value));
+      };
+
+      // append all text fields
+      appendIfValue("role", formData.role);
+      appendIfValue("firstName", formData.firstName);
+      appendIfValue("email", formData.email);
+      appendIfValue("phone", formData.phone);
+      appendIfValue("fullName", formData.businessName);
+      appendIfValue("businessName", formData.businessName);
+      appendIfValue("password", formData.password);
+      appendIfValue("tradingAs", formData.tradingAs);
+      appendIfValue("businessType", formData.businessType);
+      appendIfValue("vatNumber", formData.vatNumber);
+      appendIfValue("description", formData.description);
+      appendIfValue("addressLine1", formData.addressLine1);
+      appendIfValue("addressLine2", formData.addressLine2);
+      appendIfValue("city", formData.city);
+      appendIfValue("postCode", formData.postcode);
+      appendIfValue("contactPostcode", formData.contactPostcode);
+      appendIfValue("serviceRadius", formData.serviceRadius);
+      appendIfValue("termsAccepted", formData.termsAccepted);
+      appendIfValue("gdprConsent", formData.gdprConsent);
+      appendIfValue("marketingOptIn", formData.marketingOptIn);
+      formData.categories.forEach((cat) => appendIfValue("categories[]", cat));
+
+      // append files if provided
+      if (formData.companyRegDoc instanceof File) {
+        formDataToSend.append("companyRegDoc", formData.companyRegDoc);
+      }
+      if (formData.insuranceDoc instanceof File) {
+        formDataToSend.append("insuranceDoc", formData.insuranceDoc);
+      }
+
+      const response = await authApi.signup(formDataToSend);
       toast.success(
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
@@ -242,6 +282,21 @@ export default function SupplierOnboardingPage() {
             {currentStep === 0 && (
               <>
                 <div className="space-y-2">
+                  <Label htmlFor="firstName">
+                    First Name <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="firstName"
+                    placeholder="Your first name"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      handleInputChange("firstName", e.target.value)
+                    }
+                    className="h-12"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="businessName">
                     Business Name <span className="text-danger">*</span>
                   </Label>
@@ -308,7 +363,9 @@ export default function SupplierOnboardingPage() {
                     type="password"
                     placeholder="Create a strong password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className="h-12"
                   />
                 </div>
@@ -365,21 +422,64 @@ export default function SupplierOnboardingPage() {
                   </p>
                 </div>
 
-                <div className="flex items-start gap-3 pt-2">
-                  <Checkbox
-                    id="gdpr-consent"
-                    checked={formData.gdprConsent}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("gdprConsent", checked)
-                    }
-                  />
-                  <label
-                    htmlFor="gdpr-consent"
-                    className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
-                  >
-                    I agree to be contacted about becoming a supplier and accept
-                    the Terms of Service and Privacy Policy.
-                  </label>
+                <div className="flex flex-col gap-3 pt-2">
+                  <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                    <Checkbox
+                      id="terms"
+                      checked={formData.termsAccepted}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("termsAccepted", checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="terms"
+                      className="text-sm font-normal cursor-pointer leading-relaxed"
+                    >
+                      I confirm that all information provided is accurate and I
+                      agree to the{" "}
+                      <button className="text-primary hover:underline">
+                        Terms & Conditions
+                      </button>{" "}
+                      and{" "}
+                      <button className="text-primary hover:underline">
+                        Supplier Agreement
+                      </button>
+                      .
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                    <Checkbox
+                      id="marketing"
+                      checked={formData.marketingOptIn}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("marketingOptIn", checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="marketing"
+                      className="text-sm font-normal cursor-pointer leading-relaxed"
+                    >
+                      Send me updates about special offers and new suppliers.
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                    <Checkbox
+                      id="gdpr-consent"
+                      checked={formData.gdprConsent}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("gdprConsent", checked === true)
+                      }
+                    />
+                    <label
+                      htmlFor="gdpr-consent"
+                      className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
+                    >
+                      I agree to be contacted about becoming a supplier and
+                      accept the Terms of Service and Privacy Policy.
+                    </label>
+                  </div>
                 </div>
               </>
             )}

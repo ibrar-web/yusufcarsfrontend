@@ -17,6 +17,7 @@ export interface SupplierSignupPayload {
   role: "supplier";
   email: string;
   phone: string;
+  firstName?: string;
   contactPostcode: string;
   businessName: string;
   fullName?: string;
@@ -38,6 +39,7 @@ export interface SupplierSignupPayload {
 }
 
 export type SignupPayload = CustomerSignupPayload | SupplierSignupPayload;
+export type SignupRequest = SignupPayload | FormData;
 
 export interface SignupResponse {
   id: string;
@@ -81,22 +83,32 @@ function buildSupplierFormData(payload: SupplierSignupPayload) {
   };
 
   Object.entries(payload).forEach(([key, value]) => appendValue(key, value));
+  appendValue("firstName", payload.firstName);
   appendValue("fullName", computedFullName);
 
   return formData;
 }
 
-function isSupplierPayload(payload: SignupPayload): payload is SupplierSignupPayload {
-  return payload.role === "supplier" && "businessName" in payload;
+function isSupplierPayload(payload: SignupRequest): payload is SupplierSignupPayload {
+  return typeof payload === "object" && "role" in payload && payload.role === "supplier";
+}
+
+function isFormDataPayload(payload: SignupRequest): payload is FormData {
+  return typeof FormData !== "undefined" && payload instanceof FormData;
 }
 
 export const authApi = {
-  async signup(payload: SignupPayload) {
+  async signup(payload: SignupRequest) {
     console.log("SignupPayload :", payload);
-    const body =
-      isSupplierPayload(payload) ? buildSupplierFormData(payload) : payload;
+
+    const body = (() => {
+      if (isFormDataPayload(payload)) return payload;
+      if (isSupplierPayload(payload)) return buildSupplierFormData(payload);
+      return payload;
+    })();
+
     const config =
-      isSupplierPayload(payload)
+      isFormDataPayload(body) || isSupplierPayload(payload)
         ? { headers: { "Content-Type": "multipart/form-data" } }
         : undefined;
 

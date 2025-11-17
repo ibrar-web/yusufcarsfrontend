@@ -33,12 +33,15 @@ import {
 import { CheckCircle, Upload, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
-import { authApi } from "@/utils/api";
+import { authApi, type UserRole } from "@/utils/api";
+import { SignInDialog } from "@/components/auth/signin-dialog";
 
 export default function SupplierOnboardingPage() {
-  const { handleNavigate } = useAppState();
+  const { handleNavigate, handleAuthSuccess } = useAppState();
   const [currentStep, setCurrentStep] = useState(0);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("supplier");
   const [formData, setFormData] = useState({
     role: "supplier" as const,
     firstName: "",
@@ -194,6 +197,8 @@ export default function SupplierOnboardingPage() {
       toast.success(
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
+      setSelectedRole("supplier");
+      setShowSignIn(true);
     } catch (error) {
       console.log(error);
     }
@@ -1067,6 +1072,15 @@ export default function SupplierOnboardingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SignInDialog
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
+        onSuccess={handleAuthSuccess}
+        onSignUpClick={() => setShowSignIn(false)}
+        selectedRole={selectedRole}
+        setSelectedRole={setSelectedRole}
+      />
     </div>
   );
 }

@@ -140,7 +140,7 @@ export function SignupDialog({
       });
       toast.success("Account created successfully! Welcome to PartsQuote.");
       onOpenChange(false);
-      onSuccess?.(response.role ?? accountType);
+      onSignInClick?.();
       resetForm();
     } catch (error) {
       console.error("error :", error);

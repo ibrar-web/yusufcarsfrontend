@@ -4,7 +4,7 @@ import { apiRoutes } from "@/utils/apiroutes";
 export type UserRole = "user" | "supplier" | "admin" | "";
 
 export interface SignupPayload {
-  name: string;
+  fullName: string;
   email: string;
   phone: string;
   postcode: string;

@@ -130,7 +130,7 @@ export function SignupDialog({
 
     try {
       const response = await authApi.signup({
-        name: formData.name.trim(),
+        fullName: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
         postcode: formData.postcode.trim().toUpperCase(),

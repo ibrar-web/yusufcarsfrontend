@@ -98,6 +98,8 @@ interface AppStore {
   setSelectedQuoteId: (id: string | null) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
+  userRole: UserRole | null;
+  setUserRole: (role: UserRole | null) => void;
   signupDialogOpen: boolean;
   setSignupDialogOpen: (open: boolean) => void;
   profileDialogOpen: boolean;
@@ -128,6 +130,8 @@ export const useAppStore = create<AppStore>()((set) => ({
   setSelectedQuoteId: (selectedQuoteId) => set({ selectedQuoteId }),
   isAuthenticated: false,
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+  userRole: null,
+  setUserRole: (userRole) => set({ userRole }),
   signupDialogOpen: false,
   setSignupDialogOpen: (signupDialogOpen) => set({ signupDialogOpen }),
   profileDialogOpen: false,
@@ -152,5 +156,9 @@ export const useAppStore = create<AppStore>()((set) => ({
   confirmedOrderDetails: null,
   setConfirmedOrderDetails: (confirmedOrderDetails) =>
     set({ confirmedOrderDetails }),
-  handleAuthSuccess: () => set({ isAuthenticated: true }),
+  handleAuthSuccess: (role?: UserRole) =>
+    set({
+      isAuthenticated: true,
+      userRole: role ?? null,
+    }),
 }));

@@ -97,6 +97,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const {
     handleNavigate,
     isAuthenticated: appIsAuthenticated,
+    userRole,
     handleSignOut,
     openProfileDialog,
     openTrackOrderDialog,
@@ -141,6 +142,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   // Mock notification counts - in real app these would come from props or state management
   const notificationCount = 3;
   const unreadMessages = 2;
+  const isAdmin = userRole === "admin";
+  const isSupplier = userRole === "supplier";
+  const hasDashboardRole = isAdmin || isSupplier;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -292,6 +296,21 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   className="rounded-full"
                 >
                   Sign Up
+                </Button>
+              ) : hasDashboardRole ? (
+                <Button
+                  variant="outline"
+                  className="rounded-lg gap-2 relative"
+                  onClick={() =>
+                    hasDashboardRole &&
+                    navigate(isAdmin ? "admin-dashboard" : "supplier-dashboard")
+                  }
+                >
+                  <User className="h-4 w-4" />
+                  {isAdmin ? "Admin Dashboard" : "Supplier Dashboard"}
+                  {notificationCount > 0 && (
+                    <span className="absolute top-0 right-0 h-2 w-2 bg-[#F02801] rounded-full border-2 border-white"></span>
+                  )}
                 </Button>
               ) : (
                 <DropdownMenu>
@@ -698,6 +717,31 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   >
                     Sign Up
                   </Button>
+                ) : hasDashboardRole ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        navigate(isAdmin ? "admin-dashboard" : "supplier-dashboard");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      {isAdmin ? "Admin Dashboard" : "Supplier Dashboard"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-[#F02801] hover:text-[#D22301] hover:bg-[#FEF2F2]"
+                      onClick={() => {
+                        setShowSignOutDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <div className="pb-2 border-b border-border mb-2">

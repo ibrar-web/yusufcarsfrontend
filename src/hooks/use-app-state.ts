@@ -28,7 +28,9 @@ export function useAppState() {
     setConfirmedOrderDetails,
     confirmedOrderDetails,
     isAuthenticated,
+    userRole,
     setIsAuthenticated,
+    setUserRole,
     handleAuthSuccess,
     vehicleData,
     setVehicleData,
@@ -127,6 +129,7 @@ export function useAppState() {
 
   const handleSignOut = useCallback(() => {
     setIsAuthenticated(false);
+    setUserRole(null);
     setSelectedSupplierId(null);
     setSelectedQuoteId(null);
     setConfirmedOrderDetails(null);
@@ -140,6 +143,7 @@ export function useAppState() {
     setSelectedSupplierId,
     setSelectedQuoteId,
     setConfirmedOrderDetails,
+    setUserRole,
   ]);
 
   const authSuccess = useCallback(
@@ -160,6 +164,7 @@ export function useAppState() {
     clearQuoteNotifications,
     setQuoteNotifications,
     isAuthenticated,
+    userRole,
     handleSignOut,
     handleAuthSuccess: authSuccess,
     selectedSupplierId,

@@ -5,8 +5,7 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { isPublicPath, requiredRoleForPath } from "@/utils/apiroutes";
 
-const COOKIE_NAME = process.env.COOKIE_NAME ?? "access_token";
-const JOSE_SECRET = process.env.JOSE_SECRET ?? "super_secret_key_here_change_me";
+const JOSE_SECRET = process.env.JOSE_SECRET;
 
 const encoder = new TextEncoder();
 const secret = encoder.encode(JOSE_SECRET);
@@ -39,7 +38,7 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const token = request.cookies.get("access_token")?.value;
   const role = await extractRoleFromToken(token);
   const requiredRole = requiredRoleForPath(pathname);
 
@@ -56,5 +55,7 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+  ],
 };

@@ -3,6 +3,8 @@ import { Inter, Roboto } from "next/font/google";
 import "@/index.css";
 import "@/styles/globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { getSessionFromCookie } from "@/actions/session";
+import { SessionHydrator } from "@/components/session-hydrator";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,14 +24,17 @@ export const metadata: Metadata = {
   description: "Get instant quotes for car parts from verified UK suppliers",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSessionFromCookie();
+
   return (
     <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
+        <SessionHydrator session={session} />
         {children}
         <Toaster />
       </body>

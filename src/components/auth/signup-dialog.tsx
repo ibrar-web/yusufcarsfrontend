@@ -42,7 +42,7 @@ export function SignupDialog({
     name: "",
     email: "",
     phone: "",
-    postcode: "",
+    postCode: "",
     password: "",
     confirmPassword: "",
   });
@@ -82,9 +82,9 @@ export function SignupDialog({
     }
 
     if (
-      !formData.postcode.match(/^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i)
+      !formData.postCode.match(/^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i)
     ) {
-      newErrors.postcode = "Please enter a valid UK postcode";
+      newErrors.postCode = "Please enter a valid UK postCode";
     }
 
     if (formData.password.length < 8) {
@@ -108,7 +108,7 @@ export function SignupDialog({
       name: "",
       email: "",
       phone: "",
-      postcode: "",
+      postCode: "",
       password: "",
       confirmPassword: "",
     });
@@ -133,7 +133,7 @@ export function SignupDialog({
         fullName: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
-        postcode: formData.postcode.trim().toUpperCase(),
+        postCode: formData.postCode.trim().toUpperCase(),
         password: formData.password,
         role: accountType,
         marketingOptIn: acceptMarketing,
@@ -374,7 +374,7 @@ export function SignupDialog({
               {/* Postcode */}
               <div className="space-y-2">
                 <Label
-                  htmlFor="postcode"
+                  htmlFor="postCode"
                   className="font-['Roboto'] text-[#0F172A]"
                   style={{ fontSize: "14px", lineHeight: "1.5" }}
                 >
@@ -383,32 +383,32 @@ export function SignupDialog({
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
                   <Input
-                    id="postcode"
+                    id="postCode"
                     type="text"
                     placeholder="SW1A 1AA"
-                    value={formData.postcode}
+                    value={formData.postCode}
                     onChange={(e) => {
                       setFormData({
                         ...formData,
-                        postcode: e.target.value.toUpperCase(),
+                        postCode: e.target.value.toUpperCase(),
                       });
-                      if (errors.postcode)
-                        setErrors({ ...errors, postcode: "" });
+                      if (errors.postCode)
+                        setErrors({ ...errors, postCode: "" });
                     }}
                     className={`pl-10 h-12 rounded-xl border-2 ${
-                      errors.postcode ? "border-[#F02801]" : "border-[#E5E7EB]"
+                      errors.postCode ? "border-[#F02801]" : "border-[#E5E7EB]"
                     } focus:border-[#F02801] font-['Roboto']`}
                     style={{ fontSize: "16px", lineHeight: "1.5" }}
                     required
                   />
                 </div>
-                {errors.postcode && (
+                {errors.postCode && (
                   <p
                     className="font-['Roboto'] text-[#F02801] flex items-center gap-1"
                     style={{ fontSize: "14px", lineHeight: "1.5" }}
                   >
                     <X className="h-3 w-3" />
-                    {errors.postcode}
+                    {errors.postCode}
                   </p>
                 )}
               </div>

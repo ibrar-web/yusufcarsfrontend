@@ -7,7 +7,7 @@ export interface CustomerSignupPayload {
   fullName: string;
   email: string;
   phone: string;
-  postcode: string;
+  postCode: string;
   password: string;
   role: UserRole;
   marketingOptIn?: boolean;

@@ -2,7 +2,13 @@
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,12 +33,14 @@ import {
 import { CheckCircle, Upload, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
+import { authApi } from "@/utils/api";
 
 export default function SupplierOnboardingPage() {
   const { handleNavigate } = useAppState();
   const [currentStep, setCurrentStep] = useState(0);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [formData, setFormData] = useState({
+    role: "supplier" as const,
     email: "",
     phone: "",
     contactPostcode: "",
@@ -125,11 +133,16 @@ export default function SupplierOnboardingPage() {
     }
   };
 
-  const handleSubmit = () => {
-    toast.success("Application submitted successfully! We'll review your details within 2-3 business days.");
-    setTimeout(() => {
-      handleNavigate("supplier-dashboard");
-    }, 2000);
+  const handleSubmit = async () => {
+    try {
+      const response = await authApi.signup({...formData});
+      toast.success(
+        "Application submitted successfully! We'll review your details within 2-3 business days."
+      );
+    } catch (error) {}
+    // setTimeout(() => {
+    //   handleNavigate("supplier-dashboard");
+    // }, 2000);
   };
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100;
@@ -145,7 +158,8 @@ export default function SupplierOnboardingPage() {
             <div>
               <h1 className="text-3xl mb-2">Become a Supplier</h1>
               <p className="text-subtle-ink">
-                Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+                Step {currentStep + 1} of {steps.length}:{" "}
+                {steps[currentStep].title}
               </p>
             </div>
             <Badge variant="secondary" className="px-4 py-2">
@@ -160,7 +174,9 @@ export default function SupplierOnboardingPage() {
           {steps.map((step, index) => (
             <div
               key={step.id}
-              className={`flex items-center ${index < steps.length - 1 ? "flex-1" : ""}`}
+              className={`flex items-center ${
+                index < steps.length - 1 ? "flex-1" : ""
+              }`}
             >
               <div className="flex flex-col items-center min-w-[120px]">
                 <div
@@ -179,7 +195,11 @@ export default function SupplierOnboardingPage() {
                   )}
                 </div>
                 <div className="text-xs text-center hidden md:block">
-                  <div className={index <= currentStep ? "font-medium" : "text-subtle-ink"}>
+                  <div
+                    className={
+                      index <= currentStep ? "font-medium" : "text-subtle-ink"
+                    }
+                  >
                     {step.title}
                   </div>
                 </div>
@@ -213,7 +233,9 @@ export default function SupplierOnboardingPage() {
                     id="businessName"
                     placeholder="Your business name"
                     value={formData.businessName}
-                    onChange={(e) => handleInputChange("businessName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("businessName", e.target.value)
+                    }
                     className="h-12"
                   />
                 </div>
@@ -254,7 +276,9 @@ export default function SupplierOnboardingPage() {
                     id="contactPostcode"
                     placeholder="SW1A 1AA"
                     value={formData.contactPostcode}
-                    onChange={(e) => handleInputChange("contactPostcode", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("contactPostcode", e.target.value)
+                    }
                     className="h-12"
                   />
                 </div>
@@ -264,31 +288,51 @@ export default function SupplierOnboardingPage() {
                     Categories you supply <span className="text-danger">*</span>
                   </Label>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {['Engine', 'Brakes', 'Suspension', 'Electrical', 'Bodywork', 'Interior'].map((cat) => (
+                    {[
+                      "Engine",
+                      "Brakes",
+                      "Suspension",
+                      "Electrical",
+                      "Bodywork",
+                      "Interior",
+                    ].map((cat) => (
                       <Badge
                         key={cat}
                         onClick={() => handleCategoryToggle(cat)}
                         className={`rounded-full px-3 py-1.5 cursor-pointer transition-all ${
                           formData.categories.includes(cat)
-                            ? 'bg-primary text-white border-primary'
-                            : 'bg-muted text-subtle-ink border-muted hover:bg-primary/10 hover:border-primary/50'
+                            ? "bg-primary text-white border-primary"
+                            : "bg-muted text-subtle-ink border-muted hover:bg-primary/10 hover:border-primary/50"
                         }`}
                       >
-                        <span className="font-['Roboto']" style={{ fontSize: '13px' }}>{cat}</span>
+                        <span
+                          className="font-['Roboto']"
+                          style={{ fontSize: "13px" }}
+                        >
+                          {cat}
+                        </span>
                       </Badge>
                     ))}
                   </div>
-                  <p className="text-xs text-subtle-ink">Select all categories that apply</p>
+                  <p className="text-xs text-subtle-ink">
+                    Select all categories that apply
+                  </p>
                 </div>
 
                 <div className="flex items-start gap-3 pt-2">
                   <Checkbox
                     id="gdpr-consent"
                     checked={formData.gdprConsent}
-                    onCheckedChange={(checked) => handleInputChange("gdprConsent", checked)}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("gdprConsent", checked)
+                    }
                   />
-                  <label htmlFor="gdpr-consent" className="text-sm text-subtle-ink leading-relaxed cursor-pointer">
-                    I agree to be contacted about becoming a supplier and accept the Terms of Service and Privacy Policy.
+                  <label
+                    htmlFor="gdpr-consent"
+                    className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
+                  >
+                    I agree to be contacted about becoming a supplier and accept
+                    the Terms of Service and Privacy Policy.
                   </label>
                 </div>
               </>
@@ -303,7 +347,9 @@ export default function SupplierOnboardingPage() {
                     id="tradingAs"
                     placeholder="e.g. AutoParts Direct"
                     value={formData.tradingAs}
-                    onChange={(e) => handleInputChange("tradingAs", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("tradingAs", e.target.value)
+                    }
                   />
                 </div>
 
@@ -313,7 +359,9 @@ export default function SupplierOnboardingPage() {
                   </Label>
                   <Select
                     value={formData.businessType}
-                    onValueChange={(value) => handleInputChange("businessType", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("businessType", value)
+                    }
                   >
                     <SelectTrigger id="businessType">
                       <SelectValue placeholder="Select business type" />
@@ -322,7 +370,9 @@ export default function SupplierOnboardingPage() {
                       <SelectItem value="sole-trader">Sole Trader</SelectItem>
                       <SelectItem value="partnership">Partnership</SelectItem>
                       <SelectItem value="limited">Limited Company</SelectItem>
-                      <SelectItem value="plc">Public Limited Company</SelectItem>
+                      <SelectItem value="plc">
+                        Public Limited Company
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -333,9 +383,13 @@ export default function SupplierOnboardingPage() {
                     id="vatNumber"
                     placeholder="GB123456789"
                     value={formData.vatNumber}
-                    onChange={(e) => handleInputChange("vatNumber", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("vatNumber", e.target.value)
+                    }
                   />
-                  <p className="text-xs text-subtle-ink">Optional if not VAT registered</p>
+                  <p className="text-xs text-subtle-ink">
+                    Optional if not VAT registered
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -347,9 +401,13 @@ export default function SupplierOnboardingPage() {
                     placeholder="Tell customers about your business, experience, and what makes you stand out..."
                     rows={5}
                     value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
                   />
-                  <p className="text-xs text-subtle-ink">This will appear on your profile page</p>
+                  <p className="text-xs text-subtle-ink">
+                    This will appear on your profile page
+                  </p>
                 </div>
               </>
             )}
@@ -365,7 +423,9 @@ export default function SupplierOnboardingPage() {
                     id="addressLine1"
                     placeholder="Street address"
                     value={formData.addressLine1}
-                    onChange={(e) => handleInputChange("addressLine1", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("addressLine1", e.target.value)
+                    }
                   />
                 </div>
 
@@ -375,7 +435,9 @@ export default function SupplierOnboardingPage() {
                     id="addressLine2"
                     placeholder="Apartment, suite, etc."
                     value={formData.addressLine2}
-                    onChange={(e) => handleInputChange("addressLine2", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("addressLine2", e.target.value)
+                    }
                   />
                 </div>
 
@@ -388,7 +450,9 @@ export default function SupplierOnboardingPage() {
                       id="city"
                       placeholder="e.g. Birmingham"
                       value={formData.city}
-                      onChange={(e) => handleInputChange("city", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("city", e.target.value)
+                      }
                     />
                   </div>
 
@@ -400,7 +464,9 @@ export default function SupplierOnboardingPage() {
                       id="postcode"
                       placeholder="e.g. B1 1AA"
                       value={formData.postcode}
-                      onChange={(e) => handleInputChange("postcode", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("postcode", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -411,7 +477,9 @@ export default function SupplierOnboardingPage() {
                   </Label>
                   <Select
                     value={formData.serviceRadius}
-                    onValueChange={(value) => handleInputChange("serviceRadius", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("serviceRadius", value)
+                    }
                   >
                     <SelectTrigger id="serviceRadius">
                       <SelectValue />
@@ -438,7 +506,10 @@ export default function SupplierOnboardingPage() {
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     {categories.map((category) => (
-                      <div key={category} className="flex items-center space-x-2">
+                      <div
+                        key={category}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={category}
                           checked={formData.categories.includes(category)}
@@ -462,7 +533,8 @@ export default function SupplierOnboardingPage() {
               <>
                 <div className="space-y-3">
                   <Label htmlFor="companyReg">
-                    Company Registration Document <span className="text-danger">*</span>
+                    Company Registration Document{" "}
+                    <span className="text-danger">*</span>
                   </Label>
                   <p className="text-sm text-subtle-ink">
                     Certificate of incorporation or business registration
@@ -474,7 +546,10 @@ export default function SupplierOnboardingPage() {
                       className="hidden"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) =>
-                        handleFileUpload("companyRegDoc", e.target.files?.[0] || null)
+                        handleFileUpload(
+                          "companyRegDoc",
+                          e.target.files?.[0] || null
+                        )
                       }
                     />
                     <label htmlFor="companyReg" className="cursor-pointer">
@@ -485,8 +560,12 @@ export default function SupplierOnboardingPage() {
                         </p>
                       ) : (
                         <>
-                          <p className="font-medium mb-1">Click to upload document</p>
-                          <p className="text-sm text-subtle-ink">PDF, JPG or PNG (max 5MB)</p>
+                          <p className="font-medium mb-1">
+                            Click to upload document
+                          </p>
+                          <p className="text-sm text-subtle-ink">
+                            PDF, JPG or PNG (max 5MB)
+                          </p>
                         </>
                       )}
                     </label>
@@ -495,10 +574,12 @@ export default function SupplierOnboardingPage() {
 
                 <div className="space-y-3">
                   <Label htmlFor="insurance">
-                    Public Liability Insurance <span className="text-danger">*</span>
+                    Public Liability Insurance{" "}
+                    <span className="text-danger">*</span>
                   </Label>
                   <p className="text-sm text-subtle-ink">
-                    Proof of current public liability insurance (minimum £1M cover)
+                    Proof of current public liability insurance (minimum £1M
+                    cover)
                   </p>
                   <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer">
                     <input
@@ -507,7 +588,10 @@ export default function SupplierOnboardingPage() {
                       className="hidden"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) =>
-                        handleFileUpload("insuranceDoc", e.target.files?.[0] || null)
+                        handleFileUpload(
+                          "insuranceDoc",
+                          e.target.files?.[0] || null
+                        )
                       }
                     />
                     <label htmlFor="insurance" className="cursor-pointer">
@@ -518,8 +602,12 @@ export default function SupplierOnboardingPage() {
                         </p>
                       ) : (
                         <>
-                          <p className="font-medium mb-1">Click to upload document</p>
-                          <p className="text-sm text-subtle-ink">PDF, JPG or PNG (max 5MB)</p>
+                          <p className="font-medium mb-1">
+                            Click to upload document
+                          </p>
+                          <p className="text-sm text-subtle-ink">
+                            PDF, JPG or PNG (max 5MB)
+                          </p>
                         </>
                       )}
                     </label>
@@ -528,9 +616,9 @@ export default function SupplierOnboardingPage() {
 
                 <div className="bg-muted/50 rounded-xl p-4">
                   <p className="text-sm text-subtle-ink">
-                    <strong className="text-ink">Note:</strong> All documents will be reviewed by
-                    our team within 2-3 business days. We may contact you if additional
-                    verification is needed.
+                    <strong className="text-ink">Note:</strong> All documents
+                    will be reviewed by our team within 2-3 business days. We
+                    may contact you if additional verification is needed.
                   </p>
                 </div>
               </>
@@ -545,19 +633,27 @@ export default function SupplierOnboardingPage() {
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Business Name:</span>
-                        <span className="font-medium">{formData.businessName || "Not provided"}</span>
+                        <span className="font-medium">
+                          {formData.businessName || "Not provided"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Email:</span>
-                        <span className="font-medium">{formData.email || "Not provided"}</span>
+                        <span className="font-medium">
+                          {formData.email || "Not provided"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Phone:</span>
-                        <span className="font-medium">{formData.phone || "Not provided"}</span>
+                        <span className="font-medium">
+                          {formData.phone || "Not provided"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Postcode:</span>
-                        <span className="font-medium">{formData.contactPostcode || "Not provided"}</span>
+                        <span className="font-medium">
+                          {formData.contactPostcode || "Not provided"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -567,11 +663,15 @@ export default function SupplierOnboardingPage() {
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Business Type:</span>
-                        <span className="font-medium">{formData.businessType || "Not selected"}</span>
+                        <span className="font-medium">
+                          {formData.businessType || "Not selected"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">VAT Number:</span>
-                        <span className="font-medium">{formData.vatNumber || "Not provided"}</span>
+                        <span className="font-medium">
+                          {formData.vatNumber || "Not provided"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -594,7 +694,9 @@ export default function SupplierOnboardingPage() {
                         </span>
                       </div>
                       <div>
-                        <span className="text-subtle-ink block mb-2">Categories:</span>
+                        <span className="text-subtle-ink block mb-2">
+                          Categories:
+                        </span>
                         <div className="flex flex-wrap gap-2">
                           {formData.categories.map((cat) => (
                             <Badge key={cat} variant="secondary">
@@ -610,7 +712,9 @@ export default function SupplierOnboardingPage() {
                     <h3 className="font-semibold mb-3">Documents</h3>
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-subtle-ink">Company Registration:</span>
+                        <span className="text-subtle-ink">
+                          Company Registration:
+                        </span>
                         <span className="font-medium flex items-center gap-2">
                           {formData.companyRegDoc ? (
                             <>
@@ -647,10 +751,20 @@ export default function SupplierOnboardingPage() {
                       handleInputChange("termsAccepted", checked === true)
                     }
                   />
-                  <Label htmlFor="terms" className="text-sm font-normal cursor-pointer leading-relaxed">
-                    I confirm that all information provided is accurate and I agree to the{" "}
-                    <button className="text-primary hover:underline">Terms & Conditions</button> and{" "}
-                    <button className="text-primary hover:underline">Supplier Agreement</button>.
+                  <Label
+                    htmlFor="terms"
+                    className="text-sm font-normal cursor-pointer leading-relaxed"
+                  >
+                    I confirm that all information provided is accurate and I
+                    agree to the{" "}
+                    <button className="text-primary hover:underline">
+                      Terms & Conditions
+                    </button>{" "}
+                    and{" "}
+                    <button className="text-primary hover:underline">
+                      Supplier Agreement
+                    </button>
+                    .
                   </Label>
                 </div>
               </>
@@ -671,14 +785,14 @@ export default function SupplierOnboardingPage() {
           </Button>
 
           {currentStep < steps.length - 1 ? (
-            <Button 
+            <Button
               onClick={() => {
                 if (currentStep === 0) {
                   setShowWelcomeDialog(true);
                 } else {
                   handleNext();
                 }
-              }} 
+              }}
               className="gap-2"
             >
               Continue
@@ -701,10 +815,16 @@ export default function SupplierOnboardingPage() {
       <Dialog open={showWelcomeDialog} onOpenChange={setShowWelcomeDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-['Inter'] font-bold text-[#0F172A]" style={{ fontSize: '24px' }}>
+            <DialogTitle
+              className="font-['Inter'] font-bold text-[#0F172A]"
+              style={{ fontSize: "24px" }}
+            >
               Become a Supplier
             </DialogTitle>
-            <DialogDescription className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '14px' }}>
+            <DialogDescription
+              className="font-['Roboto'] text-[#64748B]"
+              style={{ fontSize: "14px" }}
+            >
               Join 2,500+ verified suppliers across the UK
             </DialogDescription>
           </DialogHeader>
@@ -713,25 +833,68 @@ export default function SupplierOnboardingPage() {
             {/* Registration Steps */}
             <div className="space-y-2.5 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#F02801] text-white flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold" style={{ fontSize: '12px' }}>1</div>
-                <span className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: '14px' }}>Contact Information</span>
+                <div
+                  className="w-6 h-6 rounded-full bg-[#F02801] text-white flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold"
+                  style={{ fontSize: "12px" }}
+                >
+                  1
+                </div>
+                <span
+                  className="font-['Roboto'] text-[#0F172A]"
+                  style={{ fontSize: "14px" }}
+                >
+                  Contact Information
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold" style={{ fontSize: '12px' }}>2</div>
-                <span className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '14px' }}>Business Details</span>
+                <div
+                  className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold"
+                  style={{ fontSize: "12px" }}
+                >
+                  2
+                </div>
+                <span
+                  className="font-['Roboto'] text-[#64748B]"
+                  style={{ fontSize: "14px" }}
+                >
+                  Business Details
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold" style={{ fontSize: '12px' }}>3</div>
-                <span className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '14px' }}>Service Area</span>
+                <div
+                  className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold"
+                  style={{ fontSize: "12px" }}
+                >
+                  3
+                </div>
+                <span
+                  className="font-['Roboto'] text-[#64748B]"
+                  style={{ fontSize: "14px" }}
+                >
+                  Service Area
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold" style={{ fontSize: '12px' }}>4</div>
-                <span className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '14px' }}>Documents</span>
+                <div
+                  className="w-6 h-6 rounded-full bg-[#E5E7EB] text-[#64748B] flex items-center justify-center flex-shrink-0 font-['Inter'] font-semibold"
+                  style={{ fontSize: "12px" }}
+                >
+                  4
+                </div>
+                <span
+                  className="font-['Roboto'] text-[#64748B]"
+                  style={{ fontSize: "14px" }}
+                >
+                  Documents
+                </span>
               </div>
             </div>
 
             {/* Time estimate */}
-            <p className="font-['Roboto'] text-[#64748B] text-center py-3" style={{ fontSize: '13px' }}>
+            <p
+              className="font-['Roboto'] text-[#64748B] text-center py-3"
+              style={{ fontSize: "13px" }}
+            >
               ⏱️ Takes 8-12 minutes
             </p>
           </div>

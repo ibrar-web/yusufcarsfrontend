@@ -40,7 +40,6 @@ export async function getSessionFromCookie(): Promise<SessionState> {
     if (expMs && expMs < Date.now()) {
       return { isAuthenticated: false, role: null, error: "Token expired" };
     }
-    console.log("token :", token, role);
     return {
       isAuthenticated: true,
       role,

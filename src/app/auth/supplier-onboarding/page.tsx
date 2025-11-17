@@ -190,12 +190,13 @@ export default function SupplierOnboardingPage() {
       if (formData.insuranceDoc instanceof File) {
         formDataToSend.append("insuranceDoc", formData.insuranceDoc);
       }
-
       const response = await authApi.signup(formDataToSend);
       toast.success(
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
     // setTimeout(() => {
     //   handleNavigate("supplier-dashboard");
     // }, 2000);

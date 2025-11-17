@@ -20,7 +20,6 @@ export function useAppState() {
     setSelectedSupplierId,
     selectedQuoteId,
     setSelectedQuoteId,
-    setSignupDialogOpen,
     setProfileDialogOpen,
     setNotificationDialogOpen,
     setTrackOrderDialogOpen,

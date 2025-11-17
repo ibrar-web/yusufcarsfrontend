@@ -19,6 +19,7 @@ export interface SupplierSignupPayload {
   phone: string;
   contactPostcode: string;
   businessName: string;
+  fullName?: string;
   tradingAs?: string;
   businessType: string;
   vatNumber?: string;
@@ -33,6 +34,7 @@ export interface SupplierSignupPayload {
   insuranceDoc: File | null;
   termsAccepted: boolean;
   gdprConsent: boolean;
+  password: string;
 }
 
 export type SignupPayload = CustomerSignupPayload | SupplierSignupPayload;
@@ -63,6 +65,7 @@ export interface LoginResponse {
 
 function buildSupplierFormData(payload: SupplierSignupPayload) {
   const formData = new FormData();
+  const computedFullName = payload.fullName ?? payload.businessName;
 
   const appendValue = (key: string, value: unknown) => {
     if (value === undefined || value === null) return;
@@ -78,6 +81,7 @@ function buildSupplierFormData(payload: SupplierSignupPayload) {
   };
 
   Object.entries(payload).forEach(([key, value]) => appendValue(key, value));
+  appendValue("fullName", computedFullName);
 
   return formData;
 }

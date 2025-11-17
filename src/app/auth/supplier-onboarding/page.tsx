@@ -44,6 +44,8 @@ export default function SupplierOnboardingPage() {
     email: "",
     phone: "",
     contactPostcode: "",
+    password: "",
+    confirmPassword: "",
     businessName: "",
     tradingAs: "",
     businessType: "",
@@ -134,8 +136,22 @@ export default function SupplierOnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!formData.password || !formData.confirmPassword) {
+      toast.error("Password and confirm password are required.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
     try {
-      const response = await authApi.signup({...formData});
+      const { confirmPassword, ...rest } = formData;
+      const response = await authApi.signup({
+        ...rest,
+        fullName: formData.businessName,
+      });
       toast.success(
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
@@ -278,6 +294,36 @@ export default function SupplierOnboardingPage() {
                     value={formData.contactPostcode}
                     onChange={(e) =>
                       handleInputChange("contactPostcode", e.target.value)
+                    }
+                    className="h-12"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">
+                    Password <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a strong password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    className="h-12"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">
+                    Confirm Password <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Re-enter your password"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
                     }
                     className="h-12"
                   />

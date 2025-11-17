@@ -39,6 +39,7 @@ export interface LoginResponse {
 
 export const authApi = {
   async signup(payload: SignupPayload) {
+    console.log("SignupPayload :", payload);
     return apiPost<SignupResponse>(apiRoutes.auth.signup, payload);
   },
   async login(payload: LoginPayload) {

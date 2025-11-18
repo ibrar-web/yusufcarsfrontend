@@ -27,15 +27,11 @@ export default async function middleware(req: NextRequest) {
   }
 
   // --- PUBLIC ROUTES ---
-  const PUBLIC_PATHS = ["/", "/auth"];
-  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
 
   // --- PROTECTED ROUTES ---
   const token = req.cookies.get("access_token")?.value;
   const role = await getRoleFromToken(token);
-
+  console.log("role :", role);
   // Not logged in → send to home (NOT infinite redirect)
   if (!role) {
     return NextResponse.redirect(new URL("/", req.url));
@@ -53,7 +49,10 @@ export default async function middleware(req: NextRequest) {
   if (pathname.startsWith("/user") && role !== "user") {
     return NextResponse.redirect(new URL("/", req.url));
   }
-
+  const PUBLIC_PATHS = ["/", "/auth"];
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
   return NextResponse.next();
 }
 

@@ -1,5 +1,5 @@
-import { apiPost } from "./axios-instance";
 import { apiRoutes } from "@/utils/apiroutes";
+import { apiPost } from "../apiconfig/client";
 
 export type UserRole = "user" | "supplier" | "admin" | "";
 
@@ -89,8 +89,14 @@ function buildSupplierFormData(payload: SupplierSignupPayload) {
   return formData;
 }
 
-function isSupplierPayload(payload: SignupRequest): payload is SupplierSignupPayload {
-  return typeof payload === "object" && "role" in payload && payload.role === "supplier";
+function isSupplierPayload(
+  payload: SignupRequest
+): payload is SupplierSignupPayload {
+  return (
+    typeof payload === "object" &&
+    "role" in payload &&
+    payload.role === "supplier"
+  );
 }
 
 function isFormDataPayload(payload: SignupRequest): payload is FormData {

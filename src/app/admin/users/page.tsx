@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -39,23 +39,41 @@ import {
   XCircle,
 } from "lucide-react";
 import { adminUsers } from "@/page-components/admin-dashboard/data";
+import { apiGet } from "@/utils/apiconfig/client";
+import { apiRoutes } from "@/utils/apiroutes";
 
 type AdminUser = (typeof adminUsers)[number];
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState(adminUsers);
   const [userSearch, setUserSearch] = useState("");
-  const [userStatusFilter, setUserStatusFilter] = useState<"all" | "active" | "suspended">("all");
+  const [userStatusFilter, setUserStatusFilter] = useState<
+    "all" | "active" | "suspended"
+  >("all");
   const [showAllUsers, setShowAllUsers] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userDetailsDialogOpen, setUserDetailsDialogOpen] = useState(false);
-  const [confirmUserActionDialogOpen, setConfirmUserActionDialogOpen] = useState(false);
-
+  const [confirmUserActionDialogOpen, setConfirmUserActionDialogOpen] =
+    useState(false);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+  const fetchUsers = async () => {
+    try {
+      const response = apiGet(apiRoutes.admin.users.list);
+      console.log("users list", response);
+    } catch (error) {}
+  };
   const handleToggleUserStatus = (userId: string) => {
     setUsers((prev) =>
       prev.map((user) =>
-        user.id === userId ? { ...user, status: user.status === "Active" ? "Suspended" : "Active" } : user,
-      ),
+        user.id === userId
+          ? {
+              ...user,
+              status: user.status === "Active" ? "Suspended" : "Active",
+            }
+          : user
+      )
     );
   };
 
@@ -94,8 +112,12 @@ export default function AdminUsersPage() {
                 <Users className="h-7 w-7 text-white" strokeWidth={2} />
               </div>
               <div>
-                <h2 className="text-2xl mb-1 text-[#0F172A] font-['Inter'] font-bold">All Users</h2>
-                <p className="text-base text-[#475569] font-['Roboto']">{users.length} total users registered</p>
+                <h2 className="text-2xl mb-1 text-[#0F172A] font-['Inter'] font-bold">
+                  All Users
+                </h2>
+                <p className="text-base text-[#475569] font-['Roboto']">
+                  {users.length} total users registered
+                </p>
               </div>
             </div>
             <Button className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] shadow-md rounded-full">
@@ -133,7 +155,9 @@ export default function AdminUsersPage() {
             ].map((filter) => (
               <button
                 key={filter.id}
-                onClick={() => setUserStatusFilter(filter.id as typeof userStatusFilter)}
+                onClick={() =>
+                  setUserStatusFilter(filter.id as typeof userStatusFilter)
+                }
                 className={`px-4 py-2 rounded-lg font-['Roboto'] transition-all ${
                   userStatusFilter === filter.id
                     ? "bg-white text-[#0F172A] shadow-sm"
@@ -148,7 +172,9 @@ export default function AdminUsersPage() {
 
         <Card className="border border-[#E5E7EB] shadow-[0_4px_24px_rgba(15,23,42,0.08)]">
           <CardHeader className="pb-4 border-b border-[#E5E7EB]">
-            <CardTitle className="font-['Inter'] text-[#0F172A]">Recent Users</CardTitle>
+            <CardTitle className="font-['Inter'] text-[#0F172A]">
+              Recent Users
+            </CardTitle>
             <CardDescription className="font-['Roboto'] text-[#475569]">
               Manage customers and platform access
             </CardDescription>
@@ -157,18 +183,31 @@ export default function AdminUsersPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[#E5E7EB]">
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Name</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Email</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Location</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Joined</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Status</TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Name
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Email
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Location
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Joined
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Status
+                  </TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visibleUsers.length > 0 ? (
                   visibleUsers.map((user) => (
-                    <TableRow key={user.id} className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]">
+                    <TableRow
+                      key={user.id}
+                      className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center text-white font-['Inter']">
@@ -178,14 +217,24 @@ export default function AdminUsersPage() {
                               .join("")}
                           </div>
                           <div>
-                            <p className="font-['Inter'] text-[#0F172A]">{user.name}</p>
-                            <p className="text-sm text-[#475569] font-['Roboto']">{user.id}</p>
+                            <p className="font-['Inter'] text-[#0F172A]">
+                              {user.name}
+                            </p>
+                            <p className="text-sm text-[#475569] font-['Roboto']">
+                              {user.id}
+                            </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-['Roboto'] text-[#475569]">{user.email}</TableCell>
-                      <TableCell className="font-['Roboto'] text-[#475569]">{user.location}</TableCell>
-                      <TableCell className="font-['Roboto'] text-[#475569]">{user.joinedDate}</TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {user.email}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {user.location}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {user.joinedDate}
+                      </TableCell>
                       <TableCell>
                         <Badge
                           className={`px-3 py-1 font-['Roboto'] ${
@@ -216,7 +265,9 @@ export default function AdminUsersPage() {
                     <TableCell colSpan={6} className="text-center py-12">
                       <div className="flex flex-col items-center gap-3">
                         <Search className="h-12 w-12 text-[#CBD5E1]" />
-                        <p className="text-[#475569] font-['Roboto']">No users found matching "{userSearch}"</p>
+                        <p className="text-[#475569] font-['Roboto']">
+                          No users found matching "{userSearch}"
+                        </p>
                         <Button
                           variant="outline"
                           onClick={() => setUserSearch("")}
@@ -256,10 +307,15 @@ export default function AdminUsersPage() {
         </Card>
       </div>
 
-      <Dialog open={userDetailsDialogOpen} onOpenChange={setUserDetailsDialogOpen}>
+      <Dialog
+        open={userDetailsDialogOpen}
+        onOpenChange={setUserDetailsDialogOpen}
+      >
         <DialogContent className="max-w-lg border border-[#334155] bg-[#1E293B]">
           <DialogHeader>
-            <DialogTitle className="font-['Inter'] text-white">User Details</DialogTitle>
+            <DialogTitle className="font-['Inter'] text-white">
+              User Details
+            </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#CBD5E1]">
               View user information and account status
             </DialogDescription>
@@ -278,7 +334,9 @@ export default function AdminUsersPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-['Inter'] text-white">{selectedUser.name}</h3>
+                      <h3 className="font-['Inter'] text-white">
+                        {selectedUser.name}
+                      </h3>
                       <Badge
                         className={`font-['Roboto'] ${
                           selectedUser.status === "Active"
@@ -289,7 +347,9 @@ export default function AdminUsersPage() {
                         {selectedUser.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-[#94A3B8] font-['Roboto']">{selectedUser.id}</p>
+                    <p className="text-sm text-[#94A3B8] font-['Roboto']">
+                      {selectedUser.id}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -300,28 +360,36 @@ export default function AdminUsersPage() {
                     <Mail className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Email</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedUser.email}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedUser.email}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <MapPin className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Location</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedUser.location}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedUser.location}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Joined</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedUser.joinedDate}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedUser.joinedDate}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <Users className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Role</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedUser.role}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedUser.role}
+                  </p>
                 </div>
               </div>
 
@@ -336,9 +404,16 @@ export default function AdminUsersPage() {
                     { label: "Quotes Received", value: "8" },
                     { label: "Orders Placed", value: "5" },
                   ].map((stat) => (
-                    <div key={stat.label} className="text-center p-3 bg-[#1E293B] rounded-lg border border-[#334155]">
-                      <p className="text-2xl font-['Inter'] text-white mb-1">{stat.value}</p>
-                      <p className="text-xs text-[#94A3B8] font-['Roboto']">{stat.label}</p>
+                    <div
+                      key={stat.label}
+                      className="text-center p-3 bg-[#1E293B] rounded-lg border border-[#334155]"
+                    >
+                      <p className="text-2xl font-['Inter'] text-white mb-1">
+                        {stat.value}
+                      </p>
+                      <p className="text-xs text-[#94A3B8] font-['Roboto']">
+                        {stat.label}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -378,11 +453,16 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={confirmUserActionDialogOpen} onOpenChange={setConfirmUserActionDialogOpen}>
+      <Dialog
+        open={confirmUserActionDialogOpen}
+        onOpenChange={setConfirmUserActionDialogOpen}
+      >
         <DialogContent className="max-w-md border-[#E5E7EB] bg-white">
           <DialogHeader>
             <DialogTitle className="font-['Inter'] text-[#0F172A]">
-              {selectedUser?.status === "Active" ? "Suspend User" : "Activate User"}
+              {selectedUser?.status === "Active"
+                ? "Suspend User"
+                : "Activate User"}
             </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#475569]">
               {selectedUser?.status === "Active"
@@ -401,8 +481,12 @@ export default function AdminUsersPage() {
                       .join("")}
                   </div>
                   <div>
-                    <p className="font-['Inter'] text-[#0F172A]">{selectedUser.name}</p>
-                    <p className="text-sm text-[#475569] font-['Roboto']">{selectedUser.email}</p>
+                    <p className="font-['Inter'] text-[#0F172A]">
+                      {selectedUser.name}
+                    </p>
+                    <p className="text-sm text-[#475569] font-['Roboto']">
+                      {selectedUser.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -411,10 +495,13 @@ export default function AdminUsersPage() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-[#F02801]" />
                     <div>
-                      <p className="font-['Inter'] text-[#7F1D1D] mb-1">Warning</p>
+                      <p className="font-['Inter'] text-[#7F1D1D] mb-1">
+                        Warning
+                      </p>
                       <p className="text-sm text-[#475569] font-['Roboto']">
-                        Suspending this user will immediately revoke their access. Any active quotes or requests
-                        remain visible but they cannot create new ones.
+                        Suspending this user will immediately revoke their
+                        access. Any active quotes or requests remain visible but
+                        they cannot create new ones.
                       </p>
                     </div>
                   </div>

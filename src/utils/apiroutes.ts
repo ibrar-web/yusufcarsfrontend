@@ -60,7 +60,9 @@ export function matchRoute(pathname: string, candidates: RouteTuple) {
 }
 
 export function requiredRoleForPath(pathname: string): AppRouteGroup | null {
-  const guard = protectedRouteGuards.find(({ routes }) => matchRoute(pathname, routes));
+  const guard = protectedRouteGuards.find(({ routes }) =>
+    matchRoute(pathname, routes)
+  );
   return guard?.group ?? null;
 }
 
@@ -86,9 +88,16 @@ export const apiRoutes = {
     profile: "/supplier/profile",
   },
   admin: {
-    overview: "/admin/dashboard/overview",
-    suppliers: "/admin/suppliers",
-    users: "/admin/users",
+    users: {
+      list: "/admin/users",
+      update: (id: string) => `/admin/users/${id}`,
+    },
+    supplier: {
+      list: "/admin/suppliers",
+      read: (id: string) => `/admin/suppliers/${id}`,
+      update: (id: string) => `/admin/suppliers/${id}`,
+      delete: (id: string) => `/admin/suppliers/${id}`,
+    },
   },
   website: {
     heroContent: "/website/content/hero",

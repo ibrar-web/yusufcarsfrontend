@@ -295,7 +295,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   onClick={() => setShowRoleSelection(true)}
                   className="rounded-full"
                 >
-                  Sign Up
+                  Sign In
                 </Button>
               ) : hasDashboardRole ? (
                 <Button
@@ -715,7 +715,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Sign Up
+                    Sign In
                   </Button>
                 ) : hasDashboardRole ? (
                   <>

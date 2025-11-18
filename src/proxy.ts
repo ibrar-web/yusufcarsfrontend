@@ -7,7 +7,7 @@ import { jwtVerify } from "jose";
 const JOSE_SECRET = process.env.JOSE_SECRET!;
 const secret = new TextEncoder().encode(JOSE_SECRET);
 
-// Extract role from access token
+// Extract role from token
 async function getRoleFromToken(token?: string) {
   if (!token) return null;
   try {
@@ -21,47 +21,42 @@ async function getRoleFromToken(token?: string) {
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Skip internal Next.js assets
+  // Skip next/image, static, etc.
   if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  // Public pages (add more as needed)
-  // const PUBLIC_PATHS = ["/auth", "/", "/contact", "/about"];
-  // if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
-  //   return NextResponse.next();
-  // }
+  // --- PUBLIC ROUTES ---
+  const PUBLIC_PATHS = ["/", "/auth"];
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
 
-  // Get token
+  // --- PROTECTED ROUTES ---
   const token = req.cookies.get("access_token")?.value;
   const role = await getRoleFromToken(token);
-  console.log("token :", token, role);
-  // Not logged in → redirect to auth
+
+  // Not logged in → send to home (NOT infinite redirect)
   if (!role) {
-    const url = new URL("/auth", req.url);
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // ROLE VALIDATION RULES
-  if (pathname.startsWith("/admin")) {
-    if (role !== "admin") return NextResponse.redirect(new URL("/", req.url));
+  // Role-based access rules
+  if (pathname.startsWith("/admin") && role !== "admin") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (pathname.startsWith("/supplier")) {
-    if (role !== "supplier")
-      return NextResponse.redirect(new URL("/", req.url));
+  if (pathname.startsWith("/supplier") && role !== "supplier") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (pathname.startsWith("/user")) {
-    if (role !== "user") return NextResponse.redirect(new URL("/", req.url));
+  if (pathname.startsWith("/user") && role !== "user") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // User has permission → continue
   return NextResponse.next();
 }
 
-// What paths the middleware applies to
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

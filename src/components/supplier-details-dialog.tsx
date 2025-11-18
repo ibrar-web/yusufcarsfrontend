@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { QuoteAcceptanceDialog } from "./quote-acceptance-dialog";
-import { OrderPlacedDialog } from "./order-placed-dialog";
+import { OrderPlacedDialog } from "./order/order-placed-dialog";
 import { useState } from "react";
 
 interface SupplierDetailsDialogProps {

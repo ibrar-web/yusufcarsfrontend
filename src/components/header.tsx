@@ -360,7 +360,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       Track Order
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => navigate("chat")}
+                      onClick={() => navigate("user/chat")}
                       className="relative"
                     >
                       <MessageSquare className="mr-2 h-4 w-4" />
@@ -373,7 +373,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        navigate("history");
+                        navigate("user/history");
                         toast.success("Viewing order history");
                       }}
                     >

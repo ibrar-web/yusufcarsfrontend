@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { OrderDetailsDialog } from "@/components/order-details-dialog";
+
 import { 
   Search, 
   Filter, 
@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { OrderDetailsDialog } from "@/components/order/order-details-dialog";
 
 interface HistoryPageProps {
   onNavigate: (page: string) => void;

@@ -4,9 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+} from "../ui/dialog";
+
 import { OrderPlacedDialog } from "./order-placed-dialog";
 import { useState } from "react";
 import {
@@ -20,6 +19,8 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
 interface OrderDetailsDialogProps {
   open: boolean;

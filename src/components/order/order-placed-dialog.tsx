@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import { CheckCircle, Package, Clock, MapPin, FileText } from "lucide-react";
 import { TrackOrderDialog } from "./track-order-dialog";
 

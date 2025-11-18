@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { QuoteCard } from "@/components/quote-card";
-import { OrderPlacedDialog } from "@/components/order-placed-dialog";
 import { SupplierDetailsDialog } from "@/components/supplier-details-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Grid, List, Search, X, Check, Star, MapPin, Clock, Shield } from "lucide-react";
+import { OrderPlacedDialog } from "@/components/order/order-placed-dialog";
 
 interface QuotesPageProps {
   onNavigate: (page: string, supplierId?: string) => void;

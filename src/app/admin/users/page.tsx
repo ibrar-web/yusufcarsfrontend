@@ -39,7 +39,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { adminUsers } from "@/page-components/admin-dashboard/data";
-import { apiGet } from "@/utils/apiconfig/client";
+import { apiGet } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 
 type AdminUser = (typeof adminUsers)[number];
@@ -60,7 +60,9 @@ export default function AdminUsersPage() {
   }, []);
   const fetchUsers = async () => {
     try {
-      const response = apiGet(apiRoutes.admin.users.list);
+      const response = await apiGet(apiRoutes.admin.users.list, {
+        params: { page: 1, pageSize: 20 },
+      });
       console.log("users list", response);
     } catch (error) {}
   };

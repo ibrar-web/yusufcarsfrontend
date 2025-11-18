@@ -1,5 +1,5 @@
 import { apiRoutes } from "@/utils/apiroutes";
-import { apiPost } from "../apiconfig/client";
+import { apiPost } from "../apiconfig/http";
 
 export type UserRole = "user" | "supplier" | "admin" | "";
 

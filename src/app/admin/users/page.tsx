@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
         const params = {
           page: requestedPage,
           pageSize: requestedPageSize,
-          search: userSearch || undefined,
+          query: userSearch || undefined,
           status: userStatusFilter !== "all" ? userStatusFilter : undefined,
         };
 

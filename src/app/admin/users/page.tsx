@@ -47,7 +47,6 @@ export default function AdminUsersPage() {
   const [userStatusFilter, setUserStatusFilter] = useState<
     "all" | "active" | "suspended"
   >("all");
-  const [showAllUsers, setShowAllUsers] = useState(false);
   const [selectedUser, setSelectedUser] = useState<adminUsersInterface | null>(
     null
   );
@@ -78,29 +77,6 @@ export default function AdminUsersPage() {
       )
     );
   };
-
-  const filteredUsers = useMemo(() => {
-    const matchesSearch = (user: AdminUser) => {
-      if (!userSearch) return true;
-      const term = userSearch.toLowerCase();
-      return (
-        user.name.toLowerCase().includes(term) ||
-        user.email.toLowerCase().includes(term) ||
-        user.location.toLowerCase().includes(term) ||
-        user.id.toLowerCase().includes(term)
-      );
-    };
-
-    const matchesStatus = (user: AdminUser) => {
-      if (userStatusFilter === "all") return true;
-      if (userStatusFilter === "active") return user.status === "Active";
-      return user.status === "Suspended";
-    };
-
-    return users.filter((user) => matchesSearch(user) && matchesStatus(user));
-  }, [users, userSearch, userStatusFilter]);
-
-  const visibleUsers = showAllUsers ? filteredUsers : filteredUsers.slice(0, 4);
 
   return (
     <>
@@ -204,8 +180,8 @@ export default function AdminUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visibleUsers.length > 0 ? (
-                  visibleUsers.map((user) => (
+                {users.length > 0 ? (
+                  users.map((user) => (
                     <TableRow
                       key={user.id}
                       className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
@@ -283,32 +259,9 @@ export default function AdminUsersPage() {
                 )}
               </TableBody>
             </Table>
-            {!showAllUsers && filteredUsers.length > 4 && (
-              <div className="flex justify-center pt-2 pb-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllUsers(true)}
-                  className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full"
-                >
-                  View All Users ({filteredUsers.length - 4} more)
-                </Button>
-              </div>
-            )}
-            {showAllUsers && filteredUsers.length > 4 && (
-              <div className="flex justify-center pt-2 pb-6 border-t border-[#E5E7EB] mt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllUsers(false)}
-                  className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full"
-                >
-                  Show Less
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
-
       <Dialog
         open={userDetailsDialogOpen}
         onOpenChange={setUserDetailsDialogOpen}

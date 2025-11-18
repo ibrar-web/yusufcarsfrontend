@@ -7,7 +7,7 @@ import { jwtVerify } from "jose";
 const JOSE_SECRET = process.env.JOSE_SECRET!;
 const secret = new TextEncoder().encode(JOSE_SECRET);
 
-// Extract role from token
+// Extract role
 async function getRoleFromToken(token?: string) {
   if (!token) return null;
   try {
@@ -19,40 +19,62 @@ async function getRoleFromToken(token?: string) {
 }
 
 export default async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const pathname = req.nextUrl.pathname;
 
-  // Skip next/image, static, etc.
+  // Ignore static
   if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  // --- PUBLIC ROUTES ---
+  // PUBLIC (exact match only)
+  const isHome = pathname === "/";
+  const isAuth = pathname === "/auth";
+  const isPublic = isHome || isAuth;
 
-  // --- PROTECTED ROUTES ---
+  // Get role
   const token = req.cookies.get("access_token")?.value;
   const role = await getRoleFromToken(token);
-  console.log("role :", role);
-  // Not logged in → send to home (NOT infinite redirect)
+
+  console.log("ROLE:", role, "PATH:", pathname);
+
+  // ----------------------
+  // 1. NOT LOGGED IN
+  // ----------------------
   if (!role) {
+    if (isPublic) return NextResponse.next();
+
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Role-based access rules
-  if (pathname.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+  // ----------------------
+  // 2. LOGGED IN: ROLE CHECKING
+  // ----------------------
 
-  if (pathname.startsWith("/supplier") && role !== "supplier") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  if (pathname.startsWith("/user") && role !== "user") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-  const PUBLIC_PATHS = ["/", "/auth"];
-  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
+  // Admin-only
+  if (pathname.startsWith("/admin")) {
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
     return NextResponse.next();
   }
+
+  // Supplier-only
+  if (pathname.startsWith("/supplier")) {
+    if (role !== "supplier") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // User-only
+  if (pathname.startsWith("/user")) {
+    if (role !== "user") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Other pages → allow
   return NextResponse.next();
 }
 

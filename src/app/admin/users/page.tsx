@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -41,43 +41,124 @@ import {
 import { apiGet } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { adminUsersInterface } from "@/page-components/admin-dashboard/data";
+import { TablePagination } from "@/components/table-pagination";
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<adminUsersInterface[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [userSearch, setUserSearch] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState<
     "all" | "active" | "suspended"
   >("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<adminUsersInterface | null>(
     null
   );
   const [userDetailsDialogOpen, setUserDetailsDialogOpen] = useState(false);
   const [confirmUserActionDialogOpen, setConfirmUserActionDialogOpen] =
     useState(false);
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-  const fetchUsers = async () => {
-    try {
-      const response: any = await apiGet(apiRoutes.admin.users.list, {
-        params: { page: 1, pageSize: 20 },
-      });
-      setUsers(response?.data?.data);
-      console.log("users list", response);
-    } catch (error) {}
-  };
-  const handleToggleUserStatus = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: user.isActive ? "Suspended" : "Active",
-            }
-          : user
-      )
-    );
+
+  const normalizeUsers = (payload: unknown): adminUsersInterface[] => {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload as adminUsersInterface[];
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "data" in payload &&
+      Array.isArray((payload as Record<string, unknown>).data)
+    ) {
+      return (payload as { data: adminUsersInterface[] }).data;
+    }
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "items" in payload &&
+      Array.isArray((payload as Record<string, unknown>).items)
+    ) {
+      return (payload as { items: adminUsersInterface[] }).items;
+    }
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "users" in payload &&
+      Array.isArray((payload as Record<string, unknown>).users)
+    ) {
+      return (payload as { users: adminUsersInterface[] }).users;
+    }
+    return [];
   };
 
+  const fetchUsers = useCallback(
+    async ({ page: requestedPage = 1, pageSize: requestedPageSize = 20 } = {}) => {
+      setIsLoading(true);
+      try {
+        const params = {
+          page: requestedPage,
+          pageSize: requestedPageSize,
+          search: userSearch || undefined,
+          status: userStatusFilter !== "all" ? userStatusFilter : undefined,
+        };
+
+        const response: any = await apiGet(apiRoutes.admin.users.list, {
+          params,
+        });
+
+        const data = normalizeUsers(response?.data ?? response);
+        const total =
+          response?.total ??
+          response?.data?.total ??
+          response?.meta?.total ??
+          data.length;
+        const responsePage = response?.page ?? response?.data?.page ?? requestedPage;
+        const responsePageSize =
+          response?.pageSize ?? response?.data?.pageSize ?? requestedPageSize;
+
+        setUsers(data);
+        setTotalUsers(total ?? data.length);
+        setPage(responsePage);
+        setPageSize(responsePageSize);
+      } catch (error) {
+        // Keep existing data if request fails.
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userSearch, userStatusFilter]
+  );
+
+  useEffect(() => {
+    fetchUsers({ page: 1, pageSize });
+  }, [fetchUsers, pageSize]);
+
+  const handlePageChange = (nextPage: number) => {
+    fetchUsers({ page: nextPage, pageSize });
+  };
+
+  const handlePageSizeChange = (nextSize: number) => {
+    fetchUsers({ page: 1, pageSize: nextSize });
+  };
+
+  const filteredUsers = useMemo(() => {
+    const matchesSearch = (user: adminUsersInterface) => {
+      if (!userSearch) return true;
+      const term = userSearch.toLowerCase();
+      return (
+        user.fullName.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term) ||
+        user.postCode.toLowerCase().includes(term) ||
+        user.id.toLowerCase().includes(term)
+      );
+    };
+
+    const matchesStatus = (user: adminUsersInterface) => {
+      if (userStatusFilter === "all") return true;
+      if (userStatusFilter === "active") return user.isActive;
+      return !user.isActive;
+    };
+
+    return users.filter((user) => matchesSearch(user) && matchesStatus(user));
+  }, [users, userSearch, userStatusFilter]);
   return (
     <>
       <div className="space-y-6">
@@ -94,7 +175,8 @@ export default function AdminUsersPage() {
                   All Users
                 </h2>
                 <p className="text-base text-[#475569] font-['Roboto']">
-                  {users.length} total users registered
+                  {(totalUsers || filteredUsers.length || users.length) ?? 0} total
+                  users registered
                 </p>
               </div>
             </div>
@@ -153,13 +235,18 @@ export default function AdminUsersPage() {
             <CardTitle className="font-['Inter'] text-[#0F172A]">
               Recent Users
             </CardTitle>
-            <CardDescription className="font-['Roboto'] text-[#475569]">
-              Manage customers and platform access
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
+          <CardDescription className="font-['Roboto'] text-[#475569]">
+            Manage customers and platform access
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading && (
+            <div className="px-6 py-2 text-sm text-muted-foreground">
+              Loading users...
+            </div>
+          )}
+          <Table>
+            <TableHeader>
                 <TableRow className="border-b border-[#E5E7EB]">
                   <TableHead className="font-['Inter'] text-[#0F172A]">
                     Name
@@ -180,8 +267,8 @@ export default function AdminUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length > 0 ? (
-                  users.map((user) => (
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
                     <TableRow
                       key={user.id}
                       className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
@@ -259,6 +346,16 @@ export default function AdminUsersPage() {
                 )}
               </TableBody>
             </Table>
+            <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end">
+              <TablePagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalUsers}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                className="w-full"
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -38,20 +38,19 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { adminUsers } from "@/page-components/admin-dashboard/data";
 import { apiGet } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
-
-type AdminUser = (typeof adminUsers)[number];
-
+import { adminUsersInterface } from "@/page-components/admin-dashboard/data";
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState(adminUsers);
+  const [users, setUsers] = useState<adminUsersInterface[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState<
     "all" | "active" | "suspended"
   >("all");
   const [showAllUsers, setShowAllUsers] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<adminUsersInterface | null>(
+    null
+  );
   const [userDetailsDialogOpen, setUserDetailsDialogOpen] = useState(false);
   const [confirmUserActionDialogOpen, setConfirmUserActionDialogOpen] =
     useState(false);
@@ -60,9 +59,10 @@ export default function AdminUsersPage() {
   }, []);
   const fetchUsers = async () => {
     try {
-      const response = await apiGet(apiRoutes.admin.users.list, {
+      const response: any = await apiGet(apiRoutes.admin.users.list, {
         params: { page: 1, pageSize: 20 },
       });
+      setUsers(response?.data?.data);
       console.log("users list", response);
     } catch (error) {}
   };
@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
         user.id === userId
           ? {
               ...user,
-              status: user.status === "Active" ? "Suspended" : "Active",
+              status: user.isActive ? "Suspended" : "Active",
             }
           : user
       )
@@ -192,7 +192,7 @@ export default function AdminUsersPage() {
                     Email
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Location
+                    PostCode
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
                     Joined
@@ -213,14 +213,14 @@ export default function AdminUsersPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center text-white font-['Inter']">
-                            {user.name
+                            {user.fullName
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </div>
                           <div>
                             <p className="font-['Inter'] text-[#0F172A]">
-                              {user.name}
+                              {user.fullName}
                             </p>
                             <p className="text-sm text-[#475569] font-['Roboto']">
                               {user.id}
@@ -232,20 +232,20 @@ export default function AdminUsersPage() {
                         {user.email}
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {user.location}
+                        {user.postCode}
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {user.joinedDate}
+                        {user.createdAt}
                       </TableCell>
                       <TableCell>
                         <Badge
                           className={`px-3 py-1 font-['Roboto'] ${
-                            user.status === "Active"
+                            user.isActive
                               ? "bg-[#DCFCE7] text-[#166534] border-0"
                               : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
                           }`}
                         >
-                          {user.status}
+                          {user.isActive ? "Active" : "Suspended"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -328,7 +328,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-start gap-4">
                   <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span className="text-white font-['Inter'] text-xl">
-                      {selectedUser.name
+                      {selectedUser.fullName
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
@@ -337,16 +337,16 @@ export default function AdminUsersPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-['Inter'] text-white">
-                        {selectedUser.name}
+                        {selectedUser.fullName}
                       </h3>
                       <Badge
                         className={`font-['Roboto'] ${
-                          selectedUser.status === "Active"
+                          selectedUser.isActive
                             ? "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
                             : "bg-[#7F1D1D]/30 text-[#FCA5A5] border-[#F02801]"
                         }`}
                       >
-                        {selectedUser.status}
+                        {selectedUser.isActive ? "Active" : "Suspended"}
                       </Badge>
                     </div>
                     <p className="text-sm text-[#94A3B8] font-['Roboto']">
@@ -372,7 +372,7 @@ export default function AdminUsersPage() {
                     <span className="text-sm font-['Roboto']">Location</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedUser.location}
+                    {selectedUser.postCode}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -381,7 +381,7 @@ export default function AdminUsersPage() {
                     <span className="text-sm font-['Roboto']">Joined</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedUser.joinedDate}
+                    {selectedUser.createdAt}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -431,13 +431,13 @@ export default function AdminUsersPage() {
                 </Button>
                 <Button
                   className={`flex-1 font-['Roboto'] ${
-                    selectedUser.status === "Active"
+                    selectedUser.isActive
                       ? "bg-[#EF4444] hover:bg-[#DC2626] text-white"
                       : "bg-[#22C55E] hover:bg-[#16A34A] text-white"
                   }`}
                   onClick={() => setConfirmUserActionDialogOpen(true)}
                 >
-                  {selectedUser.status === "Active" ? (
+                  {selectedUser.isActive ? (
                     <>
                       <XCircle className="h-4 w-4 mr-2" />
                       Suspend User
@@ -462,12 +462,10 @@ export default function AdminUsersPage() {
         <DialogContent className="max-w-md border-[#E5E7EB] bg-white">
           <DialogHeader>
             <DialogTitle className="font-['Inter'] text-[#0F172A]">
-              {selectedUser?.status === "Active"
-                ? "Suspend User"
-                : "Activate User"}
+              {selectedUser?.isActive ? "Suspend User" : "Activate User"}
             </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#475569]">
-              {selectedUser?.status === "Active"
+              {selectedUser?.isActive
                 ? "Are you sure you want to suspend this user? They will no longer be able to access the platform."
                 : "Are you sure you want to activate this user? They will regain access to the platform."}
             </DialogDescription>
@@ -477,14 +475,14 @@ export default function AdminUsersPage() {
               <div className="bg-[#F1F5F9] p-4 rounded-xl border border-[#E5E7EB]">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center text-white font-['Inter']">
-                    {selectedUser.name
+                    {selectedUser.fullName
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </div>
                   <div>
                     <p className="font-['Inter'] text-[#0F172A]">
-                      {selectedUser.name}
+                      {selectedUser.fullName}
                     </p>
                     <p className="text-sm text-[#475569] font-['Roboto']">
                       {selectedUser.email}
@@ -492,7 +490,7 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
               </div>
-              {selectedUser.status === "Active" && (
+              {selectedUser.isActive && (
                 <div className="bg-[#FEF3F2] p-4 rounded-xl border-2 border-[#F02801]/20">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-[#F02801]" />
@@ -519,7 +517,7 @@ export default function AdminUsersPage() {
                 </Button>
                 <Button
                   className={`flex-1 font-['Roboto'] rounded-full h-11 ${
-                    selectedUser.status === "Active"
+                    selectedUser.isActive
                       ? "bg-[#EF4444] hover:bg-[#DC2626] text-white"
                       : "bg-[#22C55E] hover:bg-[#16A34A] text-white"
                   }`}
@@ -529,7 +527,7 @@ export default function AdminUsersPage() {
                     setUserDetailsDialogOpen(false);
                   }}
                 >
-                  {selectedUser.status === "Active" ? (
+                  {selectedUser.isActive ? (
                     <>
                       <XCircle className="h-4 w-4 mr-2" />
                       Confirm Suspend

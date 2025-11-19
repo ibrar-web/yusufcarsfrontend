@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +22,22 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
-import { apiGet } from "@/utils/apiconfig/http";
+import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 type DocumentFile = {
   id: string;
   type: string;
+  displayName?: string;
   originalName: string;
   mimeType: string;
   size: string;
@@ -36,6 +46,7 @@ type DocumentFile = {
 
 type SupplierProfile = {
   id: string;
+  userId?: string;
   businessName: string;
   tradingAs?: string | null;
   businessType?: string | null;
@@ -49,24 +60,25 @@ type SupplierProfile = {
   postCode?: string | null;
   phone?: string | null;
   contactPostcode?: string | null;
+  approvalStatus?: string | null;
+  rejectionReason?: string | null;
+  approvedAt?: string | null;
+  submittedAt?: string | null;
+  updatedAt?: string | null;
   user?: {
     id: string;
     email: string;
     fullName: string;
     role: string;
-    isVerified: boolean;
     isActive: boolean;
+    suspensionReason?: string | null;
     createdAt: string;
     postCode?: string | null;
   };
   documentFiles?: {
-    companyRegDoc?: DocumentFile | null;
-    insuranceDoc?: DocumentFile | null;
-    [key: string]: DocumentFile | undefined | null;
+    byType?: Record<string, DocumentFile | null>;
+    latestDocuments?: DocumentFile[] | null;
   };
-  isVerified?: boolean;
-  isActive?: boolean;
-  createdAt?: string;
 };
 
 type ApiResponse = {
@@ -81,57 +93,79 @@ export default function AdminSupplierProfilePage() {
   const [profile, setProfile] = useState<SupplierProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actionModal, setActionModal] = useState<
+    null | "approve" | "reject" | "suspend"
+  >(null);
+  const [actionReason, setActionReason] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSubmitting, setActionSubmitting] = useState(false);
+
+  const fetchSupplierProfile = useCallback(async () => {
+    if (!supplierId) {
+      throw new Error("Missing supplier id.");
+    }
+    const response: ApiResponse = await apiGet(
+      apiRoutes.admin.supplier.read(supplierId)
+    );
+    const container = response?.data ?? response;
+    const payload =
+      container && typeof container === "object" && "data" in container
+        ? (container as { data: SupplierProfile }).data
+        : container;
+
+    if (!payload || typeof payload !== "object") {
+      throw new Error("Supplier not found.");
+    }
+
+    return payload as SupplierProfile;
+  }, [supplierId]);
 
   useEffect(() => {
     if (!supplierId) {
       setError("Missing supplier id.");
+      setProfile(null);
       return;
     }
 
-    let isMounted = true;
-    const fetchProfile = async () => {
+    let isActive = true;
+    const loadProfile = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response: ApiResponse = await apiGet(
-          apiRoutes.admin.supplier.read(supplierId),
-        );
-        const container = response?.data ?? response;
-        const payload =
-          container && typeof container === "object" && "data" in container
-            ? (container as { data: SupplierProfile }).data
-            : container;
-
-        if (!payload || typeof payload !== "object") {
-          throw new Error("Supplier not found.");
-        }
-
-        if (isMounted) {
-          setProfile(payload as SupplierProfile);
+        const data = await fetchSupplierProfile();
+        if (isActive) {
+          setProfile(data);
         }
       } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load profile.");
+        if (isActive) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load profile."
+          );
         }
       } finally {
-        if (isMounted) {
+        if (isActive) {
           setIsLoading(false);
         }
       }
     };
 
-    fetchProfile();
+    loadProfile();
     return () => {
-      isMounted = false;
+      isActive = false;
     };
-  }, [supplierId]);
+  }, [supplierId, fetchSupplierProfile]);
 
   const contactEmail = profile?.user?.email ?? "N/A";
   const phoneNumber = profile?.phone ?? "N/A";
   const derivedStatus =
-    profile && (profile.isActive ?? profile.user?.isActive) ? "Active" : "Inactive";
-  const derivedVerification =
-    profile && (profile.isVerified ?? profile.user?.isVerified) ? "Verified" : "Verification Pending";
+    profile && profile.user?.isActive ? "Active" : "Inactive";
+  const approvalStatusRaw = profile?.approvalStatus ?? "pending";
+  const approvalStatusLabel = approvalStatusRaw
+    .replace(/_/g, " ")
+    .replace(/^\w/, (char) => char.toUpperCase());
+  const roleLabel = profile?.user?.role
+    ? profile.user.role.replace(/^\w/, (char) => char.toUpperCase())
+    : "Supplier";
   const formattedAddress = useMemo(() => {
     if (!profile) return "N/A";
     const segments = [
@@ -139,29 +173,93 @@ export default function AdminSupplierProfilePage() {
       profile.addressLine2,
       profile.city,
       profile.postCode,
+      profile.contactPostcode,
     ].filter(Boolean);
     return segments.length ? segments.join(", ") : "N/A";
   }, [profile]);
   const documents = useMemo(() => {
     const list: { label: string; url: string; name?: string }[] = [];
-    const docMap = profile?.documentFiles;
-    if (docMap?.companyRegDoc?.signedUrl) {
-      list.push({
-        label: "Company Registration",
-        url: docMap.companyRegDoc.signedUrl,
-        name: docMap.companyRegDoc.originalName,
+    const byType = profile?.documentFiles?.byType;
+    if (byType) {
+      Object.values(byType).forEach((doc) => {
+        if (doc?.signedUrl) {
+          list.push({
+            label:
+              doc.displayName ??
+              doc.type.replace(/_/g, " ").replace(/^\w/, (char) => char.toUpperCase()),
+            url: doc.signedUrl,
+            name: doc.originalName,
+          });
+        }
       });
-    }
-    if (docMap?.insuranceDoc?.signedUrl) {
-      list.push({
-        label: "Insurance Certificate",
-        url: docMap.insuranceDoc.signedUrl,
-        name: docMap.insuranceDoc.originalName,
+    } else if (profile?.documentFiles?.latestDocuments) {
+      profile.documentFiles.latestDocuments.forEach((doc) => {
+        if (doc?.signedUrl) {
+          list.push({
+            label:
+              doc.displayName ??
+              doc.type.replace(/_/g, " ").replace(/^\w/, (char) => char.toUpperCase()),
+            url: doc.signedUrl,
+            name: doc.originalName,
+          });
+        }
       });
     }
     return list;
   }, [profile]);
   const categories = profile?.categories ?? [];
+  const approvalBadgeClass =
+    approvalStatusRaw === "approved"
+      ? "bg-[#DCFCE7] text-[#166534] border-0"
+      : approvalStatusRaw === "rejected"
+        ? "bg-[#FEE2E2] text-[#7F1D1D] border-0"
+        : "bg-[#FEF9C3] text-[#92400E] border-0";
+
+  const openActionModal = (type: "approve" | "reject" | "suspend") => {
+    setActionModal(type);
+    setActionReason("");
+    setActionError(null);
+  };
+
+  const closeActionModal = () => {
+    if (actionSubmitting) return;
+    setActionModal(null);
+    setActionReason("");
+    setActionError(null);
+  };
+
+  const handleActionSubmit = async () => {
+    if (!profile || !actionModal) return;
+    const requiresReason = actionModal === "reject" || actionModal === "suspend";
+    if (requiresReason && !actionReason.trim()) {
+      setActionError("Please provide a reason.");
+      return;
+    }
+
+    const endpointMap = {
+      approve: apiRoutes.admin.supplier.approve(profile.id),
+      reject: apiRoutes.admin.supplier.reject(profile.id),
+      suspend: apiRoutes.admin.supplier.suspend(profile.id),
+    } as const;
+
+    const payload =
+      actionModal === "approve" ? undefined : { reason: actionReason.trim() };
+
+    setActionSubmitting(true);
+    setActionError(null);
+    try {
+      await apiPost(endpointMap[actionModal], payload);
+      const updated = await fetchSupplierProfile();
+      setProfile(updated);
+      closeActionModal();
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Failed to perform action."
+      );
+    } finally {
+      setActionSubmitting(false);
+    }
+  };
 
   if (!supplierId) {
     return (
@@ -175,7 +273,8 @@ export default function AdminSupplierProfilePage() {
         <Card>
           <CardContent className="p-6">
             <p className="text-[#475569] font-['Roboto']">
-              No supplier id was provided. Please open this page from the suppliers table.
+              No supplier id was provided. Please open this page from the
+              suppliers table.
             </p>
           </CardContent>
         </Card>
@@ -249,7 +348,10 @@ export default function AdminSupplierProfilePage() {
                   variant="outline"
                   className="border-[#22C55E] text-[#22C55E] font-['Roboto']"
                 >
-                  {derivedVerification}
+                  {roleLabel}
+                </Badge>
+                <Badge className={`px-3 py-1 font-['Roboto'] ${approvalBadgeClass}`}>
+                  {approvalStatusLabel}
                 </Badge>
               </div>
             </CardContent>
@@ -331,9 +433,7 @@ export default function AdminSupplierProfilePage() {
                   <p className="text-sm text-[#94A3B8] font-['Roboto']">
                     Phone
                   </p>
-                  <p className="font-['Inter'] text-[#0F172A]">
-                    {phoneNumber}
-                  </p>
+                  <p className="font-['Inter'] text-[#0F172A]">{phoneNumber}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 md:col-span-2">
@@ -378,7 +478,11 @@ export default function AdminSupplierProfilePage() {
                       </div>
                     </div>
                     <Button asChild variant="outline" size="sm">
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         View
                       </a>
                     </Button>
@@ -421,18 +525,85 @@ export default function AdminSupplierProfilePage() {
           </Card>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            {/* <Button variant="outline" className="sm:w-auto">
-              Request Update
-            </Button> */}
-            <Button className="bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto">
+            <Button
+              className="bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto"
+              onClick={() => openActionModal("suspend")}
+            >
               Suspend Supplier
             </Button>
-            <Button className="bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto">
-              Approve Changes
+            <Button
+              className="bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto"
+              onClick={() => openActionModal("approve")}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="outline"
+              className="sm:w-auto"
+              onClick={() => openActionModal("reject")}
+            >
+              Reject
             </Button>
           </div>
         </>
       )}
+
+      <Dialog open={!!actionModal} onOpenChange={(open) => !open && closeActionModal()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-['Inter'] text-[#0F172A]">
+              {actionModal === "approve"
+                ? "Approve Supplier"
+                : actionModal === "reject"
+                  ? "Reject Supplier"
+                  : "Suspend Supplier"}
+            </DialogTitle>
+            <DialogDescription className="font-['Roboto'] text-[#475569]">
+              {actionModal === "approve"
+                ? "Approve this supplier to grant them access to the platform."
+                : actionModal === "reject"
+                  ? "Provide a reason for rejecting this supplier."
+                  : "Provide a reason for suspending this supplier."}
+            </DialogDescription>
+          </DialogHeader>
+          {(actionModal === "reject" || actionModal === "suspend") && (
+            <div className="space-y-2">
+              <p className="text-sm font-['Roboto'] text-[#0F172A]">Reason</p>
+              <Textarea
+                value={actionReason}
+                onChange={(event) => setActionReason(event.target.value)}
+                placeholder={`Enter ${
+                  actionModal === "suspend" ? "suspension" : "rejection"
+                } reason`}
+                rows={4}
+              />
+            </div>
+          )}
+          {actionError && (
+            <p className="text-sm text-[#B91C1C] font-['Roboto']">{actionError}</p>
+          )}
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={closeActionModal}
+              disabled={actionSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={
+                actionModal === "approve"
+                  ? "bg-[#22C55E] hover:bg-[#16A34A] text-white"
+                  : "bg-[#EF4444] hover:bg-[#DC2626] text-white"
+              }
+              onClick={handleActionSubmit}
+              disabled={actionSubmitting}
+            >
+              {actionSubmitting ? "Processing..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

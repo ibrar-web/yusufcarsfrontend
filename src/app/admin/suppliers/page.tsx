@@ -47,13 +47,38 @@ import { TablePagination } from "@/components/table-pagination";
 
 type SupplierRecord = {
   id: string;
-  email: string;
-  fullName: string;
-  role: string;
-  isVerified: boolean;
-  isActive: boolean;
-  createdAt: string;
+  userId: string;
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+    role: string;
+    isActive: boolean;
+    suspensionReason?: string | null;
+    createdAt: string;
+    postCode?: string | null;
+  };
+  businessName: string;
+  tradingAs?: string | null;
+  businessType?: string | null;
+  vatNumber?: string | null;
+  description?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
   postCode?: string | null;
+  country?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  contactPostcode?: string | null;
+  serviceRadius?: string | null;
+  categories?: string[];
+  approvalStatus?: string | null;
+  rejectionReason?: string | null;
+  approvedAt?: string | null;
+  submittedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
 };
 
 export default function AdminSuppliersPage() {
@@ -336,7 +361,7 @@ export default function AdminSuppliersPage() {
                     Status
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Verification
+                    Approval
                   </TableHead>
                   <TableHead className="text-right" />
                 </TableRow>
@@ -350,7 +375,7 @@ export default function AdminSuppliersPage() {
                     >
                       <TableCell className="font-['Inter'] text-[#0F172A]">
                         <div className="flex flex-col">
-                          <span>{supplier.fullName}</span>
+                          <span>{supplier.businessName}</span>
                           <span className="text-xs text-[#94A3B8] font-['Roboto']">
                             ID: {supplier.id}
                           </span>
@@ -358,39 +383,51 @@ export default function AdminSuppliersPage() {
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
                         <div className="flex flex-col">
-                          <span>{supplier.email}</span>
+                          <span>{supplier.user.fullName}</span>
                           <span className="text-xs text-[#94A3B8]">
-                            {supplier.role}
+                            {supplier.user.email}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {supplier.postCode || "—"}
+                        {supplier.city ||
+                          supplier.postCode ||
+                          supplier.user.postCode ||
+                          "—"}
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {formatDate(supplier.createdAt)}
+                        {formatDate(supplier.createdAt ?? supplier.user.createdAt)}
                       </TableCell>
                       <TableCell>
                         <Badge
                           className={`font-['Roboto'] ${
-                            supplier.isActive
+                            supplier.user.isActive
                               ? "bg-[#DCFCE7] text-[#166534] border-0"
                               : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
                           }`}
                         >
-                          {supplier.isActive ? "Active" : "Inactive"}
+                          {supplier.user.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={`font-['Roboto'] ${
-                            supplier.isVerified
-                              ? "bg-[#DCFCE7] text-[#166534] border-0"
-                              : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
-                          }`}
-                        >
-                          {supplier.isVerified ? "Verified" : "Not Verified"}
-                        </Badge>
+                        {(() => {
+                          const status = supplier.approvalStatus ?? "pending";
+                          const label =
+                            status.charAt(0).toUpperCase() +
+                            status.slice(1).replace(/_/g, " ");
+                          const isApproved = status === "approved";
+                          const isRejected = status === "rejected";
+                          const badgeClass = isApproved
+                            ? "bg-[#DCFCE7] text-[#166534] border-0"
+                            : isRejected
+                              ? "bg-[#FEE2E2] text-[#7F1D1D] border-0"
+                              : "bg-[#FEF9C3] text-[#92400E] border-0";
+                          return (
+                            <Badge className={`font-['Roboto'] ${badgeClass}`}>
+                              {label}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -408,7 +445,7 @@ export default function AdminSuppliersPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={7} className="text-center py-12">
                       <div className="flex flex-col items-center gap-3">
                         <Search className="h-12 w-12 text-[#CBD5E1]" />
                         <p className="text-[#475569] font-['Roboto']">
@@ -667,20 +704,20 @@ export default function AdminSuppliersPage() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-['Inter'] text-white">
-                        {selectedSupplier.fullName}
+                        {selectedSupplier.businessName}
                       </h3>
                       <Badge
                         className={`font-['Roboto'] ${
-                          selectedSupplier.isActive
+                          selectedSupplier.user.isActive
                             ? "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
                             : "bg-[#7F1D1D]/30 text-[#FCA5A5] border-[#F02801]"
                         }`}
                       >
-                        {selectedSupplier.isActive ? "Active" : "Inactive"}
+                        {selectedSupplier.user.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </div>
                     <p className="text-sm text-[#CBD5E1] font-['Roboto']">
-                      {selectedSupplier.email}
+                      {selectedSupplier.user.email}
                     </p>
                   </div>
                 </div>
@@ -692,7 +729,7 @@ export default function AdminSuppliersPage() {
                     <span className="text-sm font-['Roboto']">Email</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedSupplier.email}
+                    {selectedSupplier.user.email}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -701,7 +738,7 @@ export default function AdminSuppliersPage() {
                     <span className="text-sm font-['Roboto']">Role</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedSupplier.role}
+                    {selectedSupplier.user.role}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -728,11 +765,11 @@ export default function AdminSuppliersPage() {
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <CheckCircle className="h-4 w-4 text-[#22C55E]" />
                     <span className="text-sm font-['Roboto']">
-                      Verification
+                      Approval Status
                     </span>
                   </div>
-                  <p className="font-['Inter'] text-white">
-                    {selectedSupplier.isVerified ? "Verified" : "Pending"}
+                  <p className="font-['Inter'] text-white capitalize">
+                    {(selectedSupplier.approvalStatus ?? "pending").replace(/_/g, " ")}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">

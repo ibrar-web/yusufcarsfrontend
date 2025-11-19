@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -44,6 +44,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useAppState } from "@/hooks/use-app-state";
+import Link from "next/link";
 
 type ActiveSupplier = (typeof adminSuppliers)[number];
 type PendingSupplier = (typeof adminPendingSuppliers)[number];
@@ -54,10 +55,14 @@ export default function AdminSuppliersPage() {
   const [showAllSuppliers, setShowAllSuppliers] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
-  const [approvalSuccessDialogOpen, setApprovalSuccessDialogOpen] = useState(false);
-  const [selectedPendingSupplier, setSelectedPendingSupplier] = useState<PendingSupplier | null>(null);
-  const [selectedActiveSupplier, setSelectedActiveSupplier] = useState<ActiveSupplier | null>(null);
-  const [supplierDetailsDialogOpen, setSupplierDetailsDialogOpen] = useState(false);
+  const [approvalSuccessDialogOpen, setApprovalSuccessDialogOpen] =
+    useState(false);
+  const [selectedPendingSupplier, setSelectedPendingSupplier] =
+    useState<PendingSupplier | null>(null);
+  const [selectedActiveSupplier, setSelectedActiveSupplier] =
+    useState<ActiveSupplier | null>(null);
+  const [supplierDetailsDialogOpen, setSupplierDetailsDialogOpen] =
+    useState(false);
 
   const filteredSuppliers = useMemo(() => {
     if (!supplierSearch) return adminSuppliers;
@@ -66,11 +71,13 @@ export default function AdminSuppliersPage() {
       (supplier) =>
         supplier.name.toLowerCase().includes(term) ||
         supplier.location.toLowerCase().includes(term) ||
-        supplier.id.toLowerCase().includes(term),
+        supplier.id.toLowerCase().includes(term)
     );
   }, [supplierSearch]);
 
-  const suppliersToRender = showAllSuppliers ? filteredSuppliers : filteredSuppliers.slice(0, 10);
+  const suppliersToRender = showAllSuppliers
+    ? filteredSuppliers
+    : filteredSuppliers.slice(0, 10);
 
   return (
     <>
@@ -83,7 +90,8 @@ export default function AdminSuppliersPage() {
               Supplier Management
             </h1>
             <p className="text-base md:text-lg text-[#475569] font-['Roboto']">
-              {adminPendingSuppliers.length} pending approvals • {adminSuppliers.length} active suppliers
+              {adminPendingSuppliers.length} pending approvals •{" "}
+              {adminSuppliers.length} active suppliers
             </p>
           </div>
         </div>
@@ -91,7 +99,9 @@ export default function AdminSuppliersPage() {
         <Card className="border border-[#E5E7EB] shadow-[0_4px_24px_rgba(15,23,42,0.08)]">
           <CardHeader className="pb-4 border-b border-[#E5E7EB]">
             <div className="flex items-center justify-between">
-              <CardTitle className="font-['Inter'] text-[#0F172A]">Pending Approvals</CardTitle>
+              <CardTitle className="font-['Inter'] text-[#0F172A]">
+                Pending Approvals
+              </CardTitle>
               <Badge className="bg-[#FEF3C7] text-[#92400E] border-[#F59E0B] px-3 py-1 font-['Roboto']">
                 {adminPendingSuppliers.length} pending
               </Badge>
@@ -102,20 +112,30 @@ export default function AdminSuppliersPage() {
               <div
                 key={supplier.id}
                 className={`flex items-center gap-4 px-6 py-4 hover:bg-[#F1F5F9] transition-all ${
-                  index !== adminPendingSuppliers.length - 1 ? "border-b border-[#E5E7EB]" : ""
+                  index !== adminPendingSuppliers.length - 1
+                    ? "border-b border-[#E5E7EB]"
+                    : ""
                 }`}
               >
                 <div className="flex-1 min-w-[200px]">
-                  <h3 className="font-['Inter'] text-[#0F172A]">{supplier.name}</h3>
-                  <p className="text-sm text-[#475569] font-['Roboto']">ID: {supplier.id}</p>
+                  <h3 className="font-['Inter'] text-[#0F172A]">
+                    {supplier.name}
+                  </h3>
+                  <p className="text-sm text-[#475569] font-['Roboto']">
+                    ID: {supplier.id}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 min-w-[140px]">
                   <MapPin className="h-4 w-4 text-[#475569]" />
-                  <span className="text-sm text-[#475569] font-['Roboto']">{supplier.location}</span>
+                  <span className="text-sm text-[#475569] font-['Roboto']">
+                    {supplier.location}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 min-w-[120px]">
                   <Calendar className="h-4 w-4 text-[#475569]" />
-                  <span className="text-sm text-[#475569] font-['Roboto']">{supplier.appliedDate}</span>
+                  <span className="text-sm text-[#475569] font-['Roboto']">
+                    {supplier.appliedDate}
+                  </span>
                 </div>
                 <Button
                   size="sm"
@@ -140,7 +160,9 @@ export default function AdminSuppliersPage() {
                 <CheckCircle className="h-6 w-6 text-white" strokeWidth={2} />
               </div>
               <div>
-                <CardTitle className="font-['Inter'] text-[#0F172A]">Active Suppliers</CardTitle>
+                <CardTitle className="font-['Inter'] text-[#0F172A]">
+                  Active Suppliers
+                </CardTitle>
                 <CardDescription className="font-['Roboto'] text-[#475569]">
                   Approved suppliers on the platform
                 </CardDescription>
@@ -170,22 +192,45 @@ export default function AdminSuppliersPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[#E5E7EB]">
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Name</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Location</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Rating</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Quotes</TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">Joined</TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Name
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Location
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Rating
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Quotes
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Joined
+                  </TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {suppliersToRender.map((supplier) => (
-                  <TableRow key={supplier.id} className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]">
-                    <TableCell className="font-['Inter'] text-[#0F172A]">{supplier.name}</TableCell>
-                    <TableCell className="font-['Roboto'] text-[#475569]">{supplier.location}</TableCell>
-                    <TableCell className="font-['Roboto'] text-[#0F172A]">{supplier.rating}/5</TableCell>
-                    <TableCell className="font-['Roboto'] text-[#0F172A]">{supplier.quotes}</TableCell>
-                    <TableCell className="font-['Roboto'] text-[#475569]">{supplier.joined}</TableCell>
+                  <TableRow
+                    key={supplier.id}
+                    className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
+                  >
+                    <TableCell className="font-['Inter'] text-[#0F172A]">
+                      {supplier.name}
+                    </TableCell>
+                    <TableCell className="font-['Roboto'] text-[#475569]">
+                      {supplier.location}
+                    </TableCell>
+                    <TableCell className="font-['Roboto'] text-[#0F172A]">
+                      {supplier.rating}/5
+                    </TableCell>
+                    <TableCell className="font-['Roboto'] text-[#0F172A]">
+                      {supplier.quotes}
+                    </TableCell>
+                    <TableCell className="font-['Roboto'] text-[#475569]">
+                      {supplier.joined}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="outline"
@@ -231,7 +276,9 @@ export default function AdminSuppliersPage() {
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
         <DialogContent className="max-w-2xl border-[#E5E7EB] bg-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-['Inter'] text-[#0F172A]">Supplier Application Review</DialogTitle>
+            <DialogTitle className="font-['Inter'] text-[#0F172A]">
+              Supplier Application Review
+            </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#475569]">
               Review supplier details and documentation before approval
             </DialogDescription>
@@ -244,8 +291,12 @@ export default function AdminSuppliersPage() {
                     <Building2 className="h-8 w-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-['Inter'] text-[#0F172A] mb-1">{selectedPendingSupplier.name}</h3>
-                    <p className="text-sm text-[#475569] font-['Roboto']">{selectedPendingSupplier.description}</p>
+                    <h3 className="font-['Inter'] text-[#0F172A] mb-1">
+                      {selectedPendingSupplier.name}
+                    </h3>
+                    <p className="text-sm text-[#475569] font-['Roboto']">
+                      {selectedPendingSupplier.description}
+                    </p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {selectedPendingSupplier.categories.map((category) => (
                         <Badge
@@ -265,8 +316,12 @@ export default function AdminSuppliersPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <MapPin className="h-4 w-4 text-[#F02801]" />
                     <div>
-                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Business Address</p>
-                      <p className="font-['Roboto'] text-[#0F172A]">{selectedPendingSupplier.businessAddress}</p>
+                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                        Business Address
+                      </p>
+                      <p className="font-['Roboto'] text-[#0F172A]">
+                        {selectedPendingSupplier.businessAddress}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -274,8 +329,12 @@ export default function AdminSuppliersPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <Mail className="h-4 w-4 text-[#F02801]" />
                     <div>
-                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Email</p>
-                      <p className="font-['Roboto'] text-[#0F172A]">{selectedPendingSupplier.email}</p>
+                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                        Email
+                      </p>
+                      <p className="font-['Roboto'] text-[#0F172A]">
+                        {selectedPendingSupplier.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -283,8 +342,12 @@ export default function AdminSuppliersPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <Phone className="h-4 w-4 text-[#F02801]" />
                     <div>
-                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Phone</p>
-                      <p className="font-['Roboto'] text-[#0F172A]">{selectedPendingSupplier.phone}</p>
+                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                        Phone
+                      </p>
+                      <p className="font-['Roboto'] text-[#0F172A]">
+                        {selectedPendingSupplier.phone}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -292,8 +355,12 @@ export default function AdminSuppliersPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <Users className="h-4 w-4 text-[#F02801]" />
                     <div>
-                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Years in Business</p>
-                      <p className="font-['Roboto'] text-[#0F172A]">{selectedPendingSupplier.yearsInBusiness}</p>
+                      <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                        Years in Business
+                      </p>
+                      <p className="font-['Roboto'] text-[#0F172A]">
+                        {selectedPendingSupplier.yearsInBusiness}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -333,7 +400,9 @@ export default function AdminSuppliersPage() {
       <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
         <DialogContent className="max-w-md border-[#E5E7EB] bg-white">
           <DialogHeader>
-            <DialogTitle className="font-['Inter'] text-[#0F172A]">Confirm Supplier Approval</DialogTitle>
+            <DialogTitle className="font-['Inter'] text-[#0F172A]">
+              Confirm Supplier Approval
+            </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#475569]">
               Are you sure you want to approve this supplier?
             </DialogDescription>
@@ -346,8 +415,12 @@ export default function AdminSuppliersPage() {
                     <Building2 className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-['Inter'] text-[#0F172A]">{selectedPendingSupplier.name}</p>
-                    <p className="text-sm text-[#475569] font-['Roboto']">{selectedPendingSupplier.location}</p>
+                    <p className="font-['Inter'] text-[#0F172A]">
+                      {selectedPendingSupplier.name}
+                    </p>
+                    <p className="text-sm text-[#475569] font-['Roboto']">
+                      {selectedPendingSupplier.location}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -375,16 +448,22 @@ export default function AdminSuppliersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={approvalSuccessDialogOpen} onOpenChange={setApprovalSuccessDialogOpen}>
+      <Dialog
+        open={approvalSuccessDialogOpen}
+        onOpenChange={setApprovalSuccessDialogOpen}
+      >
         <DialogContent className="max-w-md border-[#E5E7EB] bg-white">
           <div className="text-center space-y-4">
             <div className="h-16 w-16 rounded-full bg-[#DCFCE7] border-2 border-[#22C55E] flex items-center justify-center mx-auto shadow-lg">
               <CheckCircle className="h-8 w-8 text-[#22C55E]" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-['Inter'] text-[#0F172A] mb-2">Supplier Approved</h3>
+              <h3 className="font-['Inter'] text-[#0F172A] mb-2">
+                Supplier Approved
+              </h3>
               <p className="text-sm text-[#475569] font-['Roboto']">
-                {selectedPendingSupplier?.name} has been successfully approved and notified via email.
+                {selectedPendingSupplier?.name} has been successfully approved
+                and notified via email.
               </p>
             </div>
             <Button
@@ -397,10 +476,15 @@ export default function AdminSuppliersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={supplierDetailsDialogOpen} onOpenChange={setSupplierDetailsDialogOpen}>
+      <Dialog
+        open={supplierDetailsDialogOpen}
+        onOpenChange={setSupplierDetailsDialogOpen}
+      >
         <DialogContent className="max-w-2xl border border-[#334155] bg-[#1E293B] max-h-[90vh] overflow-y-auto pt-8">
           <DialogHeader className="mb-2">
-            <DialogTitle className="font-['Inter'] text-white">Supplier Details</DialogTitle>
+            <DialogTitle className="font-['Inter'] text-white">
+              Supplier Details
+            </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#CBD5E1]">
               Complete information about this supplier
             </DialogDescription>
@@ -414,10 +498,16 @@ export default function AdminSuppliersPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-['Inter'] text-white">{selectedActiveSupplier.name}</h3>
-                      <Badge className="bg-[#166534]/30 text-[#86EFAC] border-[#22C55E] font-['Roboto']">Active</Badge>
+                      <h3 className="font-['Inter'] text-white">
+                        {selectedActiveSupplier.name}
+                      </h3>
+                      <Badge className="bg-[#166534]/30 text-[#86EFAC] border-[#22C55E] font-['Roboto']">
+                        Active
+                      </Badge>
                     </div>
-                    <p className="text-sm text-[#CBD5E1] font-['Roboto']">{selectedActiveSupplier.description}</p>
+                    <p className="text-sm text-[#CBD5E1] font-['Roboto']">
+                      {selectedActiveSupplier.description}
+                    </p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {selectedActiveSupplier.categories.map((category) => (
                         <Badge
@@ -438,21 +528,27 @@ export default function AdminSuppliersPage() {
                     <CheckCircle className="h-4 w-4 text-[#22C55E]" />
                     <span className="text-sm font-['Roboto']">Rating</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedActiveSupplier.rating}/5.0</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedActiveSupplier.rating}/5.0
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <FileText className="h-4 w-4 text-[#F59E0B]" />
                     <span className="text-sm font-['Roboto']">Quotes</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedActiveSupplier.quotes}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedActiveSupplier.quotes}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <Calendar className="h-4 w-4 text-[#3B82F6]" />
                     <span className="text-sm font-['Roboto']">Joined</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedActiveSupplier.joined}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedActiveSupplier.joined}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2 pt-2">
@@ -463,15 +559,16 @@ export default function AdminSuppliersPage() {
                 >
                   Close
                 </Button>
-                <Button
-                  className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']"
-                  onClick={() => {
-                    handleNavigate("supplier-profile");
-                    setSupplierDetailsDialogOpen(false);
-                  }}
-                >
-                  View Full Profile
-                </Button>
+                <Link href={"supplier/profile"}>
+                  <Button
+                    className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']"
+                    onClick={() => {
+                      setSupplierDetailsDialogOpen(false);
+                    }}
+                  >
+                    View Full Profile
+                  </Button>
+                </Link>
               </div>
             </div>
           )}

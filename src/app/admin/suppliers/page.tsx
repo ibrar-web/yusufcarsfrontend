@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -27,10 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  adminPendingSuppliers,
-  adminSuppliers,
-} from "@/page-components/admin-dashboard/data";
+import { adminPendingSuppliers } from "@/page-components/admin-dashboard/data";
 import {
   Building2,
   Calendar,
@@ -43,41 +40,146 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useAppState } from "@/hooks/use-app-state";
 import Link from "next/link";
+import { apiGet } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
+import { TablePagination } from "@/components/table-pagination";
 
-type ActiveSupplier = (typeof adminSuppliers)[number];
-type PendingSupplier = (typeof adminPendingSuppliers)[number];
+type SupplierRecord = {
+  id: string;
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+    role: string;
+    isVerified: boolean;
+    isActive: boolean;
+    createdAt: string;
+    postCode?: string | null;
+  };
+  businessName: string;
+  tradingAs?: string | null;
+  businessType?: string | null;
+  vatNumber?: string | null;
+  description?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  postCode?: string | null;
+  phone?: string | null;
+  contactPostcode?: string | null;
+  serviceRadius?: string | null;
+  termsAccepted?: boolean;
+  gdprConsent?: boolean;
+  categories?: string[];
+  isVerified?: boolean;
+  isActive?: boolean;
+  companyRegDoc?: string | null;
+  insuranceDoc?: string | null;
+  createdAt?: string;
+};
 
 export default function AdminSuppliersPage() {
-  const { handleNavigate } = useAppState();
+  const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
+  const [totalSuppliers, setTotalSuppliers] = useState(0);
   const [supplierSearch, setSupplierSearch] = useState("");
-  const [showAllSuppliers, setShowAllSuppliers] = useState(false);
+  const [supplierStatusFilter, setSupplierStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [isLoading, setIsLoading] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [approvalSuccessDialogOpen, setApprovalSuccessDialogOpen] =
     useState(false);
   const [selectedPendingSupplier, setSelectedPendingSupplier] =
     useState<PendingSupplier | null>(null);
-  const [selectedActiveSupplier, setSelectedActiveSupplier] =
-    useState<ActiveSupplier | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierRecord | null>(
+    null
+  );
   const [supplierDetailsDialogOpen, setSupplierDetailsDialogOpen] =
     useState(false);
+  const normalizeSuppliers = (payload: unknown): SupplierRecord[] => {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload as SupplierRecord[];
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "data" in payload &&
+      Array.isArray((payload as Record<string, unknown>).data)
+    ) {
+      return (payload as { data: SupplierRecord[] }).data;
+    }
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "items" in payload &&
+      Array.isArray((payload as Record<string, unknown>).items)
+    ) {
+      return (payload as { items: SupplierRecord[] }).items;
+    }
+    return [];
+  };
 
-  const filteredSuppliers = useMemo(() => {
-    if (!supplierSearch) return adminSuppliers;
-    const term = supplierSearch.toLowerCase();
-    return adminSuppliers.filter(
-      (supplier) =>
-        supplier.name.toLowerCase().includes(term) ||
-        supplier.location.toLowerCase().includes(term) ||
-        supplier.id.toLowerCase().includes(term)
-    );
-  }, [supplierSearch]);
+  const fetchSuppliers = useCallback(
+    async ({
+      page: requestedPage = 1,
+      pageSize: requestedPageSize = 20,
+    } = {}) => {
+      setIsLoading(true);
+      try {
+        const params = {
+          page: requestedPage,
+          limit: requestedPageSize,
+          query: supplierSearch || undefined,
+          status:
+            supplierStatusFilter !== "all" ? supplierStatusFilter : undefined,
+        };
 
-  const suppliersToRender = showAllSuppliers
-    ? filteredSuppliers
-    : filteredSuppliers.slice(0, 10);
+        const response: any = await apiGet(apiRoutes.admin.supplier.list, {
+          params,
+        });
+        const payload = response?.data ?? response;
+        const data = normalizeSuppliers(payload?.data ?? payload);
+        const meta = payload?.meta ?? response?.meta ?? {};
+
+        setSuppliers(data);
+        setTotalSuppliers(meta?.total ?? data.length);
+        setPage(meta?.page ?? requestedPage);
+        setPageSize(meta?.limit ?? requestedPageSize);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to fetch suppliers", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [supplierSearch, supplierStatusFilter]
+  );
+
+  useEffect(() => {
+    fetchSuppliers({ page: 1, pageSize });
+  }, [fetchSuppliers, pageSize]);
+
+  const handlePageChange = (nextPage: number) => {
+    fetchSuppliers({ page: nextPage, pageSize });
+  };
+
+  const handlePageSizeChange = (nextSize: number) => {
+    fetchSuppliers({ page: 1, pageSize: nextSize });
+  };
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   return (
     <>
@@ -91,7 +193,7 @@ export default function AdminSuppliersPage() {
             </h1>
             <p className="text-base md:text-lg text-[#475569] font-['Roboto']">
               {adminPendingSuppliers.length} pending approvals •{" "}
-              {adminSuppliers.length} active suppliers
+              {(totalSuppliers || suppliers.length) ?? 0} active suppliers
             </p>
           </div>
         </div>
@@ -170,105 +272,163 @@ export default function AdminSuppliersPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-              <Input
-                type="text"
-                placeholder="Search suppliers by name, location or ID..."
-                value={supplierSearch}
-                onChange={(e) => setSupplierSearch(e.target.value)}
-                className="pl-12 h-12 border-[#E5E7EB] focus:border-[#F02801] focus:ring-[#F02801] rounded-xl font-['Roboto'] text-[#0F172A] placeholder:text-[#94A3B8] max-w-md"
-              />
-              {supplierSearch && (
-                <button
-                  onClick={() => setSupplierSearch("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#F02801]"
-                >
-                  ×
-                </button>
-              )}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+              <div className="relative w-full lg:max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                <Input
+                  type="text"
+                  placeholder="Search suppliers by name, city or ID..."
+                  value={supplierSearch}
+                  onChange={(e) => setSupplierSearch(e.target.value)}
+                  className="pl-12 h-12 border-[#E5E7EB] focus:border-[#F02801] focus:ring-[#F02801] rounded-xl font-['Roboto'] text-[#0F172A] placeholder:text-[#94A3B8]"
+                />
+                {supplierSearch && (
+                  <button
+                    onClick={() => setSupplierSearch("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#F02801]"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              <div className="inline-flex p-1 bg-[#F1F5F9] rounded-xl">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "active", label: "Active" },
+                  { id: "inactive", label: "Inactive" },
+                ].map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() =>
+                      setSupplierStatusFilter(filter.id as typeof supplierStatusFilter)
+                    }
+                    className={`px-4 py-2 rounded-lg font-['Roboto'] transition-all ${
+                      supplierStatusFilter === filter.id
+                        ? "bg-white text-[#0F172A] shadow-sm"
+                        : "text-[#475569] hover:text-[#0F172A]"
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {isLoading && (
+              <div className="px-6 py-2 text-sm text-muted-foreground">
+                Loading suppliers...
+              </div>
+            )}
 
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[#E5E7EB]">
                   <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Name
+                    Business
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Location
+                    Contact
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Rating
-                  </TableHead>
-                  <TableHead className="font-['Inter'] text-[#0F172A]">
-                    Quotes
+                    City
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
                     Joined
                   </TableHead>
-                  <TableHead />
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-right" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {suppliersToRender.map((supplier) => (
-                  <TableRow
-                    key={supplier.id}
-                    className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
-                  >
-                    <TableCell className="font-['Inter'] text-[#0F172A]">
-                      {supplier.name}
-                    </TableCell>
-                    <TableCell className="font-['Roboto'] text-[#475569]">
-                      {supplier.location}
-                    </TableCell>
-                    <TableCell className="font-['Roboto'] text-[#0F172A]">
-                      {supplier.rating}/5
-                    </TableCell>
-                    <TableCell className="font-['Roboto'] text-[#0F172A]">
-                      {supplier.quotes}
-                    </TableCell>
-                    <TableCell className="font-['Roboto'] text-[#475569]">
-                      {supplier.joined}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full"
-                        onClick={() => {
-                          setSelectedActiveSupplier(supplier);
-                          setSupplierDetailsDialogOpen(true);
-                        }}
-                      >
-                        Details
-                      </Button>
+                {suppliers.length > 0 ? (
+                  suppliers.map((supplier) => (
+                    <TableRow
+                      key={supplier.id}
+                      className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"
+                    >
+                      <TableCell className="font-['Inter'] text-[#0F172A]">
+                        <div className="flex flex-col">
+                          <span>{supplier.businessName}</span>
+                          <span className="text-xs text-[#94A3B8] font-['Roboto']">
+                            ID: {supplier.id}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        <div className="flex flex-col">
+                          <span>{supplier.user?.fullName}</span>
+                          <span className="text-xs text-[#94A3B8]">
+                            {supplier.user?.email}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {supplier.city || supplier.postCode || "—"}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {formatDate(supplier.createdAt ?? supplier.user?.createdAt)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`font-['Roboto'] ${
+                            supplier.isActive ?? supplier.user?.isActive
+                              ? "bg-[#DCFCE7] text-[#166534] border-0"
+                              : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
+                          }`}
+                        >
+                          {supplier.isActive ?? supplier.user?.isActive
+                            ? "Active"
+                            : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full"
+                          onClick={() => {
+                            setSelectedSupplier(supplier);
+                            setSupplierDetailsDialogOpen(true);
+                          }}
+                        >
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3">
+                        <Search className="h-12 w-12 text-[#CBD5E1]" />
+                        <p className="text-[#475569] font-['Roboto']">
+                          No suppliers found matching "{supplierSearch}"
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => setSupplierSearch("")}
+                          className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full"
+                        >
+                          Clear Search
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
-
-            {filteredSuppliers.length > 10 && !showAllSuppliers && (
-              <div className="flex justify-center pt-6 border-t border-[#E5E7EB] mt-6">
-                <Button
-                  onClick={() => setShowAllSuppliers(true)}
-                  className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full h-11 px-8"
-                >
-                  View More Suppliers ({filteredSuppliers.length - 10} more)
-                </Button>
-              </div>
-            )}
-            {showAllSuppliers && filteredSuppliers.length > 10 && (
-              <div className="flex justify-center pt-6 border-t border-[#E5E7EB] mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllSuppliers(false)}
-                  className="border-[#E5E7EB] hover:border-[#F02801] hover:bg-[#FEF3F2] hover:text-[#F02801] font-['Roboto'] rounded-full h-11 px-8"
-                >
-                  Show Less
-                </Button>
-              </div>
-            )}
+            <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end mt-4">
+              <TablePagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalSuppliers}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                className="w-full"
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -489,7 +649,7 @@ export default function AdminSuppliersPage() {
               Complete information about this supplier
             </DialogDescription>
           </DialogHeader>
-          {selectedActiveSupplier && (
+          {selectedSupplier && (
             <div className="space-y-4 mt-4">
               <div className="bg-gradient-to-br from-[#7F1D1D]/20 via-[#7F1D1D]/10 to-transparent p-6 rounded-xl border border-[#F02801]/30">
                 <div className="flex items-start gap-4">
@@ -499,46 +659,94 @@ export default function AdminSuppliersPage() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-['Inter'] text-white">
-                        {selectedActiveSupplier.name}
+                        {selectedSupplier.businessName}
                       </h3>
-                      <Badge className="bg-[#166534]/30 text-[#86EFAC] border-[#22C55E] font-['Roboto']">
-                        Active
+                      <Badge
+                        className={`font-['Roboto'] ${
+                          selectedSupplier.isActive ?? selectedSupplier.user?.isActive
+                            ? "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
+                            : "bg-[#7F1D1D]/30 text-[#FCA5A5] border-[#F02801]"
+                        }`}
+                      >
+                        {selectedSupplier.isActive ?? selectedSupplier.user?.isActive
+                          ? "Active"
+                          : "Inactive"}
                       </Badge>
                     </div>
                     <p className="text-sm text-[#CBD5E1] font-['Roboto']">
-                      {selectedActiveSupplier.description}
+                      {selectedSupplier.description || "No description provided."}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {selectedActiveSupplier.categories.map((category) => (
-                        <Badge
-                          key={category}
-                          variant="outline"
-                          className="font-['Roboto'] border-[#F02801] text-[#FCA5A5] bg-[#7F1D1D]/20"
-                        >
-                          {category}
-                        </Badge>
-                      ))}
+                      {(selectedSupplier.categories ?? ["General"]).map(
+                        (category) => (
+                          <Badge
+                            key={category}
+                            variant="outline"
+                            className="font-['Roboto'] border-[#F02801] text-[#FCA5A5] bg-[#7F1D1D]/20"
+                          >
+                            {category}
+                          </Badge>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm font-['Roboto']">Email</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.user?.email ?? "N/A"}
+                  </p>
+                </div>
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <Phone className="h-4 w-4" />
+                    <span className="text-sm font-['Roboto']">Phone</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.phone ?? "N/A"}
+                  </p>
+                </div>
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <MapPin className="h-4 w-4" />
+                    <span className="text-sm font-['Roboto']">Address</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.addressLine1 || "N/A"}
+                  </p>
+                </div>
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm font-['Roboto']">Business Type</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.businessType || "N/A"}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <CheckCircle className="h-4 w-4 text-[#22C55E]" />
-                    <span className="text-sm font-['Roboto']">Rating</span>
+                    <span className="text-sm font-['Roboto']">Verification</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedActiveSupplier.rating}/5.0
+                    {selectedSupplier.isVerified ? "Verified" : "Pending"}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <FileText className="h-4 w-4 text-[#F59E0B]" />
-                    <span className="text-sm font-['Roboto']">Quotes</span>
+                    <span className="text-sm font-['Roboto']">Service Radius</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedActiveSupplier.quotes}
+                    {selectedSupplier.serviceRadius ?? "N/A"}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -547,7 +755,7 @@ export default function AdminSuppliersPage() {
                     <span className="text-sm font-['Roboto']">Joined</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedActiveSupplier.joined}
+                    {formatDate(selectedSupplier.createdAt ?? selectedSupplier.user?.createdAt)}
                   </p>
                 </div>
               </div>
@@ -559,7 +767,7 @@ export default function AdminSuppliersPage() {
                 >
                   Close
                 </Button>
-                <Link href={"supplier/profile"}>
+                <Link href={`/admin/suppliers/profile?id=${selectedSupplier.id}`}>
                   <Button
                     className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']"
                     onClick={() => {

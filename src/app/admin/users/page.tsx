@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -135,13 +135,15 @@ export default function AdminUsersPage() {
       const response = await apiPost(apiRoutes.admin.users.update(userId));
       setUsers((prev) =>
         prev.map((user) =>
-          user.id === userId
-            ? { ...user, isActive: !user.isActive } // immutable update
-            : user
+          user.id === userId ? { ...user, isActive: !user.isActive } : user
         )
       );
+      // eslint-disable-next-line no-console
       console.log("user status updated:", response);
-    } catch (error) {}
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to update user status", error);
+    }
   };
   useEffect(() => {
     fetchUsers({ page: 1, pageSize });
@@ -155,26 +157,6 @@ export default function AdminUsersPage() {
     fetchUsers({ page: 1, pageSize: nextSize });
   };
 
-  const filteredUsers = useMemo(() => {
-    const matchesSearch = (user: adminUsersInterface) => {
-      if (!userSearch) return true;
-      const term = userSearch.toLowerCase();
-      return (
-        user.fullName.toLowerCase().includes(term) ||
-        user.email.toLowerCase().includes(term) ||
-        user.postCode.toLowerCase().includes(term) ||
-        user.id.toLowerCase().includes(term)
-      );
-    };
-
-    const matchesStatus = (user: adminUsersInterface) => {
-      if (userStatusFilter === "all") return true;
-      if (userStatusFilter === "active") return user.isActive;
-      return !user.isActive;
-    };
-
-    return users.filter((user) => matchesSearch(user) && matchesStatus(user));
-  }, [users, userSearch, userStatusFilter]);
   return (
     <>
       <div className="space-y-6">
@@ -191,8 +173,7 @@ export default function AdminUsersPage() {
                   All Users
                 </h2>
                 <p className="text-base text-[#475569] font-['Roboto']">
-                  {(totalUsers || filteredUsers.length || users.length) ?? 0}{" "}
-                  total users registered
+                  {(totalUsers || users.length) ?? 0} total users registered
                 </p>
               </div>
             </div>
@@ -283,8 +264,8 @@ export default function AdminUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
+                {users.length > 0 ? (
+                  users.map((user) => (
                     <TableRow
                       key={user.id}
                       className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]"

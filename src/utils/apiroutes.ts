@@ -90,7 +90,7 @@ export const apiRoutes = {
   admin: {
     users: {
       list: "/admin/users",
-      update: (id: string) => `/admin/users/${id}`,
+      update: (id: string) => `/admin/users/${id}/activate`,
     },
     supplier: {
       list: "/admin/suppliers",

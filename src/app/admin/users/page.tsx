@@ -38,7 +38,7 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { apiGet } from "@/utils/apiconfig/http";
+import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { adminUsersInterface } from "@/page-components/admin-dashboard/data";
 import { TablePagination } from "@/components/table-pagination";
@@ -90,7 +90,10 @@ export default function AdminUsersPage() {
   };
 
   const fetchUsers = useCallback(
-    async ({ page: requestedPage = 1, pageSize: requestedPageSize = 20 } = {}) => {
+    async ({
+      page: requestedPage = 1,
+      pageSize: requestedPageSize = 20,
+    } = {}) => {
       setIsLoading(true);
       try {
         const params = {
@@ -110,7 +113,8 @@ export default function AdminUsersPage() {
           response?.data?.total ??
           response?.meta?.total ??
           data.length;
-        const responsePage = response?.page ?? response?.data?.page ?? requestedPage;
+        const responsePage =
+          response?.page ?? response?.data?.page ?? requestedPage;
         const responsePageSize =
           response?.pageSize ?? response?.data?.pageSize ?? requestedPageSize;
 
@@ -126,7 +130,19 @@ export default function AdminUsersPage() {
     },
     [userSearch, userStatusFilter]
   );
-
+  const toggleActive = async (userId: string) => {
+    try {
+      const response = await apiPost(apiRoutes.admin.users.update(userId));
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, isActive: !user.isActive } // immutable update
+            : user
+        )
+      );
+      console.log("user status updated:", response);
+    } catch (error) {}
+  };
   useEffect(() => {
     fetchUsers({ page: 1, pageSize });
   }, [fetchUsers, pageSize]);
@@ -175,8 +191,8 @@ export default function AdminUsersPage() {
                   All Users
                 </h2>
                 <p className="text-base text-[#475569] font-['Roboto']">
-                  {(totalUsers || filteredUsers.length || users.length) ?? 0} total
-                  users registered
+                  {(totalUsers || filteredUsers.length || users.length) ?? 0}{" "}
+                  total users registered
                 </p>
               </div>
             </div>
@@ -235,18 +251,18 @@ export default function AdminUsersPage() {
             <CardTitle className="font-['Inter'] text-[#0F172A]">
               Recent Users
             </CardTitle>
-          <CardDescription className="font-['Roboto'] text-[#475569]">
-            Manage customers and platform access
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading && (
-            <div className="px-6 py-2 text-sm text-muted-foreground">
-              Loading users...
-            </div>
-          )}
-          <Table>
-            <TableHeader>
+            <CardDescription className="font-['Roboto'] text-[#475569]">
+              Manage customers and platform access
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isLoading && (
+              <div className="px-6 py-2 text-sm text-muted-foreground">
+                Loading users...
+              </div>
+            )}
+            <Table>
+              <TableHeader>
                 <TableRow className="border-b border-[#E5E7EB]">
                   <TableHead className="font-['Inter'] text-[#0F172A]">
                     Name
@@ -572,7 +588,7 @@ export default function AdminUsersPage() {
                       : "bg-[#22C55E] hover:bg-[#16A34A] text-white"
                   }`}
                   onClick={() => {
-                    handleToggleUserStatus(selectedUser.id);
+                    toggleActive(selectedUser.id);
                     setConfirmUserActionDialogOpen(false);
                     setUserDetailsDialogOpen(false);
                   }}

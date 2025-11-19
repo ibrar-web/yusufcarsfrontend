@@ -94,7 +94,7 @@ export default function AdminSupplierProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionModal, setActionModal] = useState<
-    null | "approve" | "reject" | "suspend"
+    null | "approve" | "reject" | "suspend" | "activate"
   >(null);
   const [actionReason, setActionReason] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
@@ -157,8 +157,8 @@ export default function AdminSupplierProfilePage() {
 
   const contactEmail = profile?.user?.email ?? "N/A";
   const phoneNumber = profile?.phone ?? "N/A";
-  const derivedStatus =
-    profile && profile.user?.isActive ? "Active" : "Inactive";
+  const isActive = profile?.user?.isActive ?? false;
+  const derivedStatus = isActive ? "Active" : "Inactive";
   const approvalStatusRaw = profile?.approvalStatus ?? "pending";
   const approvalStatusLabel = approvalStatusRaw
     .replace(/_/g, " ")
@@ -215,7 +215,9 @@ export default function AdminSupplierProfilePage() {
         ? "bg-[#FEE2E2] text-[#7F1D1D] border-0"
         : "bg-[#FEF9C3] text-[#92400E] border-0";
 
-  const openActionModal = (type: "approve" | "reject" | "suspend") => {
+  const openActionModal = (
+    type: "approve" | "reject" | "suspend" | "activate"
+  ) => {
     setActionModal(type);
     setActionReason("");
     setActionError(null);
@@ -240,10 +242,13 @@ export default function AdminSupplierProfilePage() {
       approve: apiRoutes.admin.supplier.approve(profile.id),
       reject: apiRoutes.admin.supplier.reject(profile.id),
       suspend: apiRoutes.admin.supplier.suspend(profile.id),
+      activate: apiRoutes.admin.supplier.active(profile.id),
     } as const;
 
     const payload =
-      actionModal === "approve" ? undefined : { reason: actionReason.trim() };
+      actionModal === "approve" || actionModal === "activate"
+        ? undefined
+        : { reason: actionReason.trim() };
 
     setActionSubmitting(true);
     setActionError(null);
@@ -330,7 +335,7 @@ export default function AdminSupplierProfilePage() {
                     {profile.businessName}
                   </h2>
                   <p className="text-sm text-[#475569] font-['Roboto']">
-                    Supplier ID • {profile.id}
+                    User ID • {profile.user?.id ?? profile.id}
                   </p>
                 </div>
               </div>
@@ -526,10 +531,14 @@ export default function AdminSupplierProfilePage() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Button
-              className="bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto"
-              onClick={() => openActionModal("suspend")}
+              className={
+                isActive
+                  ? "bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto"
+                  : "bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto"
+              }
+              onClick={() => openActionModal(isActive ? "suspend" : "activate")}
             >
-              Suspend Supplier
+              {isActive ? "Suspend Supplier" : "Activate Supplier"}
             </Button>
             <Button
               className="bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto"
@@ -548,7 +557,10 @@ export default function AdminSupplierProfilePage() {
         </>
       )}
 
-      <Dialog open={!!actionModal} onOpenChange={(open) => !open && closeActionModal()}>
+      <Dialog
+        open={!!actionModal}
+        onOpenChange={(open) => !open && closeActionModal()}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-['Inter'] text-[#0F172A]">
@@ -556,14 +568,18 @@ export default function AdminSupplierProfilePage() {
                 ? "Approve Supplier"
                 : actionModal === "reject"
                   ? "Reject Supplier"
-                  : "Suspend Supplier"}
+                  : actionModal === "suspend"
+                    ? "Suspend Supplier"
+                    : "Activate Supplier"}
             </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#475569]">
               {actionModal === "approve"
                 ? "Approve this supplier to grant them access to the platform."
                 : actionModal === "reject"
                   ? "Provide a reason for rejecting this supplier."
-                  : "Provide a reason for suspending this supplier."}
+                  : actionModal === "suspend"
+                    ? "Provide a reason for suspending this supplier."
+                    : "Reactivate this supplier to restore access."}
             </DialogDescription>
           </DialogHeader>
           {(actionModal === "reject" || actionModal === "suspend") && (
@@ -592,7 +608,7 @@ export default function AdminSupplierProfilePage() {
             </Button>
             <Button
               className={
-                actionModal === "approve"
+                actionModal === "approve" || actionModal === "activate"
                   ? "bg-[#22C55E] hover:bg-[#16A34A] text-white"
                   : "bg-[#EF4444] hover:bg-[#DC2626] text-white"
               }

@@ -377,7 +377,7 @@ export default function AdminSuppliersPage() {
                         <div className="flex flex-col">
                           <span>{supplier.businessName}</span>
                           <span className="text-xs text-[#94A3B8] font-['Roboto']">
-                            ID: {supplier.id}
+                            User ID: {supplier.user.id}
                           </span>
                         </div>
                       </TableCell>
@@ -744,10 +744,10 @@ export default function AdminSuppliersPage() {
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <FileText className="h-4 w-4 text-[#F59E0B]" />
-                    <span className="text-sm font-['Roboto']">Supplier ID</span>
+                    <span className="text-sm font-['Roboto']">User ID</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedSupplier.id}
+                    {selectedSupplier.user.id}
                   </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
@@ -791,7 +791,7 @@ export default function AdminSuppliersPage() {
                   Close
                 </Button>
                 <Link
-                  href={`/admin/suppliers/profile?id=${selectedSupplier.id}`}
+                  href={`/admin/suppliers/profile?id=${selectedSupplier.user.id}`}
                 >
                   <Button
                     className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']"

@@ -47,36 +47,13 @@ import { TablePagination } from "@/components/table-pagination";
 
 type SupplierRecord = {
   id: string;
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    role: string;
-    isVerified: boolean;
-    isActive: boolean;
-    createdAt: string;
-    postCode?: string | null;
-  };
-  businessName: string;
-  tradingAs?: string | null;
-  businessType?: string | null;
-  vatNumber?: string | null;
-  description?: string | null;
-  addressLine1?: string | null;
-  addressLine2?: string | null;
-  city?: string | null;
+  email: string;
+  fullName: string;
+  role: string;
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt: string;
   postCode?: string | null;
-  phone?: string | null;
-  contactPostcode?: string | null;
-  serviceRadius?: string | null;
-  termsAccepted?: boolean;
-  gdprConsent?: boolean;
-  categories?: string[];
-  isVerified?: boolean;
-  isActive?: boolean;
-  companyRegDoc?: string | null;
-  insuranceDoc?: string | null;
-  createdAt?: string;
 };
 
 export default function AdminSuppliersPage() {
@@ -119,6 +96,23 @@ export default function AdminSuppliersPage() {
     ) {
       return (payload as { items: SupplierRecord[] }).items;
     }
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "data" in payload &&
+      typeof (payload as Record<string, unknown>).data === "object"
+    ) {
+      const inner = (payload as { data: unknown }).data;
+      if (Array.isArray(inner)) return inner as SupplierRecord[];
+      if (
+        inner &&
+        typeof inner === "object" &&
+        "data" in (inner as Record<string, unknown>) &&
+        Array.isArray((inner as { data: SupplierRecord[] }).data)
+      ) {
+        return (inner as { data: SupplierRecord[] }).data;
+      }
+    }
     return [];
   };
 
@@ -141,8 +135,9 @@ export default function AdminSuppliersPage() {
           params,
         });
         const payload = response?.data ?? response;
-        const data = normalizeSuppliers(payload?.data ?? payload);
-        const meta = payload?.meta ?? response?.meta ?? {};
+        const container = payload?.data ?? payload;
+        const data = normalizeSuppliers(container?.data ?? container);
+        const meta = container?.meta ?? payload?.meta ?? response?.meta ?? {};
 
         setSuppliers(data);
         setTotalSuppliers(meta?.total ?? data.length);
@@ -351,7 +346,7 @@ export default function AdminSuppliersPage() {
                     >
                       <TableCell className="font-['Inter'] text-[#0F172A]">
                         <div className="flex flex-col">
-                          <span>{supplier.businessName}</span>
+                          <span>{supplier.fullName}</span>
                           <span className="text-xs text-[#94A3B8] font-['Roboto']">
                             ID: {supplier.id}
                           </span>
@@ -359,29 +354,27 @@ export default function AdminSuppliersPage() {
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
                         <div className="flex flex-col">
-                          <span>{supplier.user?.fullName}</span>
+                          <span>{supplier.email}</span>
                           <span className="text-xs text-[#94A3B8]">
-                            {supplier.user?.email}
+                            {supplier.role}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {supplier.city || supplier.postCode || "—"}
+                        {supplier.postCode || "—"}
                       </TableCell>
                       <TableCell className="font-['Roboto'] text-[#475569]">
-                        {formatDate(supplier.createdAt ?? supplier.user?.createdAt)}
+                        {formatDate(supplier.createdAt)}
                       </TableCell>
                       <TableCell>
                         <Badge
                           className={`font-['Roboto'] ${
-                            supplier.isActive ?? supplier.user?.isActive
+                            supplier.isActive
                               ? "bg-[#DCFCE7] text-[#166534] border-0"
                               : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
                           }`}
                         >
-                          {supplier.isActive ?? supplier.user?.isActive
-                            ? "Active"
-                            : "Inactive"}
+                          {supplier.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -657,38 +650,23 @@ export default function AdminSuppliersPage() {
                     <Building2 className="h-8 w-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="font-['Inter'] text-white">
-                        {selectedSupplier.businessName}
+                        {selectedSupplier.fullName}
                       </h3>
                       <Badge
                         className={`font-['Roboto'] ${
-                          selectedSupplier.isActive ?? selectedSupplier.user?.isActive
+                          selectedSupplier.isActive
                             ? "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
                             : "bg-[#7F1D1D]/30 text-[#FCA5A5] border-[#F02801]"
                         }`}
                       >
-                        {selectedSupplier.isActive ?? selectedSupplier.user?.isActive
-                          ? "Active"
-                          : "Inactive"}
+                        {selectedSupplier.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </div>
                     <p className="text-sm text-[#CBD5E1] font-['Roboto']">
-                      {selectedSupplier.description || "No description provided."}
+                      {selectedSupplier.email}
                     </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {(selectedSupplier.categories ?? ["General"]).map(
-                        (category) => (
-                          <Badge
-                            key={category}
-                            variant="outline"
-                            className="font-['Roboto'] border-[#F02801] text-[#FCA5A5] bg-[#7F1D1D]/20"
-                          >
-                            {category}
-                          </Badge>
-                        )
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -698,39 +676,35 @@ export default function AdminSuppliersPage() {
                     <Mail className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Email</span>
                   </div>
-                  <p className="font-['Inter'] text-white">
-                    {selectedSupplier.user?.email ?? "N/A"}
-                  </p>
-                </div>
-                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
-                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
-                    <Phone className="h-4 w-4" />
-                    <span className="text-sm font-['Roboto']">Phone</span>
-                  </div>
-                  <p className="font-['Inter'] text-white">
-                    {selectedSupplier.phone ?? "N/A"}
-                  </p>
-                </div>
-                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
-                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm font-['Roboto']">Address</span>
-                  </div>
-                  <p className="font-['Inter'] text-white">
-                    {selectedSupplier.addressLine1 || "N/A"}
-                  </p>
+                  <p className="font-['Inter'] text-white">{selectedSupplier.email}</p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <Users className="h-4 w-4" />
-                    <span className="text-sm font-['Roboto']">Business Type</span>
+                    <span className="text-sm font-['Roboto']">Role</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {selectedSupplier.businessType || "N/A"}
+                    {selectedSupplier.role}
+                  </p>
+                </div>
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <FileText className="h-4 w-4 text-[#F59E0B]" />
+                    <span className="text-sm font-['Roboto']">Supplier ID</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">{selectedSupplier.id}</p>
+                </div>
+                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
+                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
+                    <MapPin className="h-4 w-4 text-[#3B82F6]" />
+                    <span className="text-sm font-['Roboto']">Postcode</span>
+                  </div>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.postCode || "N/A"}
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <CheckCircle className="h-4 w-4 text-[#22C55E]" />
@@ -742,20 +716,11 @@ export default function AdminSuppliersPage() {
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
-                    <FileText className="h-4 w-4 text-[#F59E0B]" />
-                    <span className="text-sm font-['Roboto']">Service Radius</span>
-                  </div>
-                  <p className="font-['Inter'] text-white">
-                    {selectedSupplier.serviceRadius ?? "N/A"}
-                  </p>
-                </div>
-                <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
-                  <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <Calendar className="h-4 w-4 text-[#3B82F6]" />
                     <span className="text-sm font-['Roboto']">Joined</span>
                   </div>
                   <p className="font-['Inter'] text-white">
-                    {formatDate(selectedSupplier.createdAt ?? selectedSupplier.user?.createdAt)}
+                    {formatDate(selectedSupplier.createdAt)}
                   </p>
                 </div>
               </div>

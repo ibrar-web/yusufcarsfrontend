@@ -25,6 +25,15 @@ import {
 import { apiGet } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 
+type DocumentFile = {
+  id: string;
+  type: string;
+  originalName: string;
+  mimeType: string;
+  size: string;
+  signedUrl: string;
+};
+
 type SupplierProfile = {
   id: string;
   businessName: string;
@@ -34,13 +43,12 @@ type SupplierProfile = {
   description?: string | null;
   serviceRadius?: string | null;
   categories?: string[];
-  companyRegDoc?: string | null;
-  insuranceDoc?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
   city?: string | null;
   postCode?: string | null;
   phone?: string | null;
+  contactPostcode?: string | null;
   user?: {
     id: string;
     email: string;
@@ -49,6 +57,12 @@ type SupplierProfile = {
     isVerified: boolean;
     isActive: boolean;
     createdAt: string;
+    postCode?: string | null;
+  };
+  documentFiles?: {
+    companyRegDoc?: DocumentFile | null;
+    insuranceDoc?: DocumentFile | null;
+    [key: string]: DocumentFile | undefined | null;
   };
   isVerified?: boolean;
   isActive?: boolean;
@@ -56,8 +70,10 @@ type SupplierProfile = {
 };
 
 type ApiResponse = {
+  statusCode?: number;
+  message?: string;
   data?: SupplierProfile | { data?: SupplierProfile };
-} & SupplierProfile;
+};
 
 export default function AdminSupplierProfilePage() {
   const searchParams = useSearchParams();
@@ -80,10 +96,11 @@ export default function AdminSupplierProfilePage() {
         const response: ApiResponse = await apiGet(
           apiRoutes.admin.supplier.read(supplierId),
         );
+        const container = response?.data ?? response;
         const payload =
-          response?.data && "data" in response.data
-            ? response.data.data
-            : response?.data || response;
+          container && typeof container === "object" && "data" in container
+            ? (container as { data: SupplierProfile }).data
+            : container;
 
         if (!payload || typeof payload !== "object") {
           throw new Error("Supplier not found.");
@@ -126,12 +143,21 @@ export default function AdminSupplierProfilePage() {
     return segments.length ? segments.join(", ") : "N/A";
   }, [profile]);
   const documents = useMemo(() => {
-    const list: { label: string; url: string }[] = [];
-    if (profile?.companyRegDoc) {
-      list.push({ label: "Company Registration", url: profile.companyRegDoc });
+    const list: { label: string; url: string; name?: string }[] = [];
+    const docMap = profile?.documentFiles;
+    if (docMap?.companyRegDoc?.signedUrl) {
+      list.push({
+        label: "Company Registration",
+        url: docMap.companyRegDoc.signedUrl,
+        name: docMap.companyRegDoc.originalName,
+      });
     }
-    if (profile?.insuranceDoc) {
-      list.push({ label: "Insurance Certificate", url: profile.insuranceDoc });
+    if (docMap?.insuranceDoc?.signedUrl) {
+      list.push({
+        label: "Insurance Certificate",
+        url: docMap.insuranceDoc.signedUrl,
+        name: docMap.insuranceDoc.originalName,
+      });
     }
     return list;
   }, [profile]);
@@ -347,7 +373,7 @@ export default function AdminSupplierProfilePage() {
                           {doc.label}
                         </p>
                         <p className="text-sm text-[#94A3B8] font-['Roboto']">
-                          Uploaded document
+                          {doc.name || "Uploaded document"}
                         </p>
                       </div>
                     </div>
@@ -395,9 +421,9 @@ export default function AdminSupplierProfilePage() {
           </Card>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="outline" className="sm:w-auto">
+            {/* <Button variant="outline" className="sm:w-auto">
               Request Update
-            </Button>
+            </Button> */}
             <Button className="bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto">
               Suspend Supplier
             </Button>

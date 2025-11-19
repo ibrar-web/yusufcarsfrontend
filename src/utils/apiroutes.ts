@@ -95,8 +95,10 @@ export const apiRoutes = {
     supplier: {
       list: "/admin/suppliers",
       read: (id: string) => `/admin/suppliers/${id}`,
-      update: (id: string) => `/admin/suppliers/${id}`,
-      delete: (id: string) => `/admin/suppliers/${id}`,
+      approve: (id: string) => `/admin/suppliers/${id}/approve`,
+      reject: (id: string) => `/admin/suppliers/${id}/reject`,
+      active: (id: string) => `/admin/suppliers/${id}/enable`,
+      suspend: (id: string) => `/admin/suppliers/${id}/disable`,
     },
   },
   website: {

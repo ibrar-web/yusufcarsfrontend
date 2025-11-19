@@ -7,7 +7,6 @@ import { jwtVerify } from "jose";
 const JOSE_SECRET = process.env.JOSE_SECRET!;
 const secret = new TextEncoder().encode(JOSE_SECRET);
 
-// Extract role
 async function getRoleFromToken(token?: string) {
   if (!token) return null;
   try {
@@ -21,15 +20,17 @@ async function getRoleFromToken(token?: string) {
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Ignore static
+  // Ignore static files
   if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  // PUBLIC (exact match only)
-  const isHome = pathname === "/";
-  const isAuth = pathname === "/auth";
-  const isPublic = isHome || isAuth;
+  // PUBLIC ROUTES
+  const publicPaths = ["/", "/auth", "/about", "/contact", "/products"];
+
+  const isPublic = publicPaths.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
 
   // Get role
   const token = req.cookies.get("access_token")?.value;
@@ -37,44 +38,25 @@ export default async function middleware(req: NextRequest) {
 
   console.log("ROLE:", role, "PATH:", pathname);
 
-  // ----------------------
-  // 1. NOT LOGGED IN
-  // ----------------------
+  // Not logged in
   if (!role) {
     if (isPublic) return NextResponse.next();
-
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // ----------------------
-  // 2. LOGGED IN: ROLE CHECKING
-  // ----------------------
-
-  // Admin-only
-  if (pathname.startsWith("/admin")) {
-    if (role !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
+  // Logged in users
+  if (pathname.startsWith("/admin") && role !== "admin") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Supplier-only
-  if (pathname.startsWith("/supplier")) {
-    if (role !== "supplier") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
+  if (pathname.startsWith("/supplier") && role !== "supplier") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // User-only
-  if (pathname.startsWith("/user")) {
-    if (role !== "user") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
+  if (pathname.startsWith("/user") && role !== "user") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Other pages → allow
   return NextResponse.next();
 }
 

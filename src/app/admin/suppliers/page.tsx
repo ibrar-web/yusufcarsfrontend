@@ -72,9 +72,8 @@ export default function AdminSuppliersPage() {
     useState(false);
   const [selectedPendingSupplier, setSelectedPendingSupplier] =
     useState<PendingSupplier | null>(null);
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierRecord | null>(
-    null
-  );
+  const [selectedSupplier, setSelectedSupplier] =
+    useState<SupplierRecord | null>(null);
   const [supplierDetailsDialogOpen, setSupplierDetailsDialogOpen] =
     useState(false);
   const normalizeSuppliers = (payload: unknown): SupplierRecord[] => {
@@ -296,7 +295,9 @@ export default function AdminSuppliersPage() {
                   <button
                     key={filter.id}
                     onClick={() =>
-                      setSupplierStatusFilter(filter.id as typeof supplierStatusFilter)
+                      setSupplierStatusFilter(
+                        filter.id as typeof supplierStatusFilter
+                      )
                     }
                     className={`px-4 py-2 rounded-lg font-['Roboto'] transition-all ${
                       supplierStatusFilter === filter.id
@@ -333,6 +334,9 @@ export default function AdminSuppliersPage() {
                   </TableHead>
                   <TableHead className="font-['Inter'] text-[#0F172A]">
                     Status
+                  </TableHead>
+                  <TableHead className="font-['Inter'] text-[#0F172A]">
+                    Verification
                   </TableHead>
                   <TableHead className="text-right" />
                 </TableRow>
@@ -375,6 +379,17 @@ export default function AdminSuppliersPage() {
                           }`}
                         >
                           {supplier.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`font-['Roboto'] ${
+                            supplier.isVerified
+                              ? "bg-[#DCFCE7] text-[#166534] border-0"
+                              : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
+                          }`}
+                        >
+                          {supplier.isVerified ? "Verified" : "Not Verified"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -676,7 +691,9 @@ export default function AdminSuppliersPage() {
                     <Mail className="h-4 w-4" />
                     <span className="text-sm font-['Roboto']">Email</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedSupplier.email}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.email}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
@@ -692,7 +709,9 @@ export default function AdminSuppliersPage() {
                     <FileText className="h-4 w-4 text-[#F59E0B]" />
                     <span className="text-sm font-['Roboto']">Supplier ID</span>
                   </div>
-                  <p className="font-['Inter'] text-white">{selectedSupplier.id}</p>
+                  <p className="font-['Inter'] text-white">
+                    {selectedSupplier.id}
+                  </p>
                 </div>
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
@@ -708,7 +727,9 @@ export default function AdminSuppliersPage() {
                 <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155]">
                   <div className="flex items-center gap-2 mb-1 text-[#CBD5E1]">
                     <CheckCircle className="h-4 w-4 text-[#22C55E]" />
-                    <span className="text-sm font-['Roboto']">Verification</span>
+                    <span className="text-sm font-['Roboto']">
+                      Verification
+                    </span>
                   </div>
                   <p className="font-['Inter'] text-white">
                     {selectedSupplier.isVerified ? "Verified" : "Pending"}
@@ -732,7 +753,9 @@ export default function AdminSuppliersPage() {
                 >
                   Close
                 </Button>
-                <Link href={`/admin/suppliers/profile?id=${selectedSupplier.id}`}>
+                <Link
+                  href={`/admin/suppliers/profile?id=${selectedSupplier.id}`}
+                >
                   <Button
                     className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']"
                     onClick={() => {

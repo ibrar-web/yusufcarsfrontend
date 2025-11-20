@@ -55,6 +55,7 @@ import { TrackOrderDialog } from "@/components/order/track-order-dialog";
 import { useAppStore } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
 import { UserRole } from "@/utils/api";
+import Link from "next/link";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -328,9 +329,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64">
                     {/* Notifications Header */}
-                    <div
+                    <Link
                       className="px-3 py-2 border-b border-[#E5E7EB] cursor-pointer hover:bg-[#F1F5F9] transition-colors"
-                      onClick={() => navigate("quotes")}
+                      href={"user/quotes"}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -348,7 +349,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Notification Items */}
                     <div className="py-1"></div>
@@ -359,27 +360,23 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       <Package className="mr-2 h-4 w-4" />
                       Track Order
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => navigate("user/chat")}
-                      className="relative"
-                    >
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Messages
-                      {unreadMessages > 0 && (
-                        <span className="ml-auto bg-[#F02801] text-white px-1.5 py-0.5 rounded-full text-[10px] font-semibold">
-                          {unreadMessages}
-                        </span>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        navigate("user/history");
-                        toast.success("Viewing order history");
-                      }}
-                    >
-                      <History className="mr-2 h-4 w-4" />
-                      History
-                    </DropdownMenuItem>
+                    <Link href="/user/chat">
+                      <DropdownMenuItem className="relative cursor-pointer">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Messages
+                        {unreadMessages > 0 && (
+                          <span className="ml-auto bg-[#F02801] text-white px-1.5 py-0.5 rounded-full text-[10px] font-semibold">
+                            {unreadMessages}
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/user/history">
+                      <DropdownMenuItem>
+                        <History className="mr-2 h-4 w-4" />
+                        History
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem onClick={openProfileDialog}>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
@@ -723,7 +720,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        navigate(isAdmin ? "admin-dashboard" : "supplier-dashboard");
+                        navigate(
+                          isAdmin ? "admin-dashboard" : "supplier-dashboard"
+                        );
                         setMobileMenuOpen(false);
                       }}
                     >

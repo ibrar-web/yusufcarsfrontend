@@ -41,8 +41,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { enquiryVehicle } from "@/actions/dvla";
 import { VehicleSelection } from "@/components/vehicles/vehicleSelection";
+import {
+  carMakes,
+  carModels,
+  carYears,
+  engineSizes,
+  fuelTypes,
+} from "@/data/vehicle-options";
 
 interface HomePageProps {
   onNavigate: (
@@ -75,22 +81,6 @@ interface HomePageProps {
 export function HomePage({ onNavigate }: HomePageProps) {
   const [scrollY, setScrollY] = useState(0);
 
-  // Dual input system state
-  const [inputMode, setInputMode] = useState<"registration" | "manual">(
-    "registration"
-  );
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [vehicleMake, setVehicleMake] = useState("");
-  const [vehicleModel, setVehicleModel] = useState("");
-  const [vehicleYear, setVehicleYear] = useState("");
-  const [fuelType, setFuelType] = useState("");
-  const [engineSize, setEngineSize] = useState("");
-  const [postcode, setPostcode] = useState("");
-
-  // Filter options dialog state
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [localRequest, setLocalRequest] = useState(false);
-
   // Product detail dialog state
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
@@ -107,77 +97,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const [lookupYear, setLookupYear] = useState("");
   const [lookupFuelType, setLookupFuelType] = useState("");
   const [lookupEngineSize, setLookupEngineSize] = useState("");
-
-  // UK Car Makes Data
-  const carMakes = [
-    "Audi",
-    "BMW",
-    "Ford",
-    "Mercedes-Benz",
-    "Vauxhall",
-    "Volkswagen",
-    "Nissan",
-    "Toyota",
-    "Honda",
-    "Peugeot",
-    "Renault",
-    "Citroën",
-    "Mazda",
-    "Hyundai",
-    "Kia",
-    "Volvo",
-    "Jaguar",
-    "Land Rover",
-    "Mini",
-    "Skoda",
-  ];
-
-  const carModels: Record<string, string[]> = {
-    Audi: ["A1", "A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "TT"],
-    BMW: [
-      "1 Series",
-      "2 Series",
-      "3 Series",
-      "4 Series",
-      "5 Series",
-      "X1",
-      "X3",
-      "X5",
-    ],
-    Ford: ["Fiesta", "Focus", "Mondeo", "Kuga", "Puma", "Mustang"],
-    "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "GLA", "GLC", "GLE"],
-    Vauxhall: ["Corsa", "Astra", "Insignia", "Mokka", "Grandland"],
-    Volkswagen: ["Polo", "Golf", "Passat", "Tiguan", "T-Roc", "Touareg"],
-    Nissan: ["Micra", "Juke", "Qashqai", "X-Trail", "Leaf"],
-    Toyota: ["Yaris", "Corolla", "Camry", "RAV4", "C-HR", "Prius"],
-    Honda: ["Jazz", "Civic", "Accord", "CR-V", "HR-V"],
-    Peugeot: ["108", "208", "308", "2008", "3008", "5008"],
-  };
-
-  const carYears = Array.from({ length: 25 }, (_, i) => (2025 - i).toString());
-
-  const fuelTypes = [
-    "Petrol",
-    "Diesel",
-    "Electric",
-    "Hybrid",
-    "Plug-in Hybrid",
-  ];
-
-  const engineSizes = [
-    "1.0L",
-    "1.2L",
-    "1.4L",
-    "1.6L",
-    "1.8L",
-    "2.0L",
-    "2.2L",
-    "2.5L",
-    "3.0L",
-    "3.5L",
-    "4.0L",
-    "5.0L+",
-  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -239,62 +158,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
     },
   ];
 
-  const handleLookup = async () => {
-    if (inputMode === "registration" && registrationNumber.length >= 6) {
-      const vehicledata = await enquiryVehicle(registrationNumber);
-      console.log("vehicledata :", vehicledata);
-      setFilterDialogOpen(true);
-    } else if (
-      inputMode === "manual" &&
-      vehicleMake &&
-      vehicleModel &&
-      vehicleYear &&
-      fuelType &&
-      engineSize
-    ) {
-      setFilterDialogOpen(true);
-    }
-  };
-
-  const handleConfirmFilter = () => {
-    setFilterDialogOpen(false);
-
-    if (inputMode === "registration" && registrationNumber.length >= 6) {
-      onNavigate("request-flow", undefined, {
-        registrationNumber,
-        postcode,
-        localRequest,
-      });
-    } else if (
-      inputMode === "manual" &&
-      vehicleMake &&
-      vehicleModel &&
-      vehicleYear &&
-      fuelType &&
-      engineSize
-    ) {
-      onNavigate("request-flow", undefined, {
-        make: vehicleMake,
-        model: vehicleModel,
-        year: vehicleYear,
-        fuelType: fuelType,
-        engineSize: engineSize,
-        postcode,
-        localRequest,
-      });
-    }
-  };
-
-  // Validation for button state
-  const isSearchDisabled =
-    inputMode === "registration"
-      ? registrationNumber.length < 6
-      : !vehicleMake ||
-        !vehicleModel ||
-        !vehicleYear ||
-        !fuelType ||
-        !engineSize;
-
   const isLookupDisabled =
     lookupMode === "registration"
       ? lookupRegistration.length < 6
@@ -345,37 +208,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      <VehicleSelection
-        inputMode={inputMode}
-        setInputMode={setInputMode}
-        registrationNumber={registrationNumber}
-        setRegistrationNumber={setRegistrationNumber}
-        postcode={postcode}
-        setPostcode={setPostcode}
-        vehicleMake={vehicleMake}
-        setVehicleMake={setVehicleMake}
-        vehicleModel={vehicleModel}
-        setVehicleModel={setVehicleModel}
-        vehicleYear={vehicleYear}
-        setVehicleYear={setVehicleYear}
-        fuelType={fuelType}
-        setFuelType={setFuelType}
-        engineSize={engineSize}
-        setEngineSize={setEngineSize}
-        carMakes={carMakes}
-        carModels={carModels}
-        carYears={carYears}
-        fuelTypes={fuelTypes}
-        engineSizes={engineSizes}
-        handleLookup={handleLookup}
-        isSearchDisabled={isSearchDisabled}
-        filterDialogOpen={filterDialogOpen}
-        setFilterDialogOpen={setFilterDialogOpen}
-        localRequest={localRequest}
-        setLocalRequest={setLocalRequest}
-        handleConfirmFilter={handleConfirmFilter}
-        onNavigate={onNavigate}
-      />
+      <VehicleSelection onNavigate={onNavigate} />
 
       {/* Lowest Prices Of The Season */}
       <section className="py-24 bg-white relative">

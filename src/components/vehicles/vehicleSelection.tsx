@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,70 +20,123 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-
-type VehicleSelectionProps = {
-  inputMode: "registration" | "manual";
-  setInputMode: Dispatch<SetStateAction<"registration" | "manual">>;
-  registrationNumber: string;
-  setRegistrationNumber: Dispatch<SetStateAction<string>>;
-  postcode: string;
-  setPostcode: Dispatch<SetStateAction<string>>;
-  vehicleMake: string;
-  setVehicleMake: Dispatch<SetStateAction<string>>;
-  vehicleModel: string;
-  setVehicleModel: Dispatch<SetStateAction<string>>;
-  vehicleYear: string;
-  setVehicleYear: Dispatch<SetStateAction<string>>;
-  fuelType: string;
-  setFuelType: Dispatch<SetStateAction<string>>;
-  engineSize: string;
-  setEngineSize: Dispatch<SetStateAction<string>>;
-  carMakes: string[];
-  carModels: Record<string, string[]>;
-  carYears: string[];
-  fuelTypes: string[];
-  engineSizes: string[];
-  handleLookup: () => Promise<void>;
-  isSearchDisabled: boolean;
-  filterDialogOpen: boolean;
-  setFilterDialogOpen: Dispatch<SetStateAction<boolean>>;
-  localRequest: boolean;
-  setLocalRequest: Dispatch<SetStateAction<boolean>>;
-  handleConfirmFilter: () => void;
-  onNavigate: (page: string) => void;
-};
-
-export function VehicleSelection({
-  inputMode,
-  setInputMode,
-  registrationNumber,
-  setRegistrationNumber,
-  postcode,
-  setPostcode,
-  vehicleMake,
-  setVehicleMake,
-  vehicleModel,
-  setVehicleModel,
-  vehicleYear,
-  setVehicleYear,
-  fuelType,
-  setFuelType,
-  engineSize,
-  setEngineSize,
+import { toast } from "sonner";
+import { enquiryVehicle } from "@/actions/dvla";
+import {
   carMakes,
   carModels,
   carYears,
-  fuelTypes,
   engineSizes,
-  handleLookup,
-  isSearchDisabled,
-  filterDialogOpen,
-  setFilterDialogOpen,
-  localRequest,
-  setLocalRequest,
-  handleConfirmFilter,
-  onNavigate,
-}: VehicleSelectionProps) {
+  fuelTypes,
+} from "@/data/vehicle-options";
+
+type VehicleSelectionProps = {
+  onNavigate: (
+    page: string,
+    id?: string,
+    vehicleInfo?: any,
+    partData?: any,
+    category?: string,
+    quoteData?: any
+  ) => void;
+};
+
+export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
+  const [inputMode, setInputMode] = useState<"registration" | "manual">(
+    "registration"
+  );
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [vehicleMake, setVehicleMake] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleYear, setVehicleYear] = useState("");
+  const [fuelType, setFuelType] = useState("");
+  const [engineSize, setEngineSize] = useState("");
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [localRequest, setLocalRequest] = useState(false);
+
+  const isSearchDisabled =
+    inputMode === "registration"
+      ? registrationNumber.length < 6
+      : !vehicleMake ||
+        !vehicleModel ||
+        !vehicleYear ||
+        !fuelType ||
+        !engineSize;
+
+  const handleLookup = async () => {
+    if (inputMode === "registration") {
+      if (registrationNumber.length < 6) {
+        toast.error("Enter a valid registration number.");
+        return;
+      }
+
+      try {
+        await enquiryVehicle(registrationNumber);
+        setFilterDialogOpen(true);
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to lookup vehicle details."
+        );
+      }
+      return;
+    }
+
+    if (
+      !vehicleMake ||
+      !vehicleModel ||
+      !vehicleYear ||
+      !fuelType ||
+      !engineSize
+    ) {
+      toast.error("Select your vehicle details first.");
+      return;
+    }
+
+    setFilterDialogOpen(true);
+  };
+
+  const handleConfirmFilter = () => {
+    if (inputMode === "registration") {
+      if (registrationNumber.length < 6) {
+        toast.error("Enter a valid registration number.");
+        return;
+      }
+
+      setFilterDialogOpen(false);
+      onNavigate("request-flow", undefined, {
+        registrationNumber,
+        postcode,
+        localRequest,
+      });
+      return;
+    }
+
+    if (
+      !vehicleMake ||
+      !vehicleModel ||
+      !vehicleYear ||
+      !fuelType ||
+      !engineSize
+    ) {
+      toast.error("Select your vehicle details first.");
+      return;
+    }
+
+    setFilterDialogOpen(false);
+    onNavigate("request-flow", undefined, {
+      make: vehicleMake,
+      model: vehicleModel,
+      year: vehicleYear,
+      fuelType,
+      engineSize,
+      postcode,
+      localRequest,
+    });
+  };
+
   return (
     <section className="relative overflow-hidden min-h-[450px] lg:min-h-[500px]">
       <div className="absolute inset-0">

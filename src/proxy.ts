@@ -26,7 +26,15 @@ export default async function middleware(req: NextRequest) {
   }
 
   // PUBLIC ROUTES
-  const publicPaths = ["/", "/auth", "/about", "/contact", "/products"];
+  const publicPaths = [
+    "/",
+    "/auth",
+    "/about",
+    "/contact",
+    "/products",
+    "/request-flow",
+    "/vehicle-confirmation",
+  ];
 
   const isPublic = publicPaths.some(
     (p) => pathname === p || pathname.startsWith(p + "/")

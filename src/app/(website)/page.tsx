@@ -6,7 +6,6 @@ import { useAppState } from "@/hooks/use-app-state";
 export default function Home() {
   const {
     handleNavigate,
-    openSignupDialog,
     isAuthenticated,
     handleSignOut,
     openProfileDialog,
@@ -19,7 +18,6 @@ export default function Home() {
   return (
     <HomePage
       onNavigate={handleNavigate}
-      onSignupClick={openSignupDialog}
       isAuthenticated={isAuthenticated}
       onSignOut={handleSignOut}
       onProfileClick={openProfileDialog}

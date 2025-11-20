@@ -24,6 +24,8 @@ export type VehicleEnquiryResponse = {
   euroStatus?: string;
   taxStatus?: string;
   taxDueDate?: string;
+  motStatus?: string;
+  artEndDate?: string;
 };
 
 function ensureConfig() {
@@ -52,7 +54,7 @@ export async function enquiryVehicle(
     body: JSON.stringify({ registrationNumber }),
     cache: "no-store",
   });
-
+  console.log("dvla response :", response);
   if (!response.ok) {
     const message = await response.text().catch(() => response.statusText);
     throw new Error(`DVLA lookup failed: ${message || response.statusText}`);

@@ -291,11 +291,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
         !fuelType ||
         !engineSize;
 
-  const handleViewDetail = (product: any) => {
-    setSelectedProduct(product);
-    setProductDetailOpen(true);
-  };
-
   const isLookupDisabled =
     lookupMode === "registration"
       ? lookupRegistration.length < 6

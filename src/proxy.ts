@@ -25,6 +25,10 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   // PUBLIC ROUTES
   const publicPaths = [
     "/",

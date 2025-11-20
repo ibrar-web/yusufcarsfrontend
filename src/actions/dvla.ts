@@ -1,10 +1,4 @@
-const DVLA_API_URL = process.env.DVLA_API;
-const DVLA_API_KEY = process.env.DVLA_API_KEY;
-
-export type VehicleEnquiryRequest = {
-  registrationNumber: string;
-};
-
+"use server";
 export type VehicleEnquiryResponse = {
   registrationNumber: string;
   make?: string;
@@ -28,37 +22,59 @@ export type VehicleEnquiryResponse = {
   artEndDate?: string;
 };
 
-function ensureConfig() {
-  if (!DVLA_API_KEY) {
-    throw new Error(
-      "Missing DVLA_API_KEY; update your environment configuration."
-    );
-  }
-}
-
 export async function enquiryVehicle(
   registrationNumber: string
 ): Promise<VehicleEnquiryResponse> {
-  ensureConfig();
-
   if (!registrationNumber) {
     throw new Error("Registration number is required.");
   }
 
-  const response = await fetch(DVLA_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": DVLA_API_KEY,
-    },
-    body: JSON.stringify({ registrationNumber }),
-    cache: "no-store",
-  });
-  console.log("dvla response :", response);
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(`DVLA lookup failed: ${message || response.statusText}`);
+  const apiKey = process.env.DVLA_API_KEY;
+  const apiUrl = process.env.DVLA_API;
+  console.log(apiKey, apiUrl,registrationNumber);
+  if (!apiKey || !apiUrl) {
+    throw new Error("DVLA API configuration missing in environment variables.");
   }
 
-  return (await response.json()) as VehicleEnquiryResponse;
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ registrationNumber }),
+  });
+  console.log("response :", response);
+  const raw = await response.text();
+
+  if (!response.ok) {
+    try {
+      const parsed = JSON.parse(raw);
+
+      // Handle DVLA "Vehicle Not Found"
+      if (parsed?.errors?.[0]?.code === "404") {
+        throw new Error("Vehicle not found in DVLA records.");
+      }
+
+      throw new Error(
+        parsed?.error || `DVLA lookup failed: ${response.statusText}`
+      );
+    } catch {
+      throw new Error(
+        raw
+          ? `DVLA lookup failed: ${raw}`
+          : `DVLA lookup failed: ${response.statusText}`
+      );
+    }
+  }
+
+  try {
+    return JSON.parse(raw) as VehicleEnquiryResponse;
+  } catch {
+    throw new Error(
+      raw
+        ? `Unable to parse DVLA response: ${raw}`
+        : "Unable to parse DVLA response."
+    );
+  }
 }

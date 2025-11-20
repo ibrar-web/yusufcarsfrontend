@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { enquiryVehicle } from "@/actions/dvla";
 
 interface HomePageProps {
   onNavigate: (
@@ -237,8 +238,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
     },
   ];
 
-  const handleLookup = () => {
+  const handleLookup = async () => {
     if (inputMode === "registration" && registrationNumber.length >= 6) {
+      const vehicledata =await enquiryVehicle(registrationNumber);
+      console.log("vehicledata :",vehicledata)
       setFilterDialogOpen(true);
     } else if (
       inputMode === "manual" &&

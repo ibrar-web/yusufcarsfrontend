@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { enquiryVehicle } from "@/actions/dvla";
+import { VehicleSelection } from "@/components/vehicles/vehicleSelection";
 
 interface HomePageProps {
   onNavigate: (
@@ -240,8 +241,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   const handleLookup = async () => {
     if (inputMode === "registration" && registrationNumber.length >= 6) {
-      const vehicledata =await enquiryVehicle(registrationNumber);
-      console.log("vehicledata :",vehicledata)
+      const vehicledata = await enquiryVehicle(registrationNumber);
+      console.log("vehicledata :", vehicledata);
       setFilterDialogOpen(true);
     } else if (
       inputMode === "manual" &&
@@ -344,346 +345,37 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Automotive showcase with background image */}
-      <section className="relative overflow-hidden min-h-[450px] lg:min-h-[500px]">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <ImageWithFallback
-            src="https://images.unsplash.com/photo-1753899762863-af6e21e86438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibHVlJTIwc3BvcnRzJTIwY2FyfGVufDF8fHx8MTc1OTIyNjI4OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-            alt="Blue sports car"
-            className="w-full h-full object-cover"
-          />
-          {/* Overlay gradient for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/30 to-transparent" />
-        </div>
-
-        {/* Content */}
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-12 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
-            {/* Left Side - Search Form */}
-            <div className="fade-in-up order-2 lg:order-1">
-              {/* Frosted Glass Card */}
-              <div className="relative max-w-lg mx-auto lg:mx-0 w-full">
-                {/* Overlapping Pill Tabs */}
-                <div className="absolute -top-3 left-8 z-20 flex gap-2">
-                  <button
-                    onClick={() => setInputMode("registration")}
-                    className={`px-6 py-3 rounded-full font-['Roboto'] font-semibold transition-all duration-300 ${
-                      inputMode === "registration"
-                        ? "bg-[#F02801] text-white shadow-lg shadow-[#F02801]/30"
-                        : "bg-[#94A3B8] text-white shadow-md"
-                    }`}
-                    style={{ fontSize: "15px" }}
-                  >
-                    Registration
-                  </button>
-                  <button
-                    onClick={() => setInputMode("manual")}
-                    className={`px-6 py-3 rounded-full font-['Roboto'] font-semibold transition-all duration-300 ${
-                      inputMode === "manual"
-                        ? "bg-[#F02801] text-white shadow-lg shadow-[#F02801]/30"
-                        : "bg-[#94A3B8] text-white shadow-md"
-                    }`}
-                    style={{ fontSize: "15px" }}
-                  >
-                    Manual
-                  </button>
-                </div>
-
-                {/* Frosted Glass Container */}
-                <div
-                  className="relative backdrop-blur-xl rounded-[24px] p-8 lg:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.16)] border border-white/40"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.85)",
-                  }}
-                >
-                  {/* Form Header - Dynamic based on tab */}
-                  <div className="mb-10">
-                    <h2
-                      className="font-['Inter'] font-bold text-[#0F172A] leading-tight"
-                      style={{ fontSize: "26px" }}
-                    >
-                      {inputMode === "registration"
-                        ? "Add Your Registration Number"
-                        : "Select Your Vehicle"}
-                    </h2>
-                  </div>
-
-                  {/* Registration Tab Content */}
-                  {inputMode === "registration" && (
-                    <div className="space-y-6">
-                      {/* Registration Number Input */}
-                      <div>
-                        <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
-                          Vehicle Registration Number
-                        </label>
-                        <Input
-                          type="text"
-                          value={registrationNumber}
-                          onChange={(e) => {
-                            const value = e.target.value
-                              .toUpperCase()
-                              .replace(/[^A-Z0-9]/g, "");
-                            setRegistrationNumber(value);
-                          }}
-                          placeholder="E.G. AB12 CDE"
-                          maxLength={8}
-                          className="h-14 text-[18px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] font-semibold tracking-wider text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
-                          style={{ letterSpacing: "0.2em" }}
-                        />
-                      </div>
-
-                      {/* Postcode Input */}
-                      <div>
-                        <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
-                          Your Postcode
-                        </label>
-                        <Input
-                          type="text"
-                          value={postcode}
-                          onChange={(e) => {
-                            const value = e.target.value
-                              .toUpperCase()
-                              .replace(/[^A-Z0-9\s]/g, "");
-                            setPostcode(value);
-                          }}
-                          placeholder="E.G. SW1A 1AA"
-                          maxLength={8}
-                          className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
-                        />
-                      </div>
-
-                      {/* CTA Button */}
-                      <Button
-                        onClick={handleLookup}
-                        disabled={isSearchDisabled}
-                        className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
-                        style={{ fontSize: "16px" }}
-                      >
-                        FILTER
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Manual Tab Content */}
-                  {inputMode === "manual" && (
-                    <div className="space-y-6">
-                      {/* Make */}
-                      <div>
-                        <Select
-                          value={vehicleMake}
-                          onValueChange={(value) => {
-                            setVehicleMake(value);
-                            setVehicleModel("");
-                          }}
-                        >
-                          <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                            <SelectValue placeholder="Select Maker" />
-                          </SelectTrigger>
-                          <SelectContent className="font-['Roboto']">
-                            {carMakes.map((make) => (
-                              <SelectItem
-                                key={make}
-                                value={make}
-                                className="text-[18px]"
-                              >
-                                {make}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Model */}
-                      <div>
-                        <Select
-                          value={vehicleModel}
-                          onValueChange={setVehicleModel}
-                          disabled={!vehicleMake}
-                        >
-                          <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
-                            <SelectValue placeholder="Select Model" />
-                          </SelectTrigger>
-                          <SelectContent className="font-['Roboto']">
-                            {vehicleMake &&
-                              carModels[vehicleMake]?.map((model) => (
-                                <SelectItem
-                                  key={model}
-                                  value={model}
-                                  className="text-[18px]"
-                                >
-                                  {model}
-                                </SelectItem>
-                              ))}
-                            {vehicleMake && !carModels[vehicleMake] && (
-                              <SelectItem value="other" className="text-[18px]">
-                                Other Models
-                              </SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Year */}
-                      <div>
-                        <Select
-                          value={vehicleYear}
-                          onValueChange={setVehicleYear}
-                        >
-                          <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                            <SelectValue placeholder="Select Year" />
-                          </SelectTrigger>
-                          <SelectContent className="font-['Roboto'] max-h-[300px]">
-                            {carYears.map((year) => (
-                              <SelectItem
-                                key={year}
-                                value={year}
-                                className="text-[18px]"
-                              >
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Fuel Type */}
-                      <div>
-                        <Select value={fuelType} onValueChange={setFuelType}>
-                          <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                            <SelectValue placeholder="Select Fuel Type" />
-                          </SelectTrigger>
-                          <SelectContent className="font-['Roboto']">
-                            {fuelTypes.map((fuel) => (
-                              <SelectItem
-                                key={fuel}
-                                value={fuel}
-                                className="text-[18px]"
-                              >
-                                {fuel}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Engine Size */}
-                      <div>
-                        <Select
-                          value={engineSize}
-                          onValueChange={setEngineSize}
-                        >
-                          <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                            <SelectValue placeholder="Select Engine Size" />
-                          </SelectTrigger>
-                          <SelectContent className="font-['Roboto']">
-                            {engineSizes.map((size) => (
-                              <SelectItem
-                                key={size}
-                                value={size}
-                                className="text-[18px]"
-                              >
-                                {size}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* CTA Button */}
-                      <Button
-                        onClick={handleLookup}
-                        disabled={isSearchDisabled}
-                        className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
-                        style={{ fontSize: "16px" }}
-                      >
-                        FILTER
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Filter Options Dialog */}
-            <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
-              <DialogContent className="sm:max-w-[500px] bg-white border-2 border-[#F1F5F9] rounded-[24px] p-8">
-                <DialogHeader>
-                  <DialogTitle className="font-['Inter'] text-[#0F172A] text-[24px]">
-                    Filter Options
-                  </DialogTitle>
-                  <DialogDescription className="font-['Roboto'] text-[#475569] text-[16px]">
-                    Customise your supplier search preferences
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-6 py-6">
-                  {/* Local Request Toggle */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-[#1E293B] border-2 border-[#334155] hover:border-[#F02801] transition-colors duration-200">
-                    <div className="flex-1 pr-4">
-                      <Label
-                        htmlFor="local-request"
-                        className="font-['Roboto'] text-[16px] text-[#F1F5F9] cursor-pointer"
-                      >
-                        Local Request
-                      </Label>
-                      <p className="font-['Roboto'] text-[14px] text-[#CBD5E1] mt-1">
-                        Only show nearby suppliers in your area
-                      </p>
-                    </div>
-                    <Switch
-                      id="local-request"
-                      checked={localRequest}
-                      onCheckedChange={setLocalRequest}
-                      className="data-[state=checked]:bg-[#F02801]"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setFilterDialogOpen(false)}
-                    className="flex-1 h-12 rounded-full font-['Roboto'] border-2 border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all duration-200"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleConfirmFilter}
-                    className="flex-1 h-12 rounded-full font-['Roboto'] bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Right Side - Promotional Content */}
-            <div
-              className="relative fade-in-up order-1 lg:order-2 bg-white/80 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none rounded-2xl lg:rounded-none p-8 lg:p-0"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="text-left lg:text-left flex flex-col justify-center h-full py-12 lg:py-16">
-                <h1 className="font-['Inter'] text-[42px] sm:text-[56px] lg:text-[72px] font-black text-white leading-[1.1] tracking-tight italic mb-4 lg:mb-6">
-                  Fix It Fast.
-                  <br />
-                  Drive Happy.
-                </h1>
-                <p className="font-['Roboto'] text-[16px] lg:text-[22px] text-white font-medium mb-8 lg:mb-10 tracking-wide leading-relaxed">
-                  From bolt-ons to full builds — tune your ride the smart way.
-                </p>
-                <Button
-                  onClick={() => onNavigate("supplier-onboarding")}
-                  className="h-14 w-[140px] font-['Roboto'] font-bold bg-[#F02801] hover:bg-[#D22301] text-white rounded-full transition-all duration-300 shadow-[0_8px_24px_rgba(240,40,1,0.5)] hover:shadow-[0_12px_32px_rgba(240,40,1,0.6)] hover:scale-105 uppercase tracking-wider"
-                  style={{ fontSize: "15px" }}
-                >
-                  APPLY NOW
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <VehicleSelection
+        inputMode={inputMode}
+        setInputMode={setInputMode}
+        registrationNumber={registrationNumber}
+        setRegistrationNumber={setRegistrationNumber}
+        postcode={postcode}
+        setPostcode={setPostcode}
+        vehicleMake={vehicleMake}
+        setVehicleMake={setVehicleMake}
+        vehicleModel={vehicleModel}
+        setVehicleModel={setVehicleModel}
+        vehicleYear={vehicleYear}
+        setVehicleYear={setVehicleYear}
+        fuelType={fuelType}
+        setFuelType={setFuelType}
+        engineSize={engineSize}
+        setEngineSize={setEngineSize}
+        carMakes={carMakes}
+        carModels={carModels}
+        carYears={carYears}
+        fuelTypes={fuelTypes}
+        engineSizes={engineSizes}
+        handleLookup={handleLookup}
+        isSearchDisabled={isSearchDisabled}
+        filterDialogOpen={filterDialogOpen}
+        setFilterDialogOpen={setFilterDialogOpen}
+        localRequest={localRequest}
+        setLocalRequest={setLocalRequest}
+        handleConfirmFilter={handleConfirmFilter}
+        onNavigate={onNavigate}
+      />
 
       {/* Lowest Prices Of The Season */}
       <section className="py-24 bg-white relative">

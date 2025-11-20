@@ -17,22 +17,44 @@ function VehicleConfirmationPage({
   onNavigate,
   vehicleData,
 }: VehicleConfirmationPageProps) {
+  const dvlaDetails = vehicleData?.dvla;
   const vehicleTitle =
-    [vehicleData?.year, vehicleData?.make, vehicleData?.model]
+    [
+      vehicleData?.year ?? dvlaDetails?.yearOfManufacture,
+      vehicleData?.make ?? dvlaDetails?.make,
+      vehicleData?.model,
+    ]
       .filter(Boolean)
       .join(" ") || "Review Your Vehicle";
 
   const baseDetails = [
-    { label: "Make", value: vehicleData?.make },
+    { label: "Make", value: vehicleData?.make ?? dvlaDetails?.make },
     { label: "Model", value: vehicleData?.model },
-    { label: "Year", value: vehicleData?.year },
+    {
+      label: "Year",
+      value: vehicleData?.year ?? dvlaDetails?.yearOfManufacture?.toString(),
+    },
   ];
 
   const extendedDetails = [
-    { label: "Registration", value: vehicleData?.registrationNumber },
+    {
+      label: "Registration",
+      value:
+        vehicleData?.registrationNumber ?? dvlaDetails?.registrationNumber,
+    },
     { label: "Postcode", value: vehicleData?.postcode },
-    { label: "Fuel Type", value: vehicleData?.fuelType },
-    { label: "Engine Size", value: vehicleData?.engineSize },
+    {
+      label: "Fuel Type",
+      value: vehicleData?.fuelType ?? dvlaDetails?.fuelType,
+    },
+    {
+      label: "Engine Size",
+      value:
+        vehicleData?.engineSize ??
+        (dvlaDetails?.engineCapacity
+          ? `${dvlaDetails.engineCapacity}cc`
+          : undefined),
+    },
     {
       label: "Request Scope",
       value:
@@ -43,6 +65,23 @@ function VehicleConfirmationPage({
             : "Any supplier",
     },
   ];
+
+  const dvlaExtras = [
+    { label: "Colour", value: dvlaDetails?.colour },
+    { label: "Fuel", value: dvlaDetails?.fuelType },
+    { label: "Wheelplan", value: dvlaDetails?.wheelplan },
+    { label: "Tax Status", value: dvlaDetails?.taxStatus },
+    { label: "Tax Due Date", value: dvlaDetails?.taxDueDate },
+    { label: "MOT Status", value: dvlaDetails?.motStatus },
+    { label: "MOT Expiry", value: dvlaDetails?.motExpiryDate },
+    { label: "CO2 Emissions", value: dvlaDetails?.co2Emissions?.toString() },
+    {
+      label: "Engine Capacity",
+      value: dvlaDetails?.engineCapacity
+        ? `${dvlaDetails.engineCapacity}cc`
+        : undefined,
+    },
+  ].filter((detail) => detail.value);
 
   const formatValue = (value?: string) => value || "Not provided";
 
@@ -150,6 +189,24 @@ function VehicleConfirmationPage({
                   </div>
                 ))}
               </div>
+
+              {dvlaExtras.length > 0 && (
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                  {dvlaExtras.map((detail) => (
+                    <div key={detail.label} className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                      <div className="relative text-center p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-xl border border-white/[0.04] hover:border-primary/20 transition-all">
+                        <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
+                          {detail.label}
+                        </p>
+                        <p className="font-['Inter'] font-semibold text-white/70">
+                          {formatValue(detail.value)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="relative z-10 flex flex-col sm:flex-row gap-4">

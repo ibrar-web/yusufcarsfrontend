@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { UserRole } from "@/utils/api";
+import type { VehicleEnquiryResponse } from "@/types/dvla";
 
 export type OrderDetails = {
   orderNumber: string;
@@ -21,6 +22,7 @@ export type VehicleData = {
   year?: string;
   fuelType?: string;
   engineSize?: string;
+  dvla?: VehicleEnquiryResponse;
 } | null;
 
 export type PartData = {

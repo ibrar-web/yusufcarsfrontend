@@ -1,26 +1,5 @@
 "use server";
-export type VehicleEnquiryResponse = {
-  registrationNumber: string;
-  make?: string;
-  monthOfFirstRegistration?: string;
-  yearOfManufacture?: number;
-  engineCapacity?: number;
-  co2Emissions?: number;
-  fuelType?: string;
-  markedForExport?: boolean;
-  colour?: string;
-  typeApproval?: string;
-  motExpiryDate?: string;
-  dateOfLastV5CIssued?: string;
-  wheelplan?: string;
-  revenueWeight?: number;
-  realDrivingEmissions?: string;
-  euroStatus?: string;
-  taxStatus?: string;
-  taxDueDate?: string;
-  motStatus?: string;
-  artEndDate?: string;
-};
+import { VehicleEnquiryResponse } from "@/types/dvla";
 
 export async function enquiryVehicle(
   registrationNumber: string
@@ -31,9 +10,9 @@ export async function enquiryVehicle(
 
   const apiKey = process.env.DVLA_API_KEY;
   const apiUrl = process.env.DVLA_API;
-  console.log(apiKey, apiUrl, registrationNumber);
+
   if (!apiKey || !apiUrl) {
-    throw new Error("DVLA API configuration missing in environment variables.");
+    throw new Error("System configuration error. Please try again later.");
   }
 
   const response = await fetch(apiUrl, {
@@ -46,35 +25,43 @@ export async function enquiryVehicle(
   });
 
   const raw = await response.text();
+  console.log("raw :", raw);
 
+  // Handle errors safely
   if (!response.ok) {
-    try {
-      const parsed = JSON.parse(raw);
-      console.log("response :", parsed);
-      // Handle DVLA "Vehicle Not Found"
-      if (parsed?.errors?.[0]?.code === "404") {
-        throw new Error("Vehicle not found in DVLA records.");
-      }
+    let parsed: any = null;
 
-      throw new Error(
-        parsed?.error || `DVLA lookup failed: ${response.statusText}`
-      );
+    try {
+      parsed = JSON.parse(raw);
     } catch {
-      throw new Error(
-        raw
-          ? `DVLA lookup failed: ${raw}`
-          : `DVLA lookup failed: ${response.statusText}`
-      );
+      // JSON can't be parsed → internal provider error, hide it
+      throw new Error("Unable to retrieve vehicle details. Please try again later.");
     }
+
+    const firstError = parsed?.errors?.[0];
+
+    // INVALID REG FORMAT
+    if (
+      firstError?.status === "400" &&
+      firstError?.code === "400" &&
+      firstError?.detail?.includes("Invalid format")
+    ) {
+      throw new Error("The registration number format is invalid.");
+    }
+
+    // VEHICLE NOT FOUND
+    if (firstError?.code === "404") {
+      throw new Error("Vehicle information not found for this registration number.");
+    }
+
+    // ANY OTHER PROVIDER ERROR → Do NOT expose details
+    throw new Error("Unable to retrieve vehicle details at this time. Please try again later.");
   }
 
+  // Handle success response
   try {
     return JSON.parse(raw) as VehicleEnquiryResponse;
   } catch {
-    throw new Error(
-      raw
-        ? `Unable to parse DVLA response: ${raw}`
-        : "Unable to parse DVLA response."
-    );
+    throw new Error("Unexpected response received from the verification service.");
   }
 }

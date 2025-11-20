@@ -1,0 +1,22 @@
+export type VehicleEnquiryResponse = {
+  registrationNumber: string;
+  make?: string;
+  monthOfFirstRegistration?: string;
+  yearOfManufacture?: number;
+  engineCapacity?: number;
+  co2Emissions?: number;
+  fuelType?: string;
+  markedForExport?: boolean;
+  colour?: string;
+  typeApproval?: string;
+  motExpiryDate?: string;
+  dateOfLastV5CIssued?: string;
+  wheelplan?: string;
+  revenueWeight?: number;
+  realDrivingEmissions?: string;
+  euroStatus?: string;
+  taxStatus?: string;
+  taxDueDate?: string;
+  motStatus?: string;
+  artEndDate?: string;
+};

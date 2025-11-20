@@ -29,6 +29,8 @@ import {
   engineSizes,
   fuelTypes,
 } from "@/data/vehicle-options";
+import type { VehicleData } from "@/stores/app-store";
+import type { VehicleEnquiryResponse } from "@/types/dvla";
 
 type VehicleSelectionProps = {
   onNavigate: (
@@ -54,6 +56,9 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const [engineSize, setEngineSize] = useState("");
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [localRequest, setLocalRequest] = useState(false);
+  const [dvlaDetails, setDvlaDetails] = useState<VehicleEnquiryResponse | null>(
+    null
+  );
 
   const isSearchDisabled =
     inputMode === "registration"
@@ -73,9 +78,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
       try {
         const data = await enquiryVehicle(registrationNumber);
-        console.log(data);
+        setDvlaDetails(data);
         setFilterDialogOpen(true);
       } catch (error) {
+        setDvlaDetails(null);
         toast.error(
           error instanceof Error
             ? error.message
@@ -99,6 +105,35 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     setFilterDialogOpen(true);
   };
 
+  const buildVehiclePayload = (): VehicleData => {
+    const isRegistration = inputMode === "registration";
+    const dvlaYear = dvlaDetails?.yearOfManufacture
+      ? String(dvlaDetails.yearOfManufacture)
+      : undefined;
+    const dvlaEngine =
+      dvlaDetails?.engineCapacity !== undefined
+        ? `${dvlaDetails.engineCapacity}cc`
+        : undefined;
+
+    return {
+      inputMode,
+      registrationNumber:
+        registrationNumber || dvlaDetails?.registrationNumber || undefined,
+      postcode: postcode || undefined,
+      localRequest,
+      make: isRegistration
+        ? dvlaDetails?.make || undefined
+        : vehicleMake || undefined,
+      model: isRegistration ? undefined : vehicleModel || undefined,
+      year: isRegistration ? dvlaYear : vehicleYear || undefined,
+      fuelType: isRegistration
+        ? dvlaDetails?.fuelType || undefined
+        : fuelType || undefined,
+      engineSize: isRegistration ? dvlaEngine : engineSize || undefined,
+      dvla: isRegistration ? dvlaDetails || undefined : undefined,
+    };
+  };
+
   const handleConfirmFilter = () => {
     if (inputMode === "registration") {
       if (registrationNumber.length < 6) {
@@ -107,12 +142,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       }
 
       setFilterDialogOpen(false);
-      onNavigate("request-flow", undefined, {
-        inputMode: "registration",
-        registrationNumber,
-        postcode,
-        localRequest,
-      });
+      onNavigate("request-flow", undefined, buildVehiclePayload());
       return;
     }
 
@@ -128,16 +158,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     }
 
     setFilterDialogOpen(false);
-    onNavigate("request-flow", undefined, {
-      inputMode: "manual",
-      make: vehicleMake,
-      model: vehicleModel,
-      year: vehicleYear,
-      fuelType,
-      engineSize,
-      postcode,
-      localRequest,
-    });
+    onNavigate("request-flow", undefined, buildVehiclePayload());
   };
 
   return (
@@ -167,7 +188,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                   Registration
                 </button>
                 <button
-                  onClick={() => setInputMode("manual")}
+                  onClick={() => {
+                    setInputMode("manual");
+                    setDvlaDetails(null);
+                  }}
                   className={`px-6 py-3 rounded-full font-['Roboto'] font-semibold transition-all duration-300 ${
                     inputMode === "manual"
                       ? "bg-[#F02801] text-white shadow-lg shadow-[#F02801]/30"
@@ -206,6 +230,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                             .toUpperCase()
                             .replace(/[^A-Z0-9]/g, "");
                           setRegistrationNumber(value);
+                          setDvlaDetails(null);
                         }}
                         placeholder="E.G. AB12 CDE"
                         maxLength={8}

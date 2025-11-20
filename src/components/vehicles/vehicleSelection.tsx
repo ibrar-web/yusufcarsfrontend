@@ -72,7 +72,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       }
 
       try {
-        await enquiryVehicle(registrationNumber);
+        const data = await enquiryVehicle(registrationNumber);
+        console.log(data);
         setFilterDialogOpen(true);
       } catch (error) {
         toast.error(
@@ -107,6 +108,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
       setFilterDialogOpen(false);
       onNavigate("request-flow", undefined, {
+        inputMode: "registration",
         registrationNumber,
         postcode,
         localRequest,
@@ -127,6 +129,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
     setFilterDialogOpen(false);
     onNavigate("request-flow", undefined, {
+      inputMode: "manual",
       make: vehicleMake,
       model: vehicleModel,
       year: vehicleYear,
@@ -293,7 +296,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                       </Select>
                     </div>
                     <div>
-                      <Select value={vehicleYear} onValueChange={setVehicleYear}>
+                      <Select
+                        value={vehicleYear}
+                        onValueChange={setVehicleYear}
+                      >
                         <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
                           <SelectValue placeholder="Select Year" />
                         </SelectTrigger>

@@ -62,10 +62,8 @@ export function useAppState() {
         setSelectedSupplierId(null);
       }
 
-      if (vehicleInfo) {
+      if (vehicleInfo !== undefined) {
         setVehicleData(vehicleInfo);
-      } else {
-        setVehicleData(null);
       }
 
       if (partData) {

@@ -31,7 +31,7 @@ export async function enquiryVehicle(
 
   const apiKey = process.env.DVLA_API_KEY;
   const apiUrl = process.env.DVLA_API;
-  console.log(apiKey, apiUrl,registrationNumber);
+  console.log(apiKey, apiUrl, registrationNumber);
   if (!apiKey || !apiUrl) {
     throw new Error("DVLA API configuration missing in environment variables.");
   }
@@ -44,13 +44,13 @@ export async function enquiryVehicle(
     },
     body: JSON.stringify({ registrationNumber }),
   });
-  console.log("response :", response);
+
   const raw = await response.text();
 
   if (!response.ok) {
     try {
       const parsed = JSON.parse(raw);
-
+      console.log("response :", parsed);
       // Handle DVLA "Vehicle Not Found"
       if (parsed?.errors?.[0]?.code === "404") {
         throw new Error("Vehicle not found in DVLA records.");

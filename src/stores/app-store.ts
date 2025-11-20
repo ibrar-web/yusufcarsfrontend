@@ -12,10 +12,15 @@ export type OrderDetails = {
 };
 
 export type VehicleData = {
-  make: string;
-  model: string;
-  year: string;
+  inputMode?: "registration" | "manual";
   registrationNumber?: string;
+  postcode?: string;
+  localRequest?: boolean;
+  make?: string;
+  model?: string;
+  year?: string;
+  fuelType?: string;
+  engineSize?: string;
 } | null;
 
 export type PartData = {

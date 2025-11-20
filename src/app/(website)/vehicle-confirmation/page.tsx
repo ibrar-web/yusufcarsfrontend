@@ -5,22 +5,47 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { useAppState } from "@/hooks/use-app-state";
+import type { VehicleData } from "@/stores/app-store";
 
 interface VehicleConfirmationPageProps {
   onNavigate: (page: string) => void;
-  vehicleData?: {
-    make: string;
-    model: string;
-    year: string;
-    registrationNumber?: string;
-  };
+  vehicleData?: VehicleData | null;
   onSignupClick?: () => void;
 }
 
 function VehicleConfirmationPage({
   onNavigate,
-  vehicleData = { make: "Volkswagen", model: "Golf", year: "2018" },
+  vehicleData,
 }: VehicleConfirmationPageProps) {
+  const vehicleTitle =
+    [vehicleData?.year, vehicleData?.make, vehicleData?.model]
+      .filter(Boolean)
+      .join(" ") || "Review Your Vehicle";
+
+  const baseDetails = [
+    { label: "Make", value: vehicleData?.make },
+    { label: "Model", value: vehicleData?.model },
+    { label: "Year", value: vehicleData?.year },
+  ];
+
+  const extendedDetails = [
+    { label: "Registration", value: vehicleData?.registrationNumber },
+    { label: "Postcode", value: vehicleData?.postcode },
+    { label: "Fuel Type", value: vehicleData?.fuelType },
+    { label: "Engine Size", value: vehicleData?.engineSize },
+    {
+      label: "Request Scope",
+      value:
+        vehicleData?.localRequest === undefined
+          ? undefined
+          : vehicleData.localRequest
+            ? "Local suppliers only"
+            : "Any supplier",
+    },
+  ];
+
+  const formatValue = (value?: string) => value || "Not provided";
+
   const handleNo = () => {
     onNavigate("home");
   };
@@ -84,64 +109,46 @@ function VehicleConfirmationPage({
                   className="font-['Inter'] font-bold text-white/70"
                   style={{ fontSize: "28px", lineHeight: "1.3" }}
                 >
-                  {vehicleData.year} {vehicleData.make} {vehicleData.model}
+                  {vehicleTitle}
                 </h2>
               </div>
 
               <div className="relative z-10 grid grid-cols-3 gap-3">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative text-center p-5 bg-[#0F172A]/40 backdrop-blur-sm rounded-xl shadow-sm border border-white/[0.03] hover:border-primary/20 transition-all">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-2 border border-primary/20">
-                      <Car className="h-4 w-4 text-primary/80" />
+                {baseDetails.map((detail) => (
+                  <div key={detail.label} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                    <div className="relative text-center p-5 bg-[#0F172A]/40 backdrop-blur-sm rounded-xl shadow-sm border border-white/[0.03] hover:border-primary/20 transition-all">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-2 border border-primary/20">
+                        <Car className="h-4 w-4 text-primary/80" />
+                      </div>
+                      <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
+                        {detail.label}
+                      </p>
+                      <p
+                        className="font-['Inter'] font-bold text-white/70"
+                        style={{ fontSize: "16px" }}
+                      >
+                        {formatValue(detail.value)}
+                      </p>
                     </div>
-                    <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
-                      Make
-                    </p>
-                    <p
-                      className="font-['Inter'] font-bold text-white/70"
-                      style={{ fontSize: "16px" }}
-                    >
-                      {vehicleData.make}
-                    </p>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative text-center p-5 bg-[#0F172A]/40 backdrop-blur-sm rounded-xl shadow-sm border border-white/[0.03] hover:border-primary/20 transition-all">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-2 border border-primary/20">
-                      <Car className="h-4 w-4 text-primary/80" />
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                {extendedDetails.map((detail) => (
+                  <div key={detail.label} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                    <div className="relative text-center p-4 bg-[#0F172A]/30 backdrop-blur-sm rounded-xl border border-white/[0.04] hover:border-primary/20 transition-all">
+                      <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
+                        {detail.label}
+                      </p>
+                      <p className="font-['Inter'] font-semibold text-white/70">
+                        {formatValue(detail.value)}
+                      </p>
                     </div>
-                    <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
-                      Model
-                    </p>
-                    <p
-                      className="font-['Inter'] font-bold text-white/70"
-                      style={{ fontSize: "16px" }}
-                    >
-                      {vehicleData.model}
-                    </p>
                   </div>
-                </div>
-
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative text-center p-5 bg-[#0F172A]/40 backdrop-blur-sm rounded-xl shadow-sm border border-white/[0.03] hover:border-primary/20 transition-all">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-2 border border-primary/20">
-                      <Car className="h-4 w-4 text-primary/80" />
-                    </div>
-                    <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
-                      Year
-                    </p>
-                    <p
-                      className="font-['Inter'] font-bold text-white/70"
-                      style={{ fontSize: "16px" }}
-                    >
-                      {vehicleData.year}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -160,7 +167,7 @@ function VehicleConfirmationPage({
               </Button>
 
               <Button
-                onClick={() => onNavigate("products")}
+                onClick={() => onNavigate("products", undefined, vehicleData ?? undefined)}
                 className="flex-1 h-14 bg-primary hover:bg-primary-hover text-white font-['Roboto'] font-semibold rounded-full transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden"
                 style={{ fontSize: "15px" }}
               >

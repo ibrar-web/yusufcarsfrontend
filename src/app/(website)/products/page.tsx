@@ -345,24 +345,6 @@ export default function ProductsPage() {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  {!product.inStock && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <Badge className="bg-white text-[#0F172A] font-semibold">
-                        Out of Stock
-                      </Badge>
-                    </div>
-                  )}
-                  {product.originalPrice > product.price && (
-                    <Badge className="absolute top-3 right-3 bg-[#F02801] text-white font-semibold">
-                      -
-                      {Math.round(
-                        ((product.originalPrice - product.price) /
-                          product.originalPrice) *
-                          100
-                      )}
-                      %
-                    </Badge>
-                  )}
                 </div>
 
                 {/* Product Info */}
@@ -393,8 +375,7 @@ export default function ProductsPage() {
                         openSignupDialog();
                       }
                     }}
-                    disabled={!product.inStock}
-                    className="w-full h-11 rounded-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full h-11 rounded-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 cursor-pointer"
                     style={{ fontSize: "14px" }}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
@@ -470,49 +451,12 @@ export default function ProductsPage() {
                   >
                     {selectedProduct.name}
                   </h3>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < Math.floor(selectedProduct.rating)
-                              ? "text-[#F59E0B] fill-current"
-                              : "text-[#E5E7EB] fill-current"
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span
-                      className="font-['Roboto'] text-[#64748B]"
-                      style={{ fontSize: "13px" }}
-                    >
-                      {selectedProduct.rating}
-                    </span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2">
-                    <span
-                      className="font-['Inter'] font-bold text-[#0F172A]"
-                      style={{ fontSize: "24px" }}
-                    >
-                      £{selectedProduct.price.toFixed(2)}
-                    </span>
-                    {selectedProduct.originalPrice > selectedProduct.price && (
-                      <span
-                        className="font-['Roboto'] text-[#94A3B8] line-through"
-                        style={{ fontSize: "14px" }}
-                      >
-                        £{selectedProduct.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
+                  <p
+                    className="font-['Roboto'] text-[#475569]"
+                    style={{ fontSize: "14px", lineHeight: 1.6 }}
+                  >
+                    Category: {selectedProduct.category}
+                  </p>
                 </div>
               </div>
 
@@ -617,50 +561,12 @@ export default function ProductsPage() {
                   >
                     {requestedProduct.name}
                   </h3>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < Math.floor(requestedProduct.rating)
-                              ? "text-[#F59E0B] fill-current"
-                              : "text-[#E5E7EB] fill-current"
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span
-                      className="font-['Roboto'] text-[#64748B]"
-                      style={{ fontSize: "13px" }}
-                    >
-                      {requestedProduct.rating}
-                    </span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2">
-                    <span
-                      className="font-['Inter'] font-bold text-[#0F172A]"
-                      style={{ fontSize: "24px" }}
-                    >
-                      £{requestedProduct.price.toFixed(2)}
-                    </span>
-                    {requestedProduct.originalPrice >
-                      requestedProduct.price && (
-                      <span
-                        className="font-['Roboto'] text-[#94A3B8] line-through"
-                        style={{ fontSize: "14px" }}
-                      >
-                        £{requestedProduct.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
+                  <p
+                    className="font-['Roboto'] text-[#475569]"
+                    style={{ fontSize: "14px", lineHeight: 1.6 }}
+                  >
+                    Category: {requestedProduct.category}
+                  </p>
                 </div>
               </div>
 
@@ -866,21 +772,6 @@ export default function ProductsPage() {
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                   />
-                  {selectedProduct.originalPrice > selectedProduct.price && (
-                    <Badge
-                      className="absolute top-2 right-2 bg-[#F02801] text-white"
-                      style={{ fontSize: "10px" }}
-                    >
-                      -
-                      {Math.round(
-                        ((selectedProduct.originalPrice -
-                          selectedProduct.price) /
-                          selectedProduct.originalPrice) *
-                          100
-                      )}
-                      % OFF
-                    </Badge>
-                  )}
                 </div>
 
                 {/* Category & Features */}
@@ -912,36 +803,16 @@ export default function ProductsPage() {
                     ))}
                   </div>
 
-                  {/* Stock Status */}
-                  <div
-                    className={`p-2 rounded-lg ${
-                      selectedProduct.inStock
-                        ? "bg-[#F0FDF4] border border-[#86EFAC]"
-                        : "bg-[#FEF2F2] border border-[#FECACA]"
-                    }`}
-                  >
+                  {/* Availability */}
+                  <div className="p-2 rounded-lg bg-[#ECFEFF] border border-[#A5F3FC]">
                     <div className="flex items-center gap-1.5">
-                      {selectedProduct.inStock ? (
-                        <>
-                          <CheckCircle className="h-3.5 w-3.5 text-[#22C55E]" />
-                          <span
-                            className="font-['Roboto'] font-medium text-[#166534]"
-                            style={{ fontSize: "12px" }}
-                          >
-                            In Stock
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Package className="h-3.5 w-3.5 text-[#F02801]" />
-                          <span
-                            className="font-['Roboto'] font-medium text-[#991B1B]"
-                            style={{ fontSize: "12px" }}
-                          >
-                            Out of Stock
-                          </span>
-                        </>
-                      )}
+                      <CheckCircle className="h-3.5 w-3.5 text-[#0E7490]" />
+                      <span
+                        className="font-['Roboto'] font-medium text-[#0E7490]"
+                        style={{ fontSize: "12px" }}
+                      >
+                        Available for quote requests
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -969,8 +840,7 @@ export default function ProductsPage() {
                         openSignupDialog();
                       }
                     }}
-                    disabled={!selectedProduct.inStock}
-                    className="flex-1 h-9 rounded-lg bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50 cursor-pointer"
+                    className="flex-1 h-9 rounded-lg bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 cursor-pointer"
                     style={{ fontSize: "13px" }}
                   >
                     <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />

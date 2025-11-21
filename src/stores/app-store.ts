@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import type { UserRole } from "@/utils/api";
-import type { VehicleEnquiryResponse } from "@/types/dvla";
 
 export type OrderDetails = {
   orderNumber: string;
@@ -19,10 +18,17 @@ export type VehicleData = {
   localRequest?: boolean;
   make?: string;
   model?: string;
-  year?: string;
+  yearOfManufacture?: string;
   fuelType?: string;
   engineSize?: string;
-  dvla?: VehicleEnquiryResponse;
+  engineCapacity?: number;
+  co2Emissions?: number;
+  colour?: string;
+  wheelplan?: string;
+  taxStatus?: string;
+  taxDueDate?: string;
+  motStatus?: string;
+  motExpiryDate?: string;
 } | null;
 
 export type PartData = {

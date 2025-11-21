@@ -56,9 +56,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const [engineSize, setEngineSize] = useState("");
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [localRequest, setLocalRequest] = useState(false);
-  const [dvlaDetails, setDvlaDetails] = useState<VehicleEnquiryResponse | null>(
-    null
-  );
+  const [lookupDetails, setLookupDetails] =
+    useState<VehicleEnquiryResponse | null>(null);
 
   const isSearchDisabled =
     inputMode === "registration"
@@ -78,10 +77,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
       try {
         const data = await enquiryVehicle(registrationNumber);
-        setDvlaDetails(data);
+        setLookupDetails(data);
         setFilterDialogOpen(true);
       } catch (error) {
-        setDvlaDetails(null);
+        setLookupDetails(null);
         toast.error(
           error instanceof Error
             ? error.message
@@ -107,30 +106,37 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
   const buildVehiclePayload = (): VehicleData => {
     const isRegistration = inputMode === "registration";
-    const dvlaYear = dvlaDetails?.yearOfManufacture
-      ? String(dvlaDetails.yearOfManufacture)
+    const lookupYear = lookupDetails?.yearOfManufacture
+      ? String(lookupDetails.yearOfManufacture)
       : undefined;
-    const dvlaEngine =
-      dvlaDetails?.engineCapacity !== undefined
-        ? `${dvlaDetails.engineCapacity}cc`
+    const lookupEngine =
+      lookupDetails?.engineCapacity !== undefined
+        ? `${lookupDetails.engineCapacity}cc`
         : undefined;
 
     return {
       inputMode,
       registrationNumber:
-        registrationNumber || dvlaDetails?.registrationNumber || undefined,
+        registrationNumber || lookupDetails?.registrationNumber || undefined,
       postcode: postcode || undefined,
       localRequest,
       make: isRegistration
-        ? dvlaDetails?.make || undefined
+        ? lookupDetails?.make || undefined
         : vehicleMake || undefined,
       model: isRegistration ? undefined : vehicleModel || undefined,
-      year: isRegistration ? dvlaYear : vehicleYear || undefined,
+      yearOfManufacture: isRegistration ? lookupYear : vehicleYear || undefined,
       fuelType: isRegistration
-        ? dvlaDetails?.fuelType || undefined
+        ? lookupDetails?.fuelType || undefined
         : fuelType || undefined,
-      engineSize: isRegistration ? dvlaEngine : engineSize || undefined,
-      dvla: isRegistration ? dvlaDetails || undefined : undefined,
+      engineSize: isRegistration ? lookupEngine : engineSize || undefined,
+      engineCapacity: lookupDetails?.engineCapacity,
+      co2Emissions: lookupDetails?.co2Emissions,
+      colour: lookupDetails?.colour,
+      wheelplan: lookupDetails?.wheelplan,
+      taxStatus: lookupDetails?.taxStatus,
+      taxDueDate: lookupDetails?.taxDueDate,
+      motStatus: lookupDetails?.motStatus,
+      motExpiryDate: lookupDetails?.motExpiryDate,
     };
   };
 
@@ -190,7 +196,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                 <button
                   onClick={() => {
                     setInputMode("manual");
-                    setDvlaDetails(null);
+                    setLookupDetails(null);
                   }}
                   className={`px-6 py-3 rounded-full font-['Roboto'] font-semibold transition-all duration-300 ${
                     inputMode === "manual"
@@ -230,7 +236,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                             .toUpperCase()
                             .replace(/[^A-Z0-9]/g, "");
                           setRegistrationNumber(value);
-                          setDvlaDetails(null);
+                          setLookupDetails(null);
                         }}
                         placeholder="E.G. AB12 CDE"
                         maxLength={8}

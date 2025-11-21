@@ -17,42 +17,40 @@ function VehicleConfirmationPage({
   onNavigate,
   vehicleData,
 }: VehicleConfirmationPageProps) {
-  const dvlaDetails = vehicleData?.dvla;
   const vehicleTitle =
     [
-      vehicleData?.year ?? dvlaDetails?.yearOfManufacture,
-      vehicleData?.make ?? dvlaDetails?.make,
+      vehicleData?.yearOfManufacture,
+      vehicleData?.make,
       vehicleData?.model,
     ]
       .filter(Boolean)
       .join(" ") || "Review Your Vehicle";
 
   const baseDetails = [
-    { label: "Make", value: vehicleData?.make ?? dvlaDetails?.make },
+    { label: "Make", value: vehicleData?.make },
     { label: "Model", value: vehicleData?.model },
     {
-      label: "Year",
-      value: vehicleData?.year ?? dvlaDetails?.yearOfManufacture?.toString(),
+      label: "Year of Manufacture",
+      value: vehicleData?.yearOfManufacture,
     },
   ];
 
   const extendedDetails = [
     {
       label: "Registration",
-      value:
-        vehicleData?.registrationNumber ?? dvlaDetails?.registrationNumber,
+      value: vehicleData?.registrationNumber,
     },
     { label: "Postcode", value: vehicleData?.postcode },
     {
       label: "Fuel Type",
-      value: vehicleData?.fuelType ?? dvlaDetails?.fuelType,
+      value: vehicleData?.fuelType,
     },
     {
       label: "Engine Size",
       value:
         vehicleData?.engineSize ??
-        (dvlaDetails?.engineCapacity
-          ? `${dvlaDetails.engineCapacity}cc`
+        (vehicleData?.engineCapacity
+          ? `${vehicleData.engineCapacity}cc`
           : undefined),
     },
     {
@@ -66,24 +64,29 @@ function VehicleConfirmationPage({
     },
   ];
 
-  const dvlaExtras = [
-    { label: "Colour", value: dvlaDetails?.colour },
-    { label: "Fuel", value: dvlaDetails?.fuelType },
-    { label: "Wheelplan", value: dvlaDetails?.wheelplan },
-    { label: "Tax Status", value: dvlaDetails?.taxStatus },
-    { label: "Tax Due Date", value: dvlaDetails?.taxDueDate },
-    { label: "MOT Status", value: dvlaDetails?.motStatus },
-    { label: "MOT Expiry", value: dvlaDetails?.motExpiryDate },
-    { label: "CO2 Emissions", value: dvlaDetails?.co2Emissions?.toString() },
+  const vehicleExtras = [
+    { label: "Colour", value: vehicleData?.colour },
+    { label: "Fuel", value: vehicleData?.fuelType },
+    { label: "Wheelplan", value: vehicleData?.wheelplan },
+    { label: "Tax Status", value: vehicleData?.taxStatus },
+    { label: "Tax Due Date", value: vehicleData?.taxDueDate },
+    { label: "MOT Status", value: vehicleData?.motStatus },
+    { label: "MOT Expiry", value: vehicleData?.motExpiryDate },
+    { label: "CO2 Emissions", value: vehicleData?.co2Emissions },
     {
       label: "Engine Capacity",
-      value: dvlaDetails?.engineCapacity
-        ? `${dvlaDetails.engineCapacity}cc`
+      value: vehicleData?.engineCapacity
+        ? `${vehicleData.engineCapacity}cc`
         : undefined,
     },
-  ].filter((detail) => detail.value);
+  ].filter(
+    (detail) => detail.value !== undefined && detail.value !== null && detail.value !== ""
+  );
 
-  const formatValue = (value?: string) => value || "Not provided";
+  const formatValue = (value?: string | number | boolean) =>
+    value !== undefined && value !== null && value !== ""
+      ? String(value)
+      : "Not provided";
 
   const handleNo = () => {
     onNavigate("home");
@@ -190,9 +193,9 @@ function VehicleConfirmationPage({
                 ))}
               </div>
 
-              {dvlaExtras.length > 0 && (
+              {vehicleExtras.length > 0 && (
                 <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                  {dvlaExtras.map((detail) => (
+                  {vehicleExtras.map((detail) => (
                     <div key={detail.label} className="relative group">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                       <div className="relative text-center p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-xl border border-white/[0.04] hover:border-primary/20 transition-all">

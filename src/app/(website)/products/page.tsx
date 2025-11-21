@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Footer } from "@/components/footer";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
@@ -14,34 +14,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Search,
-  ShoppingCart,
-  ArrowLeft,
-  Package,
-  CheckCircle,
-} from "lucide-react";
+import { Search, ShoppingCart, Package, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { vehicle_product } from "@/data/vehicle-products";
-
-interface ProductsPageProps {
-  onNavigate: (
-    page: string,
-    id?: string,
-    vehicleInfo?: any,
-    partData?: any,
-    category?: string,
-    quoteData?: any
-  ) => void;
-  onBack?: () => void;
-  onSignupClick?: () => void;
-  isAuthenticated?: boolean;
-  onSignOut?: () => void;
-  onProfileClick?: () => void;
-  onNotificationClick?: () => void;
-  onTrackOrderClick?: () => void;
-  initialCategory?: string;
-}
+import { useAppState } from "@/hooks/use-app-state";
 
 // Category filter options
 const categories = [
@@ -52,28 +28,35 @@ const categories = [
   { id: "electrical", name: "Electrical", icon: Package },
 ];
 
-export default function ProductsPage({
-  onNavigate,
-  onBack,
-  onSignupClick,
-  isAuthenticated,
-  onSignOut,
-  onProfileClick,
-  onNotificationClick,
-  onTrackOrderClick,
-  initialCategory,
-}: ProductsPageProps) {
+export default function ProductsPage() {
+  const {
+    handleNavigate,
+    handleBack,
+    openSignupDialog,
+    isAuthenticated,
+    selectedCategory: globalCategory,
+    setSelectedCategory: persistSelectedCategory,
+  } = useAppState();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(
-    initialCategory || "all"
+    globalCategory || "all"
   );
   const [requestSuccessDialogOpen, setRequestSuccessDialogOpen] =
     useState(false);
   const [requestedProduct, setRequestedProduct] = useState<any>(null);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [quoteConfirmDialogOpen, setQuoteConfirmDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setSelectedCategory(globalCategory || "all");
+  }, [globalCategory]);
+
+  const handleCategorySelect = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    persistSelectedCategory(categoryId === "all" ? null : categoryId);
+  };
 
   const filteredProducts = vehicle_product.filter((product) => {
     const matchesSearch = product.name
@@ -85,19 +68,6 @@ export default function ProductsPage({
     return matchesSearch && matchesCategory;
   });
 
-  const handleRequestQuote = (product: any) => {
-    setSelectedProduct(product);
-    setConfirmDialogOpen(true);
-  };
-
-  const handleAddToBasket = () => {
-    if (selectedProduct) {
-      toast.success(`Added ${selectedProduct.name} to your basket`);
-      setConfirmDialogOpen(false);
-      onNavigate("vehicle-confirmation");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Page Header */}
@@ -106,7 +76,7 @@ export default function ProductsPage({
           {/* Back Button */}
           <div className="mb-6">
             <BackButton
-              onBack={onBack || (() => onNavigate("home"))}
+              onBack={handleBack || (() => handleNavigate("home"))}
               label="Back"
             />
           </div>
@@ -155,7 +125,7 @@ export default function ProductsPage({
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => handleCategorySelect(category.id)}
                   className={`group flex items-center gap-2 px-5 py-2.5 rounded-full font-['Roboto'] font-medium transition-all duration-300 ${
                     selectedCategory === category.id
                       ? "bg-[#F02801] text-white shadow-lg shadow-[#F02801]/30"
@@ -258,11 +228,11 @@ export default function ProductsPage({
                       if (isAuthenticated) {
                         setQuoteConfirmDialogOpen(true);
                       } else {
-                        onSignupClick?.();
+                        openSignupDialog();
                       }
                     }}
                     disabled={!product.inStock}
-                    className="w-full h-11 rounded-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-11 rounded-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     style={{ fontSize: "14px" }}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
@@ -294,7 +264,7 @@ export default function ProductsPage({
         </div>
       </section>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer onNavigate={handleNavigate} />
 
       {/* Confirmation Dialog */}
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
@@ -418,7 +388,7 @@ export default function ProductsPage({
                 </Button>
                 <Button
                   onClick={() => {
-                    onNavigate("chat");
+                    handleNavigate("chat");
                     toast.success(
                       "Order placed! Contact the supplier for details."
                     );
@@ -681,7 +651,11 @@ export default function ProductsPage({
             <Button
               onClick={() => {
                 setRequestSuccessDialogOpen(false);
-                onSignupClick?.();
+                if (!isAuthenticated) {
+                  openSignupDialog();
+                } else {
+                  handleNavigate("vehicle-confirmation");
+                }
               }}
               className="flex-1 h-12 rounded-xl bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30"
               style={{ fontSize: "15px" }}
@@ -814,10 +788,14 @@ export default function ProductsPage({
                     onClick={() => {
                       setProductDetailOpen(false);
                       setRequestedProduct(selectedProduct);
-                      setRequestSuccessDialogOpen(true);
+                      if (isAuthenticated) {
+                        setRequestSuccessDialogOpen(true);
+                      } else {
+                        openSignupDialog();
+                      }
                     }}
                     disabled={!selectedProduct.inStock}
-                    className="flex-1 h-9 rounded-lg bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50"
+                    className="flex-1 h-9 rounded-lg bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30 disabled:opacity-50 cursor-pointer"
                     style={{ fontSize: "13px" }}
                   >
                     <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />

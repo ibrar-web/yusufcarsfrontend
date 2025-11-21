@@ -20,6 +20,7 @@ export function useAppState() {
     setSelectedSupplierId,
     selectedQuoteId,
     setSelectedQuoteId,
+    setSignupDialogOpen,
     setProfileDialogOpen,
     setNotificationDialogOpen,
     setTrackOrderDialogOpen,
@@ -155,6 +156,7 @@ export function useAppState() {
     handleNavigate,
     handleBack,
     handleStartChat,
+    openSignupDialog: () => setSignupDialogOpen(true),
     openProfileDialog: () => setProfileDialogOpen(true),
     openNotificationDialog: () => setNotificationDialogOpen(true),
     openTrackOrderDialog: () => setTrackOrderDialogOpen(true),
@@ -172,5 +174,6 @@ export function useAppState() {
     selectedCategory,
     quoteNotifications,
     confirmedOrderDetails,
+    setSelectedCategory,
   };
 }

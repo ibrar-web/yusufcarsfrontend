@@ -81,6 +81,7 @@ export const apiRoutes = {
     notifications: "/user/notifications",
     orders: "/user/orders",
     requests: "/user/requests",
+    requests_quote: "/user/quotes",
   },
   supplier: {
     enquiries: "/supplier/enquiries",

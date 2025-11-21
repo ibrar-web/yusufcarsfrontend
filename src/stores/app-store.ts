@@ -29,6 +29,11 @@ export type VehicleData = {
   taxDueDate?: string;
   motStatus?: string;
   motExpiryDate?: string;
+  markedForExport?: boolean;
+  typeApproval?: string;
+  revenueWeight?: number;
+  dateOfLastV5CIssued?: string;
+  monthOfFirstRegistration?: string;
 } | null;
 
 export type PartData = {

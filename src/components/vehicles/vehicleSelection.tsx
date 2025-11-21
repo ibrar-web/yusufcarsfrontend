@@ -137,6 +137,11 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       taxDueDate: lookupDetails?.taxDueDate,
       motStatus: lookupDetails?.motStatus,
       motExpiryDate: lookupDetails?.motExpiryDate,
+      markedForExport: lookupDetails?.markedForExport,
+      typeApproval: lookupDetails?.typeApproval,
+      revenueWeight: lookupDetails?.revenueWeight,
+      dateOfLastV5CIssued: lookupDetails?.dateOfLastV5CIssued,
+      monthOfFirstRegistration: lookupDetails?.monthOfFirstRegistration,
     };
   };
 

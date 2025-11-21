@@ -18,6 +18,9 @@ import { Search, ShoppingCart, Package, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { vehicle_product } from "@/data/vehicle-products";
 import { useAppState } from "@/hooks/use-app-state";
+import { apiRoutes } from "@/utils/apiroutes";
+import { apiPost } from "@/utils/apiconfig/http";
+import type { VehicleData } from "@/stores/app-store";
 
 // Category filter options
 const categories = [
@@ -27,6 +30,102 @@ const categories = [
   { id: "suspension", name: "Suspension", icon: Package },
   { id: "electrical", name: "Electrical", icon: Package },
 ];
+
+type Product = (typeof vehicle_product)[number];
+
+type QuoteRequestPayload = {
+  make?: string;
+  model?: string;
+  registrationNumber?: string;
+  taxStatus?: string;
+  taxDueDate?: string;
+  motStatus?: string;
+  yearOfManufacture?: string;
+  fuelType?: string;
+  engineSize?: string;
+  engineCapacity?: number;
+  co2Emissions?: number;
+  services: string[];
+  postcode?: string;
+  markedForExport?: boolean;
+  colour?: string;
+  typeApproval?: string;
+  revenueWeight?: number;
+  dateOfLastV5CIssued?: string;
+  motExpiryDate?: string;
+  wheelplan?: string;
+  monthOfFirstRegistration?: string;
+  requestType: "local" | "national";
+  expiresAt: string;
+};
+
+const QUOTE_EXPIRY_DAYS = 7;
+
+const slugifyServiceName = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+const resolveServiceList = (product?: Product | null): string[] => {
+  if (!product) {
+    return [];
+  }
+
+  const candidates = [product.name, product.category, product.id];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "string" || !candidate.trim()) {
+      continue;
+    }
+    const slug = slugifyServiceName(candidate);
+    if (slug) {
+      return [slug];
+    }
+  }
+
+  return [];
+};
+
+const buildQuoteRequestPayload = (
+  vehicle: NonNullable<VehicleData>,
+  product: Product,
+): QuoteRequestPayload => {
+  const services = resolveServiceList(product);
+
+  if (!services.length) {
+    throw new Error("Unable to determine the requested service.");
+  }
+
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + QUOTE_EXPIRY_DAYS);
+
+  return {
+    make: vehicle.make,
+    model: vehicle.model,
+    registrationNumber: vehicle.registrationNumber,
+    taxStatus: vehicle.taxStatus,
+    taxDueDate: vehicle.taxDueDate,
+    motStatus: vehicle.motStatus,
+    yearOfManufacture: vehicle.yearOfManufacture,
+    fuelType: vehicle.fuelType,
+    engineSize: vehicle.engineSize,
+    engineCapacity: vehicle.engineCapacity,
+    co2Emissions: vehicle.co2Emissions,
+    services,
+    postcode: vehicle.postcode,
+    markedForExport: vehicle.markedForExport,
+    colour: vehicle.colour,
+    typeApproval: vehicle.typeApproval,
+    revenueWeight: vehicle.revenueWeight,
+    dateOfLastV5CIssued: vehicle.dateOfLastV5CIssued,
+    motExpiryDate: vehicle.motExpiryDate,
+    wheelplan: vehicle.wheelplan,
+    monthOfFirstRegistration: vehicle.monthOfFirstRegistration,
+    requestType: vehicle.localRequest ? "local" : "national",
+    expiresAt: expiryDate.toISOString(),
+  };
+};
 
 export default function ProductsPage() {
   const {
@@ -39,16 +138,17 @@ export default function ProductsPage() {
     setSelectedCategory: persistSelectedCategory,
   } = useAppState();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(
     globalCategory || "all"
   );
   const [requestSuccessDialogOpen, setRequestSuccessDialogOpen] =
     useState(false);
-  const [requestedProduct, setRequestedProduct] = useState<any>(null);
+  const [requestedProduct, setRequestedProduct] = useState<Product | null>(null);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [quoteConfirmDialogOpen, setQuoteConfirmDialogOpen] = useState(false);
+  const [quoteSubmitting, setQuoteSubmitting] = useState(false);
 
   useEffect(() => {
     setSelectedCategory(globalCategory || "all");
@@ -62,6 +162,52 @@ export default function ProductsPage() {
     }
     return true;
   }, [vehicleData, handleNavigate]);
+
+  const handleQuoteRequestSubmission = async () => {
+    if (quoteSubmitting) {
+      return;
+    }
+
+    if (!requestedProduct) {
+      toast.error("Select a part before requesting a quote.");
+      return;
+    }
+
+    if (!vehicleData) {
+      toast.error("Please select your vehicle before requesting quotes.");
+      handleNavigate("home");
+      return;
+    }
+
+    let payload: QuoteRequestPayload;
+
+    try {
+      payload = buildQuoteRequestPayload(vehicleData, requestedProduct);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to prepare the quote request. Please try again.",
+      );
+      return;
+    }
+
+    try {
+      setQuoteSubmitting(true);
+      await apiPost(apiRoutes.user.requests_quote, payload);
+      toast.success("Your quote request has been sent.");
+      setQuoteConfirmDialogOpen(false);
+      setRequestSuccessDialogOpen(true);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to send the quote request. Please try again.",
+      );
+    } finally {
+      setQuoteSubmitting(false);
+    }
+  };
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -424,7 +570,12 @@ export default function ProductsPage() {
       {/* Quote Request Confirmation Dialog */}
       <Dialog
         open={quoteConfirmDialogOpen}
-        onOpenChange={setQuoteConfirmDialogOpen}
+        onOpenChange={(open) => {
+          if (quoteSubmitting) {
+            return;
+          }
+          setQuoteConfirmDialogOpen(open);
+        }}
       >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -540,21 +691,26 @@ export default function ProductsPage() {
                 <Button
                   variant="outline"
                   onClick={() => setQuoteConfirmDialogOpen(false)}
+                  disabled={quoteSubmitting}
                   className="flex-1 h-12 rounded-xl border-2 border-[#E5E7EB] hover:border-[#94A3B8] font-['Roboto'] font-medium"
                   style={{ fontSize: "15px" }}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    setQuoteConfirmDialogOpen(false);
-                    setRequestSuccessDialogOpen(true);
-                  }}
+                  onClick={handleQuoteRequestSubmission}
+                  disabled={quoteSubmitting}
                   className="flex-1 h-12 rounded-xl bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30"
                   style={{ fontSize: "15px" }}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Confirm Request
+                  {quoteSubmitting ? (
+                    "Sending..."
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Confirm Request
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

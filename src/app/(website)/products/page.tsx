@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Footer } from "@/components/footer";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ export default function ProductsPage() {
     handleBack,
     openSignupDialog,
     isAuthenticated,
+    vehicleData,
     selectedCategory: globalCategory,
     setSelectedCategory: persistSelectedCategory,
   } = useAppState();
@@ -52,6 +53,15 @@ export default function ProductsPage() {
   useEffect(() => {
     setSelectedCategory(globalCategory || "all");
   }, [globalCategory]);
+
+  const ensureVehicleSelected = useCallback(() => {
+    if (!vehicleData) {
+      toast.error("Please select your vehicle before browsing parts.");
+      handleNavigate("home");
+      return false;
+    }
+    return true;
+  }, [vehicleData, handleNavigate]);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -174,6 +184,9 @@ export default function ProductsPage() {
               <div
                 key={product.id}
                 onClick={() => {
+                  if (!ensureVehicleSelected()) {
+                    return;
+                  }
                   setSelectedProduct(product);
                   setProductDetailOpen(true);
                 }}
@@ -224,6 +237,9 @@ export default function ProductsPage() {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (!ensureVehicleSelected()) {
+                        return;
+                      }
                       setRequestedProduct(product);
                       if (isAuthenticated) {
                         setQuoteConfirmDialogOpen(true);
@@ -786,6 +802,9 @@ export default function ProductsPage() {
                   </Button>
                   <Button
                     onClick={() => {
+                      if (!ensureVehicleSelected()) {
+                        return;
+                      }
                       setProductDetailOpen(false);
                       setRequestedProduct(selectedProduct);
                       if (isAuthenticated) {

@@ -84,9 +84,11 @@ export const apiRoutes = {
     requests_quote: "/user/quotes",
   },
   supplier: {
-    enquiries: "/supplier/enquiries",
-    dashboard: "/supplier/dashboard",
-    profile: "/supplier/profile",
+    quote: {
+      newrequests: "supplier/quotes/request",
+      listoffers: "supplier/quote/offer",
+      sendoffer: "supplier/quote/offer",
+    },
   },
   admin: {
     users: {

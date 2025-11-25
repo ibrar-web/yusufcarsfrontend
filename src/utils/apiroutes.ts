@@ -78,10 +78,9 @@ export const apiRoutes = {
     profile: "/auth/profile",
   },
   user: {
-    notifications: "/user/notifications",
-    orders: "/user/orders",
-    requests: "/user/requests",
-    requests_quote: "/user/quotes",
+    quote: {
+      listoffers: "user/quotes",
+    },
   },
   supplier: {
     quote: {

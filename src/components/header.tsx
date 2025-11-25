@@ -331,7 +331,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                     {/* Notifications Header */}
                     <Link
                       className="px-3 py-2 border-b border-[#E5E7EB] cursor-pointer hover:bg-[#F1F5F9] transition-colors"
-                      href={"user/quotes"}
+                      href={"/user/quotes"}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

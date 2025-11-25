@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRoutes } from "@/utils/apiroutes";
-import { apiGet } from "@/utils/apiconfig/http";
+import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import {
   Bell,
   Calendar,
@@ -204,55 +204,87 @@ export default function SupplierRequestsPage() {
   const [partCondition, setPartCondition] = useState<"new" | "used">("new");
   const [requests, setRequests] = useState<SupplierQuoteRequest[]>([]);
   const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+  const [openRequestId, setOpenRequestId] = useState<string | null>(null);
+  const [submittingQuote, setSubmittingQuote] = useState(false);
   const newRequestsEndpoint = apiRoutes.supplier.quote.newrequests.startsWith("/")
     ? apiRoutes.supplier.quote.newrequests
     : `/${apiRoutes.supplier.quote.newrequests}`;
+  const sendOfferEndpoint = apiRoutes.supplier.quote.sendoffer.startsWith("/")
+    ? apiRoutes.supplier.quote.sendoffer
+    : `/${apiRoutes.supplier.quote.sendoffer}`;
+
+  const loadRequests = useCallback(async () => {
+    try {
+      setIsLoadingRequests(true);
+      const response = await apiGet<SupplierQuoteResponse>(newRequestsEndpoint);
+      const payloads = response?.data?.data ?? [];
+      setRequests(payloads.map(normalizeQuoteRequest));
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to load supplier requests");
+      }
+    } finally {
+      setIsLoadingRequests(false);
+    }
+  }, [newRequestsEndpoint]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchNewRequests = async () => {
-      try {
-        setIsLoadingRequests(true);
-        const response = await apiGet<SupplierQuoteResponse>(newRequestsEndpoint);
-        if (!isMounted) return;
-        const payloads = response?.data?.data ?? [];
-        setRequests(payloads.map(normalizeQuoteRequest));
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to load supplier requests");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingRequests(false);
-        }
-      }
-    };
-
-    fetchNewRequests();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [newRequestsEndpoint]);
+    loadRequests();
+  }, [loadRequests]);
 
   const newRequests = requests.filter(
     (request) => request.status === "pending" || request.status === "new"
   );
 
-  const handleSendQuote = () => {
-    if (!quoteAmount || parseFloat(quoteAmount) <= 0) {
+  const deliveryTimeMap: Record<string, string> = {
+    "same-day": "Same day",
+    "1-2": "1-2 business days",
+    "3-5": "3-5 business days",
+    "1-week": "1 week",
+  };
+
+  const handleSendQuote = async (request: SupplierQuoteRequest) => {
+    const priceValue = parseFloat(quoteAmount);
+    if (!quoteAmount || Number.isNaN(priceValue) || priceValue <= 0) {
       toast.error("Please enter a valid quote amount");
       return;
     }
 
-    setShowQuoteSentDialog(true);
-    setQuoteAmount("");
-    setQuoteNotes("");
-    setDeliveryTime("1-2");
-    setPartCondition("new");
+    const estimatedTime = deliveryTimeMap[deliveryTime] ?? deliveryTime;
+    const expiresAt = request.expiresAt
+      ? request.expiresAt
+      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const trimmedNotes = quoteNotes.trim();
+
+    try {
+      setSubmittingQuote(true);
+      await apiPost(sendOfferEndpoint, {
+        quoteRequestId: request.id,
+        price: priceValue,
+        estimatedTime,
+        partCondition: partCondition === "new" ? "New" : "Used",
+        notes: trimmedNotes ? trimmedNotes : undefined,
+        expiresAt,
+      });
+      toast.success("Quote sent successfully");
+      setShowQuoteSentDialog(true);
+      setOpenRequestId(null);
+      setQuoteAmount("");
+      setQuoteNotes("");
+      setDeliveryTime("1-2");
+      setPartCondition("new");
+      await loadRequests();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to send quote");
+      }
+    } finally {
+      setSubmittingQuote(false);
+    }
   };
 
   const renderRequestStatusBadge = (status: string) => {
@@ -435,9 +467,17 @@ export default function SupplierRequestsPage() {
                     </div>
                   </div>
 
-                  <Dialog>
+                  <Dialog
+                    open={openRequestId === request.id}
+                    onOpenChange={(open) =>
+                      setOpenRequestId(open ? request.id : null)
+                    }
+                  >
                     <DialogTrigger asChild>
-                      <Button className="w-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full py-5">
+                      <Button
+                        className="w-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full py-5"
+                        onClick={() => setOpenRequestId(request.id)}
+                      >
                         <Send className="h-4 w-4 mr-2" />
                         Quote
                       </Button>
@@ -610,16 +650,25 @@ export default function SupplierRequestsPage() {
                           <Button
                             variant="outline"
                             className="font-['Roboto'] rounded-full"
+                            onClick={() => setOpenRequestId(null)}
+                            disabled={submittingQuote}
                           >
                             Cancel
                           </Button>
                         </DialogClose>
                         <Button
-                          onClick={handleSendQuote}
+                          onClick={() => handleSendQuote(request)}
                           className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full"
+                          disabled={submittingQuote}
                         >
-                          <Send className="h-4 w-4 mr-2" />
-                          Send Quote
+                          {submittingQuote ? (
+                            "Sending..."
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send Quote
+                            </>
+                          )}
                         </Button>
                       </DialogFooter>
                     </DialogContent>

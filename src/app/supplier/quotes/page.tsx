@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,12 +8,49 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppState } from "@/hooks/use-app-state";
-import { supplierQuotes, type SupplierQuote } from "@/page-components/supplier-dashboard/data";
+import { apiRoutes } from "@/utils/apiroutes";
+import { apiGet } from "@/utils/apiconfig/http";
 import { Calendar, CheckCircle, Clock, DollarSign, Hash, MessageSquare, User, Wrench, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
+type SupplierQuoteApi = {
+  id: string;
+  quoteRequest?: {
+    id: string;
+    user?: {
+      id: string;
+      email?: string;
+      fullName?: string;
+    } | null;
+    make?: string | null;
+    model?: string | null;
+    services?: string[] | null;
+    createdAt?: string | null;
+  } | null;
+  price?: string | number | null;
+  estimatedTime?: string | null;
+  partCondition?: string | null;
+  notes?: string | null;
+  expiresAt?: string | null;
+  status?: string | null;
+  createdAt?: string | null;
+};
+
+type SupplierQuote = {
+  id: string;
+  requestId?: string;
+  customer?: string;
+  part?: string;
+  amount: number;
+  status: string;
+  sentAt?: string;
+  estimatedTime?: string;
+  partCondition?: string;
+  notes?: string;
+};
+
 const quoteStatusConfig: Record<
-  SupplierQuote["status"],
+  string,
   { className: string; label: string }
 > = {
   pending: {
@@ -36,6 +73,38 @@ const quoteStatusConfig: Record<
     className: "bg-[#F59E0B] text-white border-0 shadow-sm font-['Roboto']",
     label: "Quoted",
   },
+};
+
+const normalizeQuote = (quote: SupplierQuoteApi): SupplierQuote => {
+  const priceValue =
+    typeof quote.price === "string"
+      ? parseFloat(quote.price)
+      : quote.price ?? 0;
+  const services = quote.quoteRequest?.services ?? [];
+  const partDescription = services.length
+    ? services
+        .map((service) =>
+          service
+            .split(/[\s_-]+/)
+            .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+            .join(" ")
+        )
+        .join(", ")
+    : undefined;
+
+  return {
+    id: quote.id,
+    requestId: quote.quoteRequest?.id,
+    customer:
+      quote.quoteRequest?.user?.fullName || quote.quoteRequest?.user?.email,
+    part: partDescription,
+    amount: Number.isFinite(priceValue) ? priceValue : 0,
+    status: (quote.status || "pending").toLowerCase(),
+    sentAt: quote.createdAt || undefined,
+    estimatedTime: quote.estimatedTime || undefined,
+    partCondition: quote.partCondition || undefined,
+    notes: quote.notes || undefined,
+  };
 };
 
 function renderQuoteStatusBadge(quote: SupplierQuote) {
@@ -161,6 +230,31 @@ function renderQuoteStatusBadge(quote: SupplierQuote) {
 export default function SupplierQuotesPage() {
   const { handleNavigate } = useAppState();
   const [selectedQuoteToView, setSelectedQuoteToView] = useState<SupplierQuote | null>(null);
+  const [quotes, setQuotes] = useState<SupplierQuote[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const endpoint = apiRoutes.supplier.quote.listoffers.startsWith("/")
+      ? apiRoutes.supplier.quote.listoffers
+      : `/${apiRoutes.supplier.quote.listoffers}`;
+
+    const fetchQuotes = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiGet<{ data?: SupplierQuoteApi[] }>(endpoint);
+        const payload = response?.data ?? [];
+        setQuotes(payload.map(normalizeQuote));
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load quotes"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuotes();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -189,7 +283,21 @@ export default function SupplierQuotesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {supplierQuotes.map((quote) => (
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6 text-[#475569] font-['Roboto']">
+                    Loading quotes...
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoading && quotes.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6 text-[#475569] font-['Roboto']">
+                    No quotes available yet.
+                  </TableCell>
+                </TableRow>
+              )}
+              {quotes.map((quote) => (
                 <TableRow
                   key={quote.id}
                   className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC] cursor-pointer"

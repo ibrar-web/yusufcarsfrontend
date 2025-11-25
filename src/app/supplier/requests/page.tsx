@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,10 +33,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  supplierRequests,
-  type SupplierRequest,
-} from "@/page-components/supplier-dashboard/data";
+import { apiRoutes } from "@/utils/apiroutes";
+import { apiGet } from "@/utils/apiconfig/http";
 import {
   Bell,
   Calendar,
@@ -51,18 +49,150 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+type SupplierQuoteRequestApi = {
+  id: string;
+  user?: {
+    id: string;
+    email?: string;
+    fullName?: string;
+    postCode?: string | null;
+  } | null;
+  model?: string | null;
+  make?: string | null;
+  registrationNumber?: string | null;
+  taxStatus?: string | null;
+  taxDueDate?: string | null;
+  motStatus?: string | null;
+  yearOfManufacture?: string | null;
+  fuelType?: string | null;
+  engineSize?: string | null;
+  engineCapacity?: number | null;
+  services?: string[] | null;
+  postcode?: string | null;
+  requestType?: string | null;
+  status?: string | null;
+  expiresAt?: string | null;
+  createdAt?: string | null;
+  monthOfFirstRegistration?: string | null;
+  colour?: string | null;
+};
+
+type SupplierQuoteRequest = {
+  id: string;
+  customerName: string;
+  customerEmail?: string;
+  vehicleDisplay?: string;
+  registrationNumber?: string;
+  partDescription: string;
+  detailSummary: string;
+  status: string;
+  requestType?: string;
+  postcode?: string;
+  createdAt?: string;
+  createdRelative?: string;
+  expiresAt?: string;
+  timeRemaining?: number;
+};
+
+type SupplierQuoteResponse = {
+  statusCode?: number;
+  message?: string;
+  data?: {
+    data?: SupplierQuoteRequestApi[];
+    meta?: {
+      total?: number;
+      page?: number;
+      limit?: number;
+    };
+  };
+};
+
 const requestStatusConfig: Record<
-  SupplierRequest["status"],
+  string,
   { label: string; className: string }
 > = {
-  new: {
-    label: "New",
+  pending: {
+    label: "Pending",
     className: "bg-[#3B82F6] text-white border-0 shadow-sm font-['Roboto']",
   },
   quoted: {
     label: "Quoted",
     className: "bg-[#F59E0B] text-white border-0 shadow-sm font-['Roboto']",
   },
+  expired: {
+    label: "Expired",
+    className: "bg-[#EF4444] text-white border-0 shadow-sm font-['Roboto']",
+  },
+};
+
+const formatRelativeTime = (isoDate?: string | null) => {
+  if (!isoDate) return "";
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hr ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+};
+
+const toDisplayLabel = (value?: string | null) => {
+  if (!value) return "";
+  return value
+    .split(/[\s_-]+/)
+    .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+    .join(" ");
+};
+
+const normalizeQuoteRequest = (
+  payload: SupplierQuoteRequestApi
+): SupplierQuoteRequest => {
+  const serviceNames = payload.services?.map(toDisplayLabel).filter(Boolean) ?? [];
+  const partDescription = serviceNames.length
+    ? serviceNames.join(", ")
+    : "General service request";
+  const vehicleDisplay = [
+    payload.yearOfManufacture,
+    payload.make,
+    payload.model,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const expiresAtDate = payload.expiresAt ? new Date(payload.expiresAt) : null;
+  const timeRemaining = expiresAtDate
+    ? Math.round((expiresAtDate.getTime() - Date.now()) / 60000)
+    : undefined;
+
+  const detailSummaryParts = [
+    payload.requestType ? `Request type: ${toDisplayLabel(payload.requestType)}` : null,
+    payload.colour ? `Colour: ${payload.colour}` : null,
+    payload.monthOfFirstRegistration
+      ? `Registered: ${payload.monthOfFirstRegistration}`
+      : null,
+  ].filter(Boolean);
+
+  return {
+    id: payload.id,
+    customerName:
+      payload.user?.fullName || payload.user?.email || "Unknown customer",
+    customerEmail: payload.user?.email || undefined,
+    vehicleDisplay: vehicleDisplay || undefined,
+    registrationNumber: payload.registrationNumber || undefined,
+    partDescription,
+    detailSummary:
+      detailSummaryParts.join(" • ") ||
+      "No additional details provided",
+    status: (payload.status || "pending").toLowerCase(),
+    requestType: payload.requestType || undefined,
+    postcode: payload.postcode || payload.user?.postCode || undefined,
+    createdAt: payload.createdAt || undefined,
+    createdRelative: formatRelativeTime(payload.createdAt),
+    expiresAt: payload.expiresAt || undefined,
+    timeRemaining,
+  };
 };
 
 export default function SupplierRequestsPage() {
@@ -72,9 +202,44 @@ export default function SupplierRequestsPage() {
   const [requestsToShow, setRequestsToShow] = useState(2);
   const [showQuoteSentDialog, setShowQuoteSentDialog] = useState(false);
   const [partCondition, setPartCondition] = useState<"new" | "used">("new");
+  const [requests, setRequests] = useState<SupplierQuoteRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+  const newRequestsEndpoint = apiRoutes.supplier.quote.newrequests.startsWith("/")
+    ? apiRoutes.supplier.quote.newrequests
+    : `/${apiRoutes.supplier.quote.newrequests}`;
 
-  const newRequests = supplierRequests.filter(
-    (request) => request.status === "new"
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNewRequests = async () => {
+      try {
+        setIsLoadingRequests(true);
+        const response = await apiGet<SupplierQuoteResponse>(newRequestsEndpoint);
+        if (!isMounted) return;
+        const payloads = response?.data?.data ?? [];
+        setRequests(payloads.map(normalizeQuoteRequest));
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to load supplier requests");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRequests(false);
+        }
+      }
+    };
+
+    fetchNewRequests();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [newRequestsEndpoint]);
+
+  const newRequests = requests.filter(
+    (request) => request.status === "pending" || request.status === "new"
   );
 
   const handleSendQuote = () => {
@@ -90,8 +255,9 @@ export default function SupplierRequestsPage() {
     setPartCondition("new");
   };
 
-  const renderRequestStatusBadge = (status: SupplierRequest["status"]) => {
-    const config = requestStatusConfig[status] ?? requestStatusConfig.new;
+  const renderRequestStatusBadge = (status: string) => {
+    const normalized = status?.toLowerCase?.() ?? "pending";
+    const config = requestStatusConfig[normalized] ?? requestStatusConfig.pending;
     return (
       <Badge className={`${config.className} px-4 py-1.5`}>
         {config.label}
@@ -117,7 +283,9 @@ export default function SupplierRequestsPage() {
             New Requests
           </CardTitle>
           <CardDescription className="font-['Roboto'] text-[#475569]">
-            {newRequests.length} new part requests from customers
+            {isLoadingRequests
+              ? "Loading latest requests..."
+              : `${newRequests.length} new part requests from customers`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -167,7 +335,9 @@ export default function SupplierRequestsPage() {
                           ? `Expired ${Math.abs(
                               request.timeRemaining
                             )} mins ago`
-                          : `${request.timeRemaining ?? 0} mins left`}
+                          : request.timeRemaining !== undefined
+                            ? `${request.timeRemaining} mins left`
+                            : "No expiry"}
                       </span>
                     </div>
                   </div>
@@ -195,7 +365,7 @@ export default function SupplierRequestsPage() {
                         </p>
                       </div>
                       <p className="text-sm font-['Roboto'] text-[#0F172A] pl-9">
-                        {request.part}
+                        {request.partDescription}
                       </p>
                     </div>
 
@@ -209,10 +379,10 @@ export default function SupplierRequestsPage() {
                             For Vehicle
                           </p>
                           <p className="text-sm font-['Roboto'] text-[#0F172A]">
-                            {request.vehicle}
+                            {request.vehicleDisplay || "Vehicle details not provided"}
                           </p>
                           <p className="text-xs text-[#475569] font-['Roboto'] mt-0.5">
-                            {request.registration}
+                            {request.registrationNumber || "No registration"}
                           </p>
                         </div>
                       </div>
@@ -229,7 +399,7 @@ export default function SupplierRequestsPage() {
                           Customer
                         </p>
                         <p className="font-['Roboto'] text-[#0F172A] text-xs truncate">
-                          {request.customer}
+                          {request.customerName}
                         </p>
                       </div>
                     </div>
@@ -241,10 +411,10 @@ export default function SupplierRequestsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#166534] font-['Roboto'] mb-0.5">
-                            Distance
+                            Postcode
                           </p>
                           <p className="font-['Roboto'] text-[#0F172A] text-xs">
-                            {request.distance} mi
+                            {request.postcode || "Unknown"}
                           </p>
                         </div>
                       </div>
@@ -255,10 +425,10 @@ export default function SupplierRequestsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#5B21B6] font-['Roboto'] mb-0.5">
-                            Posted
+                            Created
                           </p>
                           <p className="font-['Roboto'] text-[#0F172A] text-xs">
-                            {request.posted}
+                            {request.createdRelative || "Unknown"}
                           </p>
                         </div>
                       </div>
@@ -289,41 +459,41 @@ export default function SupplierRequestsPage() {
                               Customer
                             </Label>
                             <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.customer}
-                            </p>
-                          </div>
+                              {request.customerName}
+                          </p>
+                        </div>
                           <div>
                             <Label className="text-[#475569] font-['Roboto']">
-                              Distance
-                            </Label>
-                            <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.distance} miles
-                            </p>
+                              Postcode
+                          </Label>
+                          <p className="font-['Roboto'] text-[#0F172A]">
+                            {request.postcode || "Unknown"}
+                          </p>
                           </div>
                           <div>
                             <Label className="text-[#475569] font-['Roboto']">
                               Vehicle
                             </Label>
                             <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.vehicle}
-                            </p>
+                              {request.vehicleDisplay || "Not provided"}
+                          </p>
                           </div>
                           <div>
                             <Label className="text-[#475569] font-['Roboto']">
                               Registration
                             </Label>
                             <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.registration}
-                            </p>
+                              {request.registrationNumber || "Not provided"}
+                          </p>
                           </div>
                         </div>
 
                         <div>
                           <Label className="text-[#475569] font-['Roboto']">
-                            Part Needed
+                            Requested Services
                           </Label>
                           <p className="font-['Roboto'] text-[#0F172A]">
-                            {request.part}
+                            {request.partDescription}
                           </p>
                         </div>
 
@@ -332,7 +502,7 @@ export default function SupplierRequestsPage() {
                             Additional Details
                           </Label>
                           <p className="font-['Roboto'] text-[#0F172A] text-sm">
-                            {request.details}
+                            {request.detailSummary}
                           </p>
                         </div>
 
@@ -457,6 +627,11 @@ export default function SupplierRequestsPage() {
                 </CardContent>
               </Card>
             ))}
+            {!isLoadingRequests && newRequests.length === 0 && (
+              <div className="col-span-full text-center py-8 text-[#475569] font-['Roboto']">
+                No new requests available.
+              </div>
+            )}
           </div>
 
           {newRequests.length > requestsToShow && (

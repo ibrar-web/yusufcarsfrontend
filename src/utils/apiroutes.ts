@@ -80,6 +80,7 @@ export const apiRoutes = {
   user: {
     quote: {
       listoffers: "user/quotes",
+      requestQuote: "/user/quotes",
     },
   },
   supplier: {

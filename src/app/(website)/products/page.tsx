@@ -89,7 +89,7 @@ const resolveServiceList = (product?: Product | null): string[] => {
 
 const buildQuoteRequestPayload = (
   vehicle: NonNullable<VehicleData>,
-  product: Product,
+  product: Product
 ): QuoteRequestPayload => {
   const services = resolveServiceList(product);
 
@@ -145,7 +145,9 @@ export default function ProductsPage() {
   );
   const [requestSuccessDialogOpen, setRequestSuccessDialogOpen] =
     useState(false);
-  const [requestedProduct, setRequestedProduct] = useState<Product | null>(null);
+  const [requestedProduct, setRequestedProduct] = useState<Product | null>(
+    null
+  );
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [quoteConfirmDialogOpen, setQuoteConfirmDialogOpen] = useState(false);
   const [quoteSubmitting, setQuoteSubmitting] = useState(false);
@@ -187,14 +189,14 @@ export default function ProductsPage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Unable to prepare the quote request. Please try again.",
+          : "Unable to prepare the quote request. Please try again."
       );
       return;
     }
 
     try {
       setQuoteSubmitting(true);
-      await apiPost(apiRoutes.user.requests_quote, payload);
+      await apiPost(apiRoutes.user.quote.requestQuote, payload);
       toast.success("Your quote request has been sent.");
       setQuoteConfirmDialogOpen(false);
       setRequestSuccessDialogOpen(true);
@@ -202,7 +204,7 @@ export default function ProductsPage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to send the quote request. Please try again.",
+          : "Failed to send the quote request. Please try again."
       );
     } finally {
       setQuoteSubmitting(false);

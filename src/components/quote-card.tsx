@@ -20,6 +20,7 @@ interface Quote {
   deliveryOption: string;
   verified?: boolean;
   partImage?: string;
+  serviceLabels?: string[];
 }
 
 interface QuoteCardProps {
@@ -60,7 +61,7 @@ export function QuoteCard({
   return (
     <div
       className={cn(
-        "relative bg-white border-2 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:-translate-y-1 group flex flex-col",
+        "relative bg-white border-2 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:-translate-y-1 group flex flex-col min-h-[520px]",
         selected ? "border-primary shadow-[0_8px_32px_rgba(239,68,68,0.2)]" : "border-[#E5E7EB]"
       )}
     >
@@ -171,7 +172,7 @@ export function QuoteCard({
         )}
 
         {/* Details */}
-        <div className="space-y-1.5 mb-3 pb-3 border-b border-[#E5E7EB] flex-1">
+        <div className="space-y-1.5 mb-3 pb-3 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5 text-[#64748B]" />
             <span className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '12px' }}>
@@ -187,6 +188,19 @@ export function QuoteCard({
             </div>
           )}
           <p className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '11px' }}>{quote.deliveryOption}</p>
+          {quote.serviceLabels && quote.serviceLabels.length > 0 && (
+            <div className="pt-2 flex flex-wrap gap-1.5">
+              {quote.serviceLabels.map((service) => (
+                <Badge
+                  key={service}
+                  className="bg-[#F1F5F9] text-[#0F172A] border border-[#E5E7EB] px-2 py-0.5 font-['Roboto']"
+                  style={{ fontSize: '10px' }}
+                >
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Actions */}

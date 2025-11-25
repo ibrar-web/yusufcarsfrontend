@@ -33,6 +33,53 @@ import { apiGet } from "@/utils/apiconfig/http";
 const FALLBACK_SUPPLIER_IMAGE =
   "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=200&fit=crop";
 
+const PART_IMAGE_MAP: Record<string, string> = {
+  "front-brake-disc-pad-set":
+    "https://images.unsplash.com/photo-1595444276957-9efea46598d7?auto=format&fit=crop&w=600&q=80",
+  "engine-oil-filter-kit":
+    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+  "coil-spring-set":
+    "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?auto=format&fit=crop&w=600&q=80",
+  "headlight-assembly":
+    "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=600&q=80",
+  "timing-belt-kit":
+    "https://images.unsplash.com/photo-1527363050776-918ace6b3296?auto=format&fit=crop&w=600&q=80",
+  "engine-mount":
+    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+};
+
+const DEFAULT_PART_IMAGES = [
+  "https://images.unsplash.com/photo-1595444276957-9efea46598d7?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=600&q=80",
+];
+
+const getPartImageForServices = (services?: string[] | null, fallbackId?: string) => {
+  if (services && services.length > 0) {
+    for (const service of services) {
+      const key = service.toLowerCase();
+      if (PART_IMAGE_MAP[key]) {
+        return PART_IMAGE_MAP[key];
+      }
+    }
+  }
+  if (fallbackId) {
+    const index = Math.abs(hashCode(fallbackId)) % DEFAULT_PART_IMAGES.length;
+    return DEFAULT_PART_IMAGES[index];
+  }
+  return DEFAULT_PART_IMAGES[0];
+};
+
+function hashCode(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
 const ensureEndpoint = (path: string) => (path.startsWith("/") ? path : `/${path}`);
 
 const formatTitleCase = (value?: string | null) => {
@@ -58,6 +105,9 @@ const formatServices = (services?: string[] | null) => {
   }
   return services.map(formatTitleCase).join(", ");
 };
+
+const buildServiceLabels = (services?: string[] | null) =>
+  services?.map(formatTitleCase) ?? [];
 
 const formatVehicleSummary = (
   year?: string | null,
@@ -158,6 +208,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
       ? parseFloat(offer.price)
       : offer.price ?? 0;
   const servicesLabel = formatServices(offer.quoteRequest?.services);
+  const servicesArray = buildServiceLabels(offer.quoteRequest?.services);
   const vehicleSummary = formatVehicleSummary(
     offer.quoteRequest?.yearOfManufacture,
     offer.quoteRequest?.make,
@@ -180,7 +231,8 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
       ? `Estimated delivery: ${offer.estimatedTime}`
       : "Standard delivery available",
     verified: offer.supplier?.approvalStatus === "approved",
-    partImage: undefined,
+    partImage: getPartImageForServices(offer.quoteRequest?.services, offer.id),
+    serviceLabels: servicesArray,
   };
 
   return {

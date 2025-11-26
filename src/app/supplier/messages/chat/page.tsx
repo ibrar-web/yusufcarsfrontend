@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
+import { useAppStore } from "@/stores/app-store";
 import { supplierMessages } from "@/page-components/supplier-dashboard/data";
 
 type UserConversation = {
@@ -43,6 +44,7 @@ const formatTime = (value: string) => {
 
 export default function Chat() {
   const { handleNavigate, selectedSupplierId } = useAppState();
+  const { setSelectedSupplierId } = useAppStore();
 
   const conversations = useMemo<UserConversation[]>(
     () =>
@@ -82,7 +84,7 @@ export default function Chat() {
                     "w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors border-b border-border",
                     currentConversation?.id === conv.id && "bg-muted"
                   )}
-                  onClick={() => handleNavigate("chat", conv.id)}
+                  onClick={() => setSelectedSupplierId(conv.id)}
                 >
                   <div className="relative">
                     <Avatar>

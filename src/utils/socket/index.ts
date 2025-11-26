@@ -6,6 +6,10 @@ import type { UserRole } from "@/utils/api";
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 let socket: Socket | null = null;
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+let lastHeartbeatAck = true;
+const HEARTBEAT_INTERVAL = 20000;
+const HEARTBEAT_TIMEOUT = 10000;
 
 export type ConnectSocketOptions = {
   role?: UserRole | null;
@@ -45,7 +49,45 @@ export function connectSocket(options: ConnectSocketOptions = {}) {
     console.warn(`[socket] connection error: ${error.message}`);
   });
 
+  socket.on("pong", () => {
+    lastHeartbeatAck = true;
+  });
+
+  startHeartbeat();
+
   return socket;
+}
+
+function startHeartbeat() {
+  if (!socket) {
+    return;
+  }
+
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+  }
+
+  heartbeatTimer = setInterval(() => {
+    if (!socket) {
+      return;
+    }
+
+    if (!lastHeartbeatAck) {
+      socket.disconnect();
+      socket.connect();
+      return;
+    }
+
+    lastHeartbeatAck = false;
+    socket.emit("ping");
+
+    setTimeout(() => {
+      if (!lastHeartbeatAck && socket) {
+        socket.disconnect();
+        socket.connect();
+      }
+    }, HEARTBEAT_TIMEOUT);
+  }, HEARTBEAT_INTERVAL);
 }
 
 export function disconnectSocket() {
@@ -54,6 +96,12 @@ export function disconnectSocket() {
     socket.disconnect();
     socket = null;
   }
+
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+  lastHeartbeatAck = true;
 }
 
 export function getSocket() {

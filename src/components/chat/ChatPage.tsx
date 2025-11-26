@@ -123,7 +123,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-muted/10 min-h-0">
+      <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 bg-muted/10 min-h-0">
         <div className="max-w-[900px] mx-auto">
           {messages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} />

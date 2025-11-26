@@ -70,8 +70,11 @@ export default function Chat() {
   }, [selectedSupplierId, conversations]);
 
   return (
-    <div className="flex flex-col bg-background rounded-2xl min-h-[calc(100vh-80px)]">
-      <div className="flex-1 flex overflow-hidden border border-[#E5E7EB] rounded-2xl">
+    <div className="flex bg-background h-screen overflow-hidden">
+      <div
+        style={{ height: "calc(100% - 100px)" }}
+        className=" flex overflow-hidden"
+      >
         <div className="hidden lg:block w-80 border-r border-border bg-muted/20">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-lg">Messages</h2>
@@ -122,21 +125,19 @@ export default function Chat() {
           </div>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
-          <ChatPage
-            onNavigate={handleNavigate}
-            conversation={
-              currentConversation
-                ? {
-                    id: currentConversation.id,
-                    supplierName: currentConversation.name,
-                    online: currentConversation.online,
-                    rating: currentConversation.rating,
-                  }
-                : null
-            }
-          />
-        </div>
+        <ChatPage
+          onNavigate={handleNavigate}
+          conversation={
+            currentConversation
+              ? {
+                  id: currentConversation.id,
+                  supplierName: currentConversation.name,
+                  online: currentConversation.online,
+                  rating: currentConversation.rating,
+                }
+              : null
+          }
+        />
       </div>
     </div>
   );

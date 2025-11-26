@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,10 +44,10 @@ export default function SupplierMessagesPage() {
             <>
               <div className="divide-y divide-[#E5E7EB]">
                 {visibleMessages.map((message) => (
-                  <button
+                  <Link
                     key={message.id}
-                    onClick={() => handleNavigate("chat")}
-                    className="w-full text-left p-4 hover:bg-[#F8FAFC] cursor-pointer transition-colors"
+                    href={`/supplier/messages/chat?conversation=${message.id}`}
+                    className="block w-full text-left p-4 hover:bg-[#F8FAFC] cursor-pointer transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -69,7 +70,7 @@ export default function SupplierMessagesPage() {
                         <p className="text-sm text-[#475569] font-['Roboto'] line-clamp-1">{message.lastMessage}</p>
                       </div>
                     </div>
-                  </button>
+                  </Link>
                 ))}
               </div>
 

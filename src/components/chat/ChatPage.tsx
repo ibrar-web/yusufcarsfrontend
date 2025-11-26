@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Header } from "@/components/header";
 import { BackButton } from "@/components/back-button";
 import { ChatBubble, TypingIndicator } from "@/components/chat-bubble";
 import { Button } from "@/components/ui/button";
@@ -27,10 +26,9 @@ interface ChatPageProps {
   onBack?: () => void;
   supplierId: string | null;
   quoteId?: string | null;
-  onSignupClick?: () => void;
 }
 
-export function ChatPage({ onNavigate, onBack, supplierId, onSignupClick }: ChatPageProps) {
+export function ChatPage({ onNavigate, onBack, supplierId }: ChatPageProps) {
   const [message, setMessage] = useState("");
   const [showTyping, setShowTyping] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
@@ -152,9 +150,7 @@ export function ChatPage({ onNavigate, onBack, supplierId, onSignupClick }: Chat
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <Header onNavigate={onNavigate} currentPage="chat" sticky={false} onSignupClick={onSignupClick} />
-
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Breadcrumb / Back Button Section */}
       <div className="bg-white border-b border-[#E5E7EB] py-3 px-6">
         <div className="max-w-[1400px] mx-auto flex items-center gap-2">

@@ -94,7 +94,7 @@ export default function Chat() {
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-lg">Messages</h2>
           </div>
-          <div className="overflow-y-auto h-full">
+          <div className="h-full overflow-y-auto">
             {conversations.map((conv) => {
               const avatarLabel = conv.avatar ?? conv.name.charAt(0);
               return (

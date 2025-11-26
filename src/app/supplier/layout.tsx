@@ -128,9 +128,9 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
         <main
           className={`flex-1 ${
             sidebarCollapsed ? "ml-20" : "ml-72"
-          } transition-all duration-300 bg-[#FFFFFF]`}
+          } transition-all duration-300 bg-[#FFFFFF] `}
         >
-          <div className="p-6">{children}</div>
+          <div className="p-6 overflow-hidden">{children}</div>
         </main>
       </div>
     </div>

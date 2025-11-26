@@ -2,13 +2,10 @@
 
 import { useMemo } from "react";
 import { ChatPage } from "@/components/chat/ChatPage";
-import { Header } from "@/components/header";
-import { BackButton } from "@/components/back-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
-import { ChevronRight } from "lucide-react";
 import { supplierMessages } from "@/page-components/supplier-dashboard/data";
 
 type UserConversation = {
@@ -45,8 +42,7 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, handleBack, openSignupDialog, selectedSupplierId } =
-    useAppState();
+  const { handleNavigate, selectedSupplierId } = useAppState();
 
   const conversations = useMemo<UserConversation[]>(
     () =>
@@ -70,16 +66,13 @@ export default function Chat() {
   }, [selectedSupplierId, conversations]);
 
   return (
-    <div className="flex bg-background h-screen overflow-hidden">
-      <div
-        style={{ height: "calc(100% - 100px)" }}
-        className=" flex overflow-hidden"
-      >
-        <div className="hidden lg:block w-80 border-r border-border bg-muted/20">
+    <div className="flex bg-background min-h-0 overflow-hidden" style={{height:'calc(100vh - 120px)'}}>
+      <div className="flex-1 flex overflow-hidden">
+        <div className="hidden lg:flex w-80 border-r border-border bg-muted/20 flex-col min-h-0">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-lg">Messages</h2>
           </div>
-          <div className="overflow-y-auto h-full">
+          <div className="flex-1 overflow-y-auto">
             {conversations.map((conv) => {
               const avatarLabel = conv.avatar ?? conv.name.charAt(0);
               return (
@@ -125,19 +118,21 @@ export default function Chat() {
           </div>
         </div>
 
-        <ChatPage
-          onNavigate={handleNavigate}
-          conversation={
-            currentConversation
-              ? {
-                  id: currentConversation.id,
-                  supplierName: currentConversation.name,
-                  online: currentConversation.online,
-                  rating: currentConversation.rating,
-                }
-              : null
-          }
-        />
+        <div className="flex-1 flex overflow-hidden min-h-0">
+          <ChatPage
+            onNavigate={handleNavigate}
+            conversation={
+              currentConversation
+                ? {
+                    id: currentConversation.id,
+                    supplierName: currentConversation.name,
+                    online: currentConversation.online,
+                    rating: currentConversation.rating,
+                  }
+                : null
+            }
+          />
+        </div>
       </div>
     </div>
   );

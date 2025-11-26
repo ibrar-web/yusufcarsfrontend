@@ -35,6 +35,13 @@ const FALLBACK_CONVERSATION: ConversationSummary = {
   rating: 0,
 };
 
+const getInitials = (value?: string) => {
+  if (!value) return "S";
+  const parts = value.trim().split(/\s+/);
+  const initials = parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("");
+  return initials || "S";
+};
+
 export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
   const [message, setMessage] = useState("");
   const [showTyping, setShowTyping] = useState(false);
@@ -42,6 +49,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
   const [showRatingDialog, setShowRatingDialog] = useState(false);
 
   const currentConversation = conversation ?? FALLBACK_CONVERSATION;
+  const displayName = currentConversation.supplierName?.trim() || "Supplier";
 
   const messages = [
     {
@@ -128,7 +136,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
           <div className="relative">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-primary text-white text-lg">
-                {currentConversation.supplierName[0]}
+                {getInitials(displayName)}
               </AvatarFallback>
             </Avatar>
             {currentConversation.online && (
@@ -136,7 +144,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
             )}
           </div>
           <div>
-            <h2 className="font-semibold">{currentConversation.supplierName}</h2>
+            <h2 className="font-semibold">{displayName}</h2>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Star className="h-3 w-3 fill-warning text-warning" />
               <span>{currentConversation.rating}</span>
@@ -196,10 +204,10 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
         open={showContactDialog}
         onOpenChange={setShowContactDialog}
         supplier={{
-          name: currentConversation.supplierName,
-          logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentConversation.supplierName)}&background=F02801&color=fff&size=128`,
+          name: displayName,
+          logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=F02801&color=fff&size=128`,
           phone: "+44 20 7946 0958",
-          email: `contact@${currentConversation.supplierName
+          email: `contact@${displayName
             .toLowerCase()
             .replace(/\s+/g, "")}.co.uk`,
           location: "Birmingham, West Midlands",
@@ -210,7 +218,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
       <RatingDialog
         open={showRatingDialog}
         onOpenChange={setShowRatingDialog}
-        supplierName={currentConversation.supplierName}
+        supplierName={displayName}
         onSubmit={(rating, feedback) => {
           console.log("Rating submitted:", rating, feedback);
         }}

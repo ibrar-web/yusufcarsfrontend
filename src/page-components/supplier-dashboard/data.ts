@@ -452,6 +452,117 @@ export const supplierMessages: SupplierMessage[] = [
   },
 ];
 
+export type ChatMessageRecord = {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export const userChatMessages: ChatMessageRecord[] = [
+  {
+    id: "MSG-USER-001",
+    chatId: "CHAT-001",
+    senderId: "USER-001",
+    content: "Hi! Thanks for sending the quote so quickly.",
+    isRead: true,
+    createdAt: "2025-11-25T10:00:00.000Z",
+  },
+  {
+    id: "MSG-USER-002",
+    chatId: "CHAT-001",
+    senderId: "SUPPLIER-001",
+    content: "You're welcome! Would you like us to fit the part as well?",
+    isRead: true,
+    createdAt: "2025-11-25T10:05:00.000Z",
+  },
+  {
+    id: "MSG-USER-003",
+    chatId: "CHAT-002",
+    senderId: "SUPPLIER-003",
+    content: "We have the radiator in stock and can deliver tomorrow.",
+    isRead: false,
+    createdAt: "2025-11-24T15:45:00.000Z",
+  },
+  {
+    id: "MSG-USER-004",
+    chatId: "CHAT-002",
+    senderId: "USER-003",
+    content: "Great, please confirm the delivery slot.",
+    isRead: false,
+    createdAt: "2025-11-24T15:50:00.000Z",
+  },
+  {
+    id: "MSG-USER-005",
+    chatId: "CHAT-003",
+    senderId: "USER-004",
+    content: "Can you share more details about warranty coverage?",
+    isRead: true,
+    createdAt: "2025-11-23T09:20:00.000Z",
+  },
+  {
+    id: "MSG-USER-006",
+    chatId: "CHAT-003",
+    senderId: "SUPPLIER-004",
+    content: "Absolutely, it includes 12 months parts and labour.",
+    isRead: true,
+    createdAt: "2025-11-23T09:22:00.000Z",
+  },
+];
+
+export const supplierChatMessages: ChatMessageRecord[] = [
+  {
+    id: "MSG-SUP-001",
+    chatId: "CHAT-010",
+    senderId: "SUPPLIER-201",
+    content: "Thanks for accepting the quote. When would you like to collect?",
+    isRead: false,
+    createdAt: "2025-11-25T11:05:00.000Z",
+  },
+  {
+    id: "MSG-SUP-002",
+    chatId: "CHAT-010",
+    senderId: "USER-210",
+    content: "Tomorrow morning works best for me.",
+    isRead: false,
+    createdAt: "2025-11-25T11:07:00.000Z",
+  },
+  {
+    id: "MSG-SUP-003",
+    chatId: "CHAT-012",
+    senderId: "SUPPLIER-205",
+    content: "Just a reminder that the alternator is ready for pickup.",
+    isRead: true,
+    createdAt: "2025-11-24T08:40:00.000Z",
+  },
+  {
+    id: "MSG-SUP-004",
+    chatId: "CHAT-014",
+    senderId: "USER-230",
+    content: "Appreciate the update. See you later today.",
+    isRead: true,
+    createdAt: "2025-11-24T16:10:00.000Z",
+  },
+  {
+    id: "MSG-SUP-005",
+    chatId: "CHAT-016",
+    senderId: "SUPPLIER-220",
+    content: "Would you like us to install the serpentine belt after delivery?",
+    isRead: false,
+    createdAt: "2025-11-23T13:55:00.000Z",
+  },
+  {
+    id: "MSG-SUP-006",
+    chatId: "CHAT-016",
+    senderId: "USER-245",
+    content: "Yes please, installation would be great.",
+    isRead: false,
+    createdAt: "2025-11-23T14:00:00.000Z",
+  },
+];
+
 export const quotePerformanceData: QuotePerformancePoint[] = [
   { month: "Jan", sent: 35, accepted: 22, revenue: 3420 },
   { month: "Feb", sent: 42, accepted: 28, revenue: 4150 },

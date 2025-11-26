@@ -42,6 +42,8 @@ export function initQuoteRequestSocket(
   }
 
   quoteRequestSocket = socket;
+  // eslint-disable-next-line no-console
+  console.info("[quoteRequestSocket] connected");
   removeRequestListeners();
 
   if (options.onRequestCreated) {
@@ -65,6 +67,8 @@ export function teardownQuoteRequestSocket() {
   removeRequestListeners();
   quoteRequestSocket = null;
   disconnectSocket();
+  // eslint-disable-next-line no-console
+  console.info("[quoteRequestSocket] disconnected");
 }
 
 export function getQuoteRequestSocket() {

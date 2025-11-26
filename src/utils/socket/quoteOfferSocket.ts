@@ -40,6 +40,8 @@ export function initQuoteOfferSocket(options: InitQuoteOfferSocketOptions) {
   }
 
   quoteOfferSocket = socket;
+  // eslint-disable-next-line no-console
+  console.info("[quoteOfferSocket] connected");
   removeOfferListeners();
 
   if (options.onOfferReceived) {
@@ -63,6 +65,8 @@ export function teardownQuoteOfferSocket() {
   removeOfferListeners();
   quoteOfferSocket = null;
   disconnectSocket();
+  // eslint-disable-next-line no-console
+  console.info("[quoteOfferSocket] disconnected");
 }
 
 export function getQuoteOfferSocket() {

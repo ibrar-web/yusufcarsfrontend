@@ -28,6 +28,7 @@ const removeChatListeners = () => {
 };
 
 export function initChatSocket(options: InitChatSocketOptions) {
+  console.info("chat socket connection setup");
   if (!options.isAuthenticated || !options.connectOptions?.authToken) {
     teardownChatSocket();
     return null;
@@ -39,14 +40,22 @@ export function initChatSocket(options: InitChatSocketOptions) {
   }
 
   chatSocket = socket;
+  // eslint-disable-next-line no-console
+  console.info("[chatSocket] connected");
   removeChatListeners();
 
   if (options.onMessageReceived) {
-    chatSocket.on(CHAT_SOCKET_EVENTS.MESSAGE_RECEIVED, options.onMessageReceived);
+    chatSocket.on(
+      CHAT_SOCKET_EVENTS.MESSAGE_RECEIVED,
+      options.onMessageReceived
+    );
   }
 
   if (options.onMessageDelivered) {
-    chatSocket.on(CHAT_SOCKET_EVENTS.MESSAGE_DELIVERED, options.onMessageDelivered);
+    chatSocket.on(
+      CHAT_SOCKET_EVENTS.MESSAGE_DELIVERED,
+      options.onMessageDelivered
+    );
   }
 
   return chatSocket;
@@ -56,6 +65,8 @@ export function teardownChatSocket() {
   removeChatListeners();
   chatSocket = null;
   disconnectSocket();
+  // eslint-disable-next-line no-console
+  console.info("[chatSocket] disconnected");
 }
 
 export function getChatSocket() {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChatBubble, TypingIndicator } from "@/components/chat-bubble";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,69 +51,26 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
   const currentConversation = conversation ?? FALLBACK_CONVERSATION;
   const displayName = currentConversation.supplierName?.trim() || "Supplier";
 
-  const messages = [
-    {
-      id: "1",
-      content:
-        "Hello! I've received your quote request for front brake pads. I have the part in stock.",
-      timestamp: new Date(2025, 8, 30, 10, 0),
-      sent: false,
-    },
-    {
-      id: "2",
-      content: "Great! How much would it cost including fitting?",
-      timestamp: new Date(2025, 8, 30, 10, 5),
-      sent: true,
-      read: true,
-    },
-    {
-      id: "3",
-      content:
-        "The brake pads are £125.99 and fitting would be an additional £45. Total £170.99. I can do it tomorrow if that works for you?",
-      timestamp: new Date(2025, 8, 30, 10, 8),
-      sent: false,
-    },
-    {
-      id: "4",
-      content: "That sounds good. What time tomorrow?",
-      timestamp: new Date(2025, 8, 30, 10, 12),
-      sent: true,
-      read: true,
-    },
-    {
-      id: "5",
-      content: "I have availability at 9am, 11am, or 2pm. Which works best for you?",
-      timestamp: new Date(2025, 8, 30, 10, 15),
-      sent: false,
-    },
-    {
-      id: "6",
-      content: "11am would be perfect, thanks!",
-      timestamp: new Date(2025, 8, 30, 10, 18),
-      sent: true,
-      read: true,
-    },
-    {
-      id: "7",
-      content:
-        "Excellent! I've booked you in for 11am tomorrow. Here's our address and what to bring:",
-      timestamp: new Date(2025, 8, 30, 10, 20),
-      sent: false,
-      attachments: [
-        {
-          type: "document" as const,
-          name: "booking-confirmation.pdf",
-          url: "#",
-        },
-      ],
-    },
-    {
-      id: "8",
-      content: "The part is ready for collection",
-      timestamp: new Date(2025, 8, 30, 14, 30),
-      sent: false,
-    },
-  ];
+  const messages = useMemo(
+    () =>
+      new Array(100).fill(null).map((_, index) => ({
+        id: `${index + 1}`,
+        content:
+          index % 2 === 0
+            ? "Hello! I've received your quote request for front brake pads. I have the part in stock."
+            : "Great! How much would it cost including fitting?",
+        timestamp: new Date(
+          2025,
+          8,
+          30,
+          10,
+          Math.min(index * 2, 59)
+        ),
+        sent: index % 2 === 1,
+        read: index % 3 === 0,
+      })),
+    []
+  );
 
   const handleSend = () => {
     if (message.trim()) {
@@ -122,7 +79,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border bg-card flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -166,7 +123,7 @@ export function ChatPage({ onNavigate, conversation }: ChatPageProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-muted/10">
+      <div className="flex-1 overflow-y-auto p-6 bg-muted/10 min-h-0">
         <div className="max-w-[900px] mx-auto">
           {messages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} />

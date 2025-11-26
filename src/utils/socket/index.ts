@@ -7,7 +7,7 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 let socket: Socket | null = null;
 
-type ConnectSocketOptions = {
+export type ConnectSocketOptions = {
   role?: UserRole | null;
   authToken?: string;
 };

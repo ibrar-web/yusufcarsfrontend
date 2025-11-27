@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ChatPage } from "@/components/chat/ChatPage";
 import { Header } from "@/components/header";
 import { BackButton } from "@/components/back-button";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
 import { useAppStore } from "@/stores/app-store";
+import { useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { supplierMessages } from "@/page-components/supplier-dashboard/data";
 
@@ -49,6 +50,14 @@ export default function Chat() {
   const { handleNavigate, handleBack, openSignupDialog, selectedSupplierId } =
     useAppState();
   const { setSelectedSupplierId } = useAppStore();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const supplierParam = searchParams.get("supplier");
+    if (supplierParam) {
+      setSelectedSupplierId(supplierParam);
+    }
+  }, [searchParams, setSelectedSupplierId]);
 
   const conversations = useMemo<UserConversation[]>(
     () =>

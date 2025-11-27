@@ -83,7 +83,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   "vehicle-confirmation": "/vehicle-confirmation",
   "parts-selection": "/parts-selection",
   quotes: "/quotes",
-  chat: "/chat",
+  chat: "/user/chat",
   "supplier-profile": "/supplier-profile",
   "supplier-onboarding": "/auth/supplier-onboarding",
   "supplier-dashboard": "/supplier/requests",

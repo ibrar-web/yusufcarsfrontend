@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from "react";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Header } from "@/components/header";
 import { QuoteCard } from "@/components/quote-card";
 import { SupplierDetailsDialog } from "@/components/supplier-details-dialog";
@@ -260,12 +261,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
 };
 
 export default function QuotesPage() {
-  const {
-    handleNavigate,
-    handleStartChat,
-    openSignupDialog,
-    showOrderConfirmation,
-  } = useAppState();
+  const { handleNavigate, openSignupDialog, showOrderConfirmation } = useAppState();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
@@ -551,11 +547,10 @@ export default function QuotesPage() {
                             <TableCell className="font-semibold">Action</TableCell>
                             {selectedQuoteData.map((quote) => (
                               <TableCell key={`action-${quote.id}`} className="text-center">
-                                <Button
-                                  className="w-full bg-primary hover:bg-primary-hover"
-                                  onClick={() => handleStartChat(quote.id, quote.supplierId)}
-                                >
-                                  Chat with Supplier
+                                <Button className="w-full bg-primary hover:bg-primary-hover" asChild>
+                                  <Link href={`/user/chat?supplier=${quote.supplierId}&quote=${quote.id}`}>
+                                    Chat with Supplier
+                                  </Link>
                                 </Button>
                               </TableCell>
                             ))}
@@ -597,9 +592,8 @@ export default function QuotesPage() {
                 });
                 setOrderDialogOpen(true);
               }}
-              onMessage={(supplierId) => handleStartChat(quote.id, supplierId)}
               onViewProfile={(id) => handleNavigate("supplier-profile", id)}
-              selected={selectedQuotes.includes(quote.id)}
+              selected={selectedQuotes.includes(quote.id)} 
               onSelect={handleSelectQuote}
               showCompare
               onSupplierClick={handleSupplierClick}
@@ -626,12 +620,6 @@ export default function QuotesPage() {
             }
           }}
           supplier={selectedSupplierQuote.supplierDetails}
-          onMessageClick={() =>
-            handleStartChat(
-              selectedSupplierQuote.id,
-              selectedSupplierQuote.supplierId,
-            )
-          }
         />
       )}
     </div>

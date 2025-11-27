@@ -32,6 +32,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { QuoteAcceptanceDialog } from "./quote-acceptance-dialog";
 import { OrderPlacedDialog } from "./order/order-placed-dialog";
 import { useState } from "react";
+import Link from "next/link";
 
 interface SupplierDetailsDialogProps {
   open: boolean;
@@ -72,14 +73,12 @@ interface SupplierDetailsDialogProps {
       verified: boolean;
     }>;
   };
-  onMessageClick?: () => void;
 }
 
 export function SupplierDetailsDialog({
   open,
   onOpenChange,
   supplier,
-  onMessageClick,
 }: SupplierDetailsDialogProps) {
   const [showAcceptanceDialog, setShowAcceptanceDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -443,20 +442,20 @@ export function SupplierDetailsDialog({
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
               <div className="flex gap-3">
-                {onMessageClick && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      onMessageClick();
-                      onOpenChange(false);
-                    }}
-                    className="flex-1 h-12 rounded-xl border-2 border-slate-300 hover:border-slate-400 font-['Roboto'] font-medium bg-white text-slate-900 hover:bg-slate-50"
-                    style={{ fontSize: "15px" }}
+                <Button
+                  variant="outline"
+                  className="flex-1 h-12 rounded-xl border-2 border-slate-300 hover:border-slate-400 font-['Roboto'] font-medium bg-white text-slate-900 hover:bg-slate-50"
+                  style={{ fontSize: "15px" }}
+                  asChild
+                >
+                  <Link
+                    href={`/user/chat?supplier=${supplier.id}`}
+                    onClick={() => onOpenChange(false)}
                   >
                     <MessageSquare className="h-5 w-5 mr-2" />
                     Message Supplier
-                  </Button>
-                )}
+                  </Link>
+                </Button>
                 <Button
                   onClick={handleAcceptClick}
                   className="flex-1 h-12 rounded-xl bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30"

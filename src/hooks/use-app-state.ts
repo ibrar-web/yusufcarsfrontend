@@ -98,18 +98,6 @@ export function useAppState() {
     ],
   );
 
-  const handleStartChat = useCallback(
-    (quoteId: string, supplierId: string) => {
-      setSelectedQuoteId(quoteId);
-      setSelectedSupplierId(supplierId);
-      router.push(pageToPath("chat"));
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    },
-    [router, setSelectedQuoteId, setSelectedSupplierId],
-  );
-
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
@@ -155,7 +143,6 @@ export function useAppState() {
   return {
     handleNavigate,
     handleBack,
-    handleStartChat,
     openSignupDialog: () => setSignupDialogOpen(true),
     openProfileDialog: () => setProfileDialogOpen(true),
     openNotificationDialog: () => setNotificationDialogOpen(true),

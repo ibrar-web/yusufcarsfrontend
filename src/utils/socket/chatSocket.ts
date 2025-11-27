@@ -29,7 +29,7 @@ const removeChatListeners = () => {
 
 export function initChatSocket(options: InitChatSocketOptions) {
   console.info("chat socket connection setup");
-  if (!options.isAuthenticated || !options.connectOptions?.authToken) {
+  if (!options.isAuthenticated) {
     teardownChatSocket();
     return null;
   }
@@ -45,6 +45,7 @@ export function initChatSocket(options: InitChatSocketOptions) {
   removeChatListeners();
 
   if (options.onMessageReceived) {
+    console.log("chat message received");
     chatSocket.on(
       CHAT_SOCKET_EVENTS.MESSAGE_RECEIVED,
       options.onMessageReceived

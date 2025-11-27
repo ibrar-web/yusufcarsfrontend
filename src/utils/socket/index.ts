@@ -38,6 +38,7 @@ export function connectSocket(options: ConnectSocketOptions = {}) {
   socket = io(SOCKET_URL, {
     transports: ["websocket"],
     autoConnect: true,
+    withCredentials: true,
     query: {
       role: options.role ?? undefined,
     },

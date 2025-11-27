@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { getSessionFromCookie } from "@/actions/session";
 import { SessionHydrator } from "@/components/session-hydrator";
+import { SocketManager } from "@/components/socket-manager";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default async function RootLayout({
     <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <SessionHydrator session={session} />
+        <SocketManager />
         {children}
         <Toaster />
       </body>

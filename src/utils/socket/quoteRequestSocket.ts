@@ -31,7 +31,7 @@ const removeRequestListeners = () => {
 export function initQuoteRequestSocket(
   options: InitQuoteRequestSocketOptions,
 ) {
-  if (!options.isAuthenticated || !options.connectOptions?.authToken) {
+  if (!options.isAuthenticated) {
     teardownQuoteRequestSocket();
     return null;
   }

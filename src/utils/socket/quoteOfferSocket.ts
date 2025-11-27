@@ -29,7 +29,7 @@ const removeOfferListeners = () => {
 };
 
 export function initQuoteOfferSocket(options: InitQuoteOfferSocketOptions) {
-  if (!options.isAuthenticated || !options.connectOptions?.authToken) {
+  if (!options.isAuthenticated) {
     teardownQuoteOfferSocket();
     return null;
   }

@@ -114,6 +114,8 @@ interface AppStore {
   setIsAuthenticated: (value: boolean) => void;
   userRole: UserRole | null;
   setUserRole: (role: UserRole | null) => void;
+  userId: string | null;
+  setUserId: (id: string | null) => void;
   signupDialogOpen: boolean;
   setSignupDialogOpen: (open: boolean) => void;
   profileDialogOpen: boolean;
@@ -142,6 +144,8 @@ export const useAppStore = create<AppStore>()((set) => ({
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   userRole: null,
   setUserRole: (userRole) => set({ userRole }),
+  userId: null,
+  setUserId: (userId) => set({ userId }),
   signupDialogOpen: false,
   setSignupDialogOpen: (signupDialogOpen) => set({ signupDialogOpen }),
   profileDialogOpen: false,

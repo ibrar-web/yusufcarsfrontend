@@ -127,8 +127,8 @@ export default function Chat() {
           .filter((conv): conv is SupplierConversation => Boolean(conv));
         if (!ignore) {
           setConversations(normalized);
-          setSelectedConversationId((prev) =>
-            prev ?? normalized[0]?.id ?? null
+          setSelectedConversationId(
+            (prev) => prev ?? normalized[0]?.id ?? null
           );
         }
       } catch (err) {
@@ -160,9 +160,12 @@ export default function Chat() {
     const targetId = selectedConversationId ?? conversations[0]?.id;
     return conversations.find((c) => c.id === targetId) ?? conversations[0];
   }, [selectedConversationId, conversations]);
-
+  console.log("currentConversation", currentConversation);
   return (
-    <div className="flex bg-background min-h-0 overflow-hidden" style={{ height: "calc(100vh - 120px)" }}>
+    <div
+      className="flex bg-background min-h-0 overflow-hidden"
+      style={{ height: "calc(100vh - 120px)" }}
+    >
       <div className="flex-1 flex overflow-hidden">
         <div className="hidden lg:flex w-80 border-r border-border bg-muted/20 flex-col min-h-0">
           <div className="p-4 border-b border-border">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatBubble, TypingIndicator } from "@/components/chat-bubble";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,12 +149,18 @@ const buildParticipantProfile = (
   };
 };
 
+const sortMessagesByDate = (list: ApiMessage[]): ApiMessage[] =>
+  [...list].sort((a, b) => {
+    const aTime = new Date(a.createdAt ?? 0).getTime();
+    const bTime = new Date(b.createdAt ?? 0).getTime();
+    return aTime - bTime;
+  });
+
 export function ChatPage({
   onNavigate,
   supplierId,
   userId,
   role,
-  chatId,
 }: ChatPageProps) {
   const normalizedRole: "user" | "supplier" =
     role === "supplier" ? "supplier" : "user";
@@ -172,13 +178,11 @@ export function ChatPage({
   const isSupplierPerspective = normalizedRole === "supplier";
   const normalizedSupplierId = supplierId?.trim() || undefined;
   const normalizedUserId = userId?.trim() || undefined;
-  const activeChatId = chatId?.trim() || undefined;
   const counterpartId = isSupplierPerspective
     ? normalizedUserId
     : normalizedSupplierId;
   const hasCounterpart = Boolean(counterpartId);
-  const hasChatIdentifier = Boolean(activeChatId);
-  const lacksSendContext = !counterpartId || !activeChatId;
+  const lacksSendContext = !counterpartId;
   const displayName =
     participant.name?.trim() ??
     FALLBACK_PARTICIPANT[normalizedRole].name ??
@@ -197,9 +201,10 @@ export function ChatPage({
   useEffect(() => {
     setParticipant(FALLBACK_PARTICIPANT[normalizedRole]);
   }, [normalizedRole, counterpartId]);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    if (!hasCounterpart && !hasChatIdentifier) {
+    if (!hasCounterpart) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -213,18 +218,18 @@ export function ChatPage({
         ? apiRoutes.supplier.chat.chatmessage
         : apiRoutes.user.chat.chatmessage;
       const queryKey = isSupplierPerspective ? "userId" : "supplierId";
-      const identifier = activeChatId
-        ? `chatId=${encodeURIComponent(activeChatId)}`
-        : counterpartId
+      const identifier = counterpartId
         ? `${queryKey}=${encodeURIComponent(counterpartId)}`
         : "";
       const endpoint = `${ensureEndpoint(route)}${
         identifier ? `?${identifier}` : ""
       }`;
+      console.log(endpoint);
       const response = await apiGet<ChatMessagesResponse>(endpoint);
       const payload = response?.data;
       const messageList = payload?.messages;
-      setMessages(Array.isArray(messageList) ? messageList : []);
+      const normalizedList = Array.isArray(messageList) ? messageList : [];
+      setMessages(sortMessagesByDate(normalizedList));
       const participantPayload = isSupplierPerspective
         ? payload?.user
         : payload?.supplier;
@@ -244,14 +249,7 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [
-    activeChatId,
-    counterpartId,
-    hasChatIdentifier,
-    hasCounterpart,
-    isSupplierPerspective,
-    normalizedRole,
-  ]);
+  }, [counterpartId, hasCounterpart, isSupplierPerspective, normalizedRole]);
 
   useEffect(() => {
     fetchMessages();
@@ -259,7 +257,7 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!counterpartId || !activeChatId) {
+    if (!counterpartId) {
       setMessage("");
       return;
     }
@@ -271,7 +269,6 @@ export function ChatPage({
         : apiRoutes.user.chat.chatmessage;
       const payload: Record<string, string> = {
         message: trimmed,
-        chatId: activeChatId,
       };
       await apiPost(ensureEndpoint(route), payload);
       const optimisticMessage: ApiMessage = {
@@ -286,7 +283,7 @@ export function ChatPage({
         createdAt: new Date().toISOString(),
         isRead: false,
       };
-      setMessages((prev) => [...prev, optimisticMessage]);
+      setMessages((prev) => sortMessagesByDate([...prev, optimisticMessage]));
       setMessage("");
     } catch (error) {
       toast.error(
@@ -298,8 +295,17 @@ export function ChatPage({
   };
 
   const displayedMessages = normalizedMessages;
-  const isSendDisabled =
-    !message.trim() || lacksSendContext || sendingMessage;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [displayedMessages.length]);
+
+  const isSendDisabled = !message.trim() || lacksSendContext || sendingMessage;
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border bg-card flex items-center justify-between">
@@ -349,7 +355,10 @@ export function ChatPage({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 bg-muted/10 min-h-0">
+      <div
+        className="flex-1 overflow-y-auto overscroll-y-contain p-6 bg-muted/10 min-h-0"
+        ref={scrollContainerRef}
+      >
         <div className="max-w-[900px] mx-auto">
           {loadingMessages && (
             <p className="text-sm text-muted-foreground mb-3">

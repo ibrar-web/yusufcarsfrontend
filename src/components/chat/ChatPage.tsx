@@ -45,25 +45,26 @@ type ApiMessage = {
 };
 
 type ParticipantApiPayload = {
+  id?: string;
   businessName?: string | null;
   tradingAs?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   fullName?: string | null;
+  name?: string | null;
   rating?: number | null;
   averageRating?: number | null;
   online?: boolean | null;
 };
 
 type ChatMessagesResponse = {
-  data?: unknown;
-  chat?: {
+  statusCode?: number;
+  message?: string;
+  data?: {
     supplier?: ParticipantApiPayload | null;
-    customer?: ParticipantApiPayload | null;
+    user?: ParticipantApiPayload | null;
+    messages?: ApiMessage[];
   };
-  supplier?: ParticipantApiPayload | null;
-  customer?: ParticipantApiPayload | null;
-  messages?: ApiMessage[];
 };
 
 type RenderMessage = {
@@ -106,97 +107,46 @@ const toNonEmptyString = (value?: string | null) => {
   return trimmed.length ? trimmed : undefined;
 };
 
-const buildParticipantName = (payload?: ParticipantApiPayload | null) => {
-  if (!payload) return undefined;
-  const resolved =
+const buildParticipantProfile = (
+  payload: ParticipantApiPayload | null | undefined,
+  current: ParticipantProfile,
+  fallback: ParticipantProfile
+): ParticipantProfile => {
+  if (!payload) {
+    return fallback;
+  }
+
+  const resolvedName =
     toNonEmptyString(payload.businessName) ??
     toNonEmptyString(payload.tradingAs) ??
-    toNonEmptyString(payload.fullName);
-  if (resolved) {
-    return resolved;
-  }
-  const first = toNonEmptyString(payload.firstName);
-  const last = toNonEmptyString(payload.lastName);
-  const composed = [first, last].filter(Boolean).join(" ").trim();
-  return composed || first;
-};
+    toNonEmptyString(payload.fullName) ??
+    toNonEmptyString(payload.name) ??
+    (() => {
+      const first = toNonEmptyString(payload.firstName);
+      const last = toNonEmptyString(payload.lastName);
+      const composed = [first, last].filter(Boolean).join(" ").trim();
+      return composed || first;
+    })() ??
+    current.name ??
+    fallback.name;
 
-const extractParticipantDetails = (
-  payload: unknown,
-  perspective: "user" | "supplier"
-): Partial<ParticipantProfile> => {
-  if (!payload || typeof payload !== "object") {
-    return {};
-  }
+  const rating =
+    typeof payload.rating === "number"
+      ? payload.rating
+      : typeof payload.averageRating === "number"
+      ? payload.averageRating
+      : current.rating ?? fallback.rating;
 
-  const container = payload as {
-    chat?: {
-      supplier?: ParticipantApiPayload | null;
-      customer?: ParticipantApiPayload | null;
-    };
-    supplier?: ParticipantApiPayload | null;
-    customer?: ParticipantApiPayload | null;
-    data?: unknown;
+  const onlineStatus =
+    typeof payload.online === "boolean"
+      ? payload.online
+      : current.online ?? fallback.online;
+
+  return {
+    name: resolvedName,
+    online: onlineStatus,
+    rating,
   };
-
-  const chatTarget =
-    perspective === "user"
-      ? container.chat?.supplier
-      : container.chat?.customer;
-  const directTarget =
-    perspective === "user" ? container.supplier : container.customer;
-  const resolvedTarget = chatTarget ?? directTarget;
-
-  if (resolvedTarget) {
-    const rating =
-      typeof resolvedTarget.rating === "number"
-        ? resolvedTarget.rating
-        : typeof resolvedTarget.averageRating === "number"
-        ? resolvedTarget.averageRating
-        : undefined;
-
-    return {
-      name: buildParticipantName(resolvedTarget),
-      online:
-        typeof resolvedTarget.online === "boolean"
-          ? resolvedTarget.online
-          : undefined,
-      rating,
-    };
-  }
-
-  if ("data" in container) {
-    return extractParticipantDetails(container.data, perspective);
-  }
-
-  return {};
-};
-
-const coerceMessageArray = (payload: unknown): ApiMessage[] => {
-  if (!payload) return [];
-  if (Array.isArray(payload)) {
-    return payload.filter(
-      (item): item is ApiMessage => typeof item === "object" && item !== null
-    );
-  }
-  if (typeof payload === "object") {
-    const container = payload as { data?: unknown; messages?: unknown };
-    if (Array.isArray(container.data)) {
-      return coerceMessageArray(container.data);
-    }
-    if (container.data) {
-      const nested = coerceMessageArray(container.data);
-      if (nested.length) return nested;
-    }
-    if (Array.isArray(container.messages)) {
-      return coerceMessageArray(container.messages);
-    }
-    if (container.messages) {
-      const nestedMessages = coerceMessageArray(container.messages);
-      if (nestedMessages.length) return nestedMessages;
-    }
-  }
-  return [];
 };
 
 export function ChatPage({
@@ -265,22 +215,20 @@ export function ChatPage({
         route
       )}?${queryKey}=${encodeURIComponent(counterpartId)}`;
       const response = await apiGet<ChatMessagesResponse>(endpoint);
-      const rawMessages = coerceMessageArray(response);
-      setMessages(rawMessages);
-      const profileUpdate = extractParticipantDetails(
-        response,
-        normalizedRole
-      );
-      if (
-        profileUpdate.name ||
-        typeof profileUpdate.online === "boolean" ||
-        typeof profileUpdate.rating === "number"
-      ) {
-        setParticipant((prev) => ({
-          ...prev,
-          ...profileUpdate,
-          name: profileUpdate.name ?? prev.name,
-        }));
+      const payload = response?.data;
+      const messageList = payload?.messages;
+      setMessages(Array.isArray(messageList) ? messageList : []);
+      const participantPayload = isSupplierPerspective
+        ? payload?.user
+        : payload?.supplier;
+      if (participantPayload) {
+        setParticipant((prev) =>
+          buildParticipantProfile(
+            participantPayload,
+            prev,
+            FALLBACK_PARTICIPANT[normalizedRole]
+          )
+        );
       }
     } catch (error) {
       setMessageError(
@@ -314,9 +262,6 @@ export function ChatPage({
       payload[primaryKey] = counterpartId;
       if (isSupplierPerspective && normalizedSupplierId) {
         payload.supplierId = normalizedSupplierId;
-      }
-      if (!isSupplierPerspective && normalizedUserId) {
-        payload.userId = normalizedUserId;
       }
       await apiPost(ensureEndpoint(route), payload);
       const optimisticMessage: ApiMessage = {

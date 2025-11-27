@@ -9,19 +9,17 @@ type Props = {
 };
 
 export function SessionHydrator({ session }: Props) {
-  const { setIsAuthenticated, setUserRole, setUserId } = useAppStore();
+  const { setIsAuthenticated, setUserRole } = useAppStore();
 
   useEffect(() => {
     if (session.isAuthenticated) {
       setIsAuthenticated(true);
       setUserRole(session.role ?? null);
-      setUserId(session.userId ?? null);
     } else {
       setIsAuthenticated(false);
       setUserRole(null);
-      setUserId(null);
     }
-  }, [session, setIsAuthenticated, setUserRole, setUserId]);
+  }, [session, setIsAuthenticated, setUserRole]);
 
   return null;
 }

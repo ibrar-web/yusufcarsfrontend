@@ -43,7 +43,7 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, selectedSupplierId, userId } = useAppState();
+  const { handleNavigate, selectedSupplierId } = useAppState();
   const { setSelectedSupplierId } = useAppStore();
 
   const conversations = useMemo<UserConversation[]>(
@@ -123,7 +123,6 @@ export default function Chat() {
         <div className="flex-1 flex overflow-hidden min-h-0">
           <ChatPage
             onNavigate={handleNavigate}
-            supplierId={userId ?? undefined}
             userId={currentConversation?.id}
             role="supplier"
           />

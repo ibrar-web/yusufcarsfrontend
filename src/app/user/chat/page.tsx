@@ -75,14 +75,7 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const {
-    handleNavigate,
-    handleBack,
-    openSignupDialog,
-    selectedSupplierId,
-    userRole,
-    userId,
-  } = useAppState();
+  const { handleNavigate, handleBack, selectedSupplierId } = useAppState();
   const { setSelectedSupplierId } = useAppStore();
   const searchParams = useSearchParams();
   const supplierParam = searchParams.get("supplier");
@@ -259,8 +252,7 @@ export default function Chat() {
           onNavigate={handleNavigate}
           enableChatApi
           supplierId={chatSupplierId}
-          userId={userId ?? undefined}
-          role={userRole ?? "user"}
+          role="user"
         />
       </div>
     </div>

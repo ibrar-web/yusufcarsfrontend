@@ -112,6 +112,12 @@ export function SocketManager() {
     initChatSocket({
       isAuthenticated,
       connectOptions,
+      onMessageReceived: (payload) => {
+        console.info("[chat] message received", payload);
+      },
+      onMessageDelivered: (payload) => {
+        console.info("[chat] message delivered", payload);
+      },
     });
 
     return () => {

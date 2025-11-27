@@ -19,6 +19,9 @@ export type InitChatSocketOptions = {
 };
 
 let chatSocket: Socket | null = null;
+const CHAT_NAMESPACE =
+  process.env.NEXT_PUBLIC_CHAT_SOCKET_NAMESPACE ?? "/chat";
+
 const removeChatListeners = () => {
   if (!chatSocket) {
     return;
@@ -34,7 +37,10 @@ export function initChatSocket(options: InitChatSocketOptions) {
     return null;
   }
 
-  const socket = connectSocket(options.connectOptions);
+  const socket = connectSocket({
+    ...options.connectOptions,
+    namespace: CHAT_NAMESPACE,
+  });
   if (!socket) {
     return null;
   }
@@ -65,7 +71,7 @@ export function initChatSocket(options: InitChatSocketOptions) {
 export function teardownChatSocket() {
   removeChatListeners();
   chatSocket = null;
-  disconnectSocket();
+  disconnectSocket(CHAT_NAMESPACE);
   // eslint-disable-next-line no-console
   console.info("[chatSocket] disconnected");
 }

@@ -19,6 +19,8 @@ export type InitQuoteOfferSocketOptions = {
 };
 
 let quoteOfferSocket: Socket | null = null;
+const QUOTE_OFFER_NAMESPACE =
+  process.env.NEXT_PUBLIC_QUOTE_OFFER_SOCKET_NAMESPACE ?? "/quote-offers";
 
 const removeOfferListeners = () => {
   if (!quoteOfferSocket) {
@@ -34,7 +36,10 @@ export function initQuoteOfferSocket(options: InitQuoteOfferSocketOptions) {
     return null;
   }
 
-  const socket = connectSocket(options.connectOptions);
+  const socket = connectSocket({
+    ...options.connectOptions,
+    namespace: QUOTE_OFFER_NAMESPACE,
+  });
   if (!socket) {
     return null;
   }
@@ -64,7 +69,7 @@ export function initQuoteOfferSocket(options: InitQuoteOfferSocketOptions) {
 export function teardownQuoteOfferSocket() {
   removeOfferListeners();
   quoteOfferSocket = null;
-  disconnectSocket();
+  disconnectSocket(QUOTE_OFFER_NAMESPACE);
   // eslint-disable-next-line no-console
   console.info("[quoteOfferSocket] disconnected");
 }

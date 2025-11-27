@@ -19,6 +19,8 @@ export type InitQuoteRequestSocketOptions = {
 };
 
 let quoteRequestSocket: Socket | null = null;
+const QUOTE_REQUEST_NAMESPACE =
+  process.env.NEXT_PUBLIC_QUOTE_REQUEST_SOCKET_NAMESPACE ?? "/quote-requests";
 
 const removeRequestListeners = () => {
   if (!quoteRequestSocket) {
@@ -36,7 +38,10 @@ export function initQuoteRequestSocket(
     return null;
   }
 
-  const socket = connectSocket(options.connectOptions);
+  const socket = connectSocket({
+    ...options.connectOptions,
+    namespace: QUOTE_REQUEST_NAMESPACE,
+  });
   if (!socket) {
     return null;
   }
@@ -66,7 +71,7 @@ export function initQuoteRequestSocket(
 export function teardownQuoteRequestSocket() {
   removeRequestListeners();
   quoteRequestSocket = null;
-  disconnectSocket();
+  disconnectSocket(QUOTE_REQUEST_NAMESPACE);
   // eslint-disable-next-line no-console
   console.info("[quoteRequestSocket] disconnected");
 }

@@ -16,10 +16,6 @@ import {
 export function useAppState() {
   const router = useRouter();
   const {
-    selectedSupplierId,
-    setSelectedSupplierId,
-    selectedQuoteId,
-    setSelectedQuoteId,
     setSignupDialogOpen,
     setProfileDialogOpen,
     setNotificationDialogOpen,
@@ -57,12 +53,6 @@ export function useAppState() {
         targetPage = "vehicle-confirmation";
       }
 
-      if (id) {
-        setSelectedSupplierId(id);
-      } else {
-        setSelectedSupplierId(null);
-      }
-
       if (vehicleInfo !== undefined) {
         setVehicleData(vehicleInfo);
       }
@@ -83,14 +73,18 @@ export function useAppState() {
         setQuoteNotifications(quoteData);
       }
 
-      router.push(pageToPath(targetPage));
+      let destination = pageToPath(targetPage);
+      if (id) {
+        const separator = destination.includes("?") ? "&" : "?";
+        destination = `${destination}${separator}supplier=${encodeURIComponent(id)}`;
+      }
+      router.push(destination);
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
     [
       router,
-      setSelectedSupplierId,
       setVehicleData,
       setSelectedPartData,
       setSelectedCategory,
@@ -117,8 +111,6 @@ export function useAppState() {
   const handleSignOut = useCallback(() => {
     setIsAuthenticated(false);
     setUserRole(null);
-    setSelectedSupplierId(null);
-    setSelectedQuoteId(null);
     setConfirmedOrderDetails(null);
     router.push("/");
     if (typeof window !== "undefined") {
@@ -127,8 +119,6 @@ export function useAppState() {
   }, [
     router,
     setIsAuthenticated,
-    setSelectedSupplierId,
-    setSelectedQuoteId,
     setConfirmedOrderDetails,
     setUserRole,
   ]);
@@ -154,8 +144,6 @@ export function useAppState() {
     userRole,
     handleSignOut,
     handleAuthSuccess: authSuccess,
-    selectedSupplierId,
-    selectedQuoteId,
     vehicleData,
     selectedPartData,
     selectedCategory,

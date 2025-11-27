@@ -8,8 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
-import { useAppStore } from "@/stores/app-store";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet } from "@/utils/apiconfig/http";
@@ -75,19 +74,22 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, handleBack, selectedSupplierId } = useAppState();
-  const { setSelectedSupplierId } = useAppStore();
+  const { handleNavigate, handleBack } = useAppState();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const supplierParam = searchParams.get("supplier");
   const [conversations, setConversations] = useState<UserConversation[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (supplierParam) {
-      setSelectedSupplierId(supplierParam);
+      setSelectedConversationId(supplierParam);
     }
-  }, [supplierParam, setSelectedSupplierId]);
+  }, [supplierParam]);
 
   useEffect(() => {
     let ignore = false;
@@ -104,7 +106,7 @@ export default function Chat() {
               item.chat?.supplier?.businessName ||
               item.chat?.supplier?.firstName ||
               "Supplier";
-            const supplierId = item.chat?.supplier?.id || item.chat?.id;
+            const supplierId = item.chat?.supplier?.userId;
             if (!supplierId) {
               return null;
             }
@@ -149,21 +151,18 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if (!selectedSupplierId && conversations.length) {
-      setSelectedSupplierId(conversations[0].id);
+    if (!selectedConversationId && conversations.length) {
+      setSelectedConversationId(conversations[0].id);
     }
-  }, [selectedSupplierId, conversations, setSelectedSupplierId]);
+  }, [selectedConversationId, conversations]);
 
   const currentConversation = useMemo(() => {
     if (!conversations.length) return null;
-    const targetId = selectedSupplierId ?? conversations[0]?.id;
+    const targetId = selectedConversationId ?? conversations[0]?.id;
     return conversations.find((c) => c.id === targetId) ?? conversations[0];
-  }, [selectedSupplierId, conversations]);
+  }, [selectedConversationId, conversations]);
   const chatSupplierId =
-    supplierParam ??
-    currentConversation?.chatId ??
-    currentConversation?.id ??
-    undefined;
+    supplierParam ?? currentConversation?.id ?? undefined;
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -211,7 +210,12 @@ export default function Chat() {
                       "w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors border-b border-border",
                       currentConversation?.id === conv.id && "bg-muted"
                     )}
-                    onClick={() => setSelectedSupplierId(conv.id)}
+                    onClick={() => {
+                      setSelectedConversationId(conv.id);
+                      const params = new URLSearchParams(searchParams.toString());
+                      params.set("supplier", conv.id);
+                      router.replace(`?${params.toString()}`, { scroll: false });
+                    }}
                   >
                     <div className="relative">
                       <Avatar>
@@ -250,8 +254,8 @@ export default function Chat() {
 
         <ChatPage
           onNavigate={handleNavigate}
-          enableChatApi
           supplierId={chatSupplierId}
+          chatId={currentConversation?.chatId}
           role="user"
         />
       </div>

@@ -110,10 +110,6 @@ export function pageToPath(page: Page) {
 }
 
 interface AppStore {
-  selectedSupplierId: string | null;
-  setSelectedSupplierId: (id: string | null) => void;
-  selectedQuoteId: string | null;
-  setSelectedQuoteId: (id: string | null) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
   userRole: UserRole | null;
@@ -142,10 +138,6 @@ interface AppStore {
 }
 
 export const useAppStore = create<AppStore>()((set) => ({
-  selectedSupplierId: null,
-  setSelectedSupplierId: (selectedSupplierId) => set({ selectedSupplierId }),
-  selectedQuoteId: null,
-  setSelectedQuoteId: (selectedQuoteId) => set({ selectedQuoteId }),
   isAuthenticated: false,
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   userRole: null,

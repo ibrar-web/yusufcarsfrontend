@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ChatPage } from "@/components/chat/ChatPage";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
-import { useAppStore } from "@/stores/app-store";
 import { supplierMessages } from "@/page-components/supplier-dashboard/data";
 
 type UserConversation = {
@@ -43,8 +42,10 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, selectedSupplierId } = useAppState();
-  const { setSelectedSupplierId } = useAppStore();
+  const { handleNavigate } = useAppState();
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
 
   const conversations = useMemo<UserConversation[]>(
     () =>
@@ -61,11 +62,17 @@ export default function Chat() {
     []
   );
 
+  useEffect(() => {
+    if (!selectedConversationId && conversations.length) {
+      setSelectedConversationId(conversations[0].id);
+    }
+  }, [selectedConversationId, conversations]);
+
   const currentConversation = useMemo(() => {
     if (!conversations.length) return null;
-    const targetId = selectedSupplierId ?? conversations[0]?.id;
+    const targetId = selectedConversationId ?? conversations[0]?.id;
     return conversations.find((c) => c.id === targetId) ?? conversations[0];
-  }, [selectedSupplierId, conversations]);
+  }, [selectedConversationId, conversations]);
 
   return (
     <div className="flex bg-background min-h-0 overflow-hidden" style={{height:'calc(100vh - 120px)'}}>
@@ -84,7 +91,7 @@ export default function Chat() {
                     "w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors border-b border-border",
                     currentConversation?.id === conv.id && "bg-muted"
                   )}
-                  onClick={() => setSelectedSupplierId(conv.id)}
+                  onClick={() => setSelectedConversationId(conv.id)}
                 >
                   <div className="relative">
                     <Avatar>

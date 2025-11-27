@@ -30,7 +30,7 @@ interface ChatPageProps {
   supplierId?: string;
   userId?: string;
   role?: UserRole | null;
-  enableChatApi?: boolean;
+  chatId?: string;
 }
 
 type ApiMessage = {
@@ -154,7 +154,7 @@ export function ChatPage({
   supplierId,
   userId,
   role,
-  enableChatApi = false,
+  chatId,
 }: ChatPageProps) {
   const normalizedRole: "user" | "supplier" =
     role === "supplier" ? "supplier" : "user";
@@ -172,11 +172,11 @@ export function ChatPage({
   const isSupplierPerspective = normalizedRole === "supplier";
   const normalizedSupplierId = supplierId?.trim() || undefined;
   const normalizedUserId = userId?.trim() || undefined;
+  const activeChatId = chatId?.trim() || undefined;
   const counterpartId = isSupplierPerspective
     ? normalizedUserId
     : normalizedSupplierId;
   const missingIdentifier = !counterpartId;
-  const shouldUseChatApi = Boolean(enableChatApi && !missingIdentifier);
   const displayName =
     participant.name?.trim() ??
     FALLBACK_PARTICIPANT[normalizedRole].name ??
@@ -197,7 +197,7 @@ export function ChatPage({
   }, [normalizedRole, counterpartId]);
 
   const fetchMessages = useCallback(async () => {
-    if (!shouldUseChatApi || !counterpartId) {
+    if (!counterpartId) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -237,7 +237,7 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [counterpartId, shouldUseChatApi, isSupplierPerspective, normalizedRole]);
+  }, [counterpartId, isSupplierPerspective, normalizedRole]);
 
   useEffect(() => {
     fetchMessages();
@@ -245,7 +245,7 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!shouldUseChatApi || !counterpartId) {
+    if (!counterpartId || !activeChatId) {
       setMessage("");
       return;
     }
@@ -257,12 +257,8 @@ export function ChatPage({
         : apiRoutes.user.chat.chatmessage;
       const payload: Record<string, string> = {
         message: trimmed,
+        chatId: activeChatId,
       };
-      const primaryKey = isSupplierPerspective ? "userId" : "supplierId";
-      payload[primaryKey] = counterpartId;
-      if (isSupplierPerspective && normalizedSupplierId) {
-        payload.supplierId = normalizedSupplierId;
-      }
       await apiPost(ensureEndpoint(route), payload);
       const optimisticMessage: ApiMessage = {
         id: crypto.randomUUID(),
@@ -288,8 +284,8 @@ export function ChatPage({
   };
 
   const displayedMessages = normalizedMessages;
-  const showSelectPrompt = enableChatApi && missingIdentifier;
-
+  const isSendDisabled =
+    !message.trim() || missingIdentifier || !activeChatId || sendingMessage;
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border bg-card flex items-center justify-between">
@@ -341,22 +337,13 @@ export function ChatPage({
 
       <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 bg-muted/10 min-h-0">
         <div className="max-w-[900px] mx-auto">
-          {enableChatApi && (
-            <>
-              {loadingMessages && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  Loading messages...
-                </p>
-              )}
-              {messageError && (
-                <p className="text-sm text-destructive mb-3">{messageError}</p>
-              )}
-              {showSelectPrompt && !loadingMessages && !messageError && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  Select a conversation to view messages.
-                </p>
-              )}
-            </>
+          {loadingMessages && (
+            <p className="text-sm text-muted-foreground mb-3">
+              Loading messages...
+            </p>
+          )}
+          {messageError && (
+            <p className="text-sm text-destructive mb-3">{messageError}</p>
           )}
           {!loadingMessages &&
             !messageError &&
@@ -388,17 +375,12 @@ export function ChatPage({
               }}
               placeholder="Type your message..."
               className="resize-none"
-              disabled={
-                shouldUseChatApi && (missingIdentifier || sendingMessage)
-              }
+              disabled={missingIdentifier || !activeChatId || sendingMessage}
             />
           </div>
           <Button
             onClick={handleSend}
-            disabled={
-              !message.trim() ||
-              (shouldUseChatApi && (missingIdentifier || sendingMessage))
-            }
+            disabled={isSendDisabled}
             className="shrink-0"
           >
             <Send className="h-5 w-5" />

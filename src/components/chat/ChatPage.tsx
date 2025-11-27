@@ -176,7 +176,9 @@ export function ChatPage({
   const counterpartId = isSupplierPerspective
     ? normalizedUserId
     : normalizedSupplierId;
-  const missingIdentifier = !counterpartId;
+  const hasCounterpart = Boolean(counterpartId);
+  const hasChatIdentifier = Boolean(activeChatId);
+  const lacksSendContext = !counterpartId || !activeChatId;
   const displayName =
     participant.name?.trim() ??
     FALLBACK_PARTICIPANT[normalizedRole].name ??
@@ -197,7 +199,7 @@ export function ChatPage({
   }, [normalizedRole, counterpartId]);
 
   const fetchMessages = useCallback(async () => {
-    if (!counterpartId) {
+    if (!hasCounterpart && !hasChatIdentifier) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -211,9 +213,14 @@ export function ChatPage({
         ? apiRoutes.supplier.chat.chatmessage
         : apiRoutes.user.chat.chatmessage;
       const queryKey = isSupplierPerspective ? "userId" : "supplierId";
-      const endpoint = `${ensureEndpoint(
-        route
-      )}?${queryKey}=${encodeURIComponent(counterpartId)}`;
+      const identifier = activeChatId
+        ? `chatId=${encodeURIComponent(activeChatId)}`
+        : counterpartId
+        ? `${queryKey}=${encodeURIComponent(counterpartId)}`
+        : "";
+      const endpoint = `${ensureEndpoint(route)}${
+        identifier ? `?${identifier}` : ""
+      }`;
       const response = await apiGet<ChatMessagesResponse>(endpoint);
       const payload = response?.data;
       const messageList = payload?.messages;
@@ -237,7 +244,14 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [counterpartId, isSupplierPerspective, normalizedRole]);
+  }, [
+    activeChatId,
+    counterpartId,
+    hasChatIdentifier,
+    hasCounterpart,
+    isSupplierPerspective,
+    normalizedRole,
+  ]);
 
   useEffect(() => {
     fetchMessages();
@@ -285,7 +299,7 @@ export function ChatPage({
 
   const displayedMessages = normalizedMessages;
   const isSendDisabled =
-    !message.trim() || missingIdentifier || !activeChatId || sendingMessage;
+    !message.trim() || lacksSendContext || sendingMessage;
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border bg-card flex items-center justify-between">
@@ -375,7 +389,7 @@ export function ChatPage({
               }}
               placeholder="Type your message..."
               className="resize-none"
-              disabled={missingIdentifier || !activeChatId || sendingMessage}
+              disabled={lacksSendContext || sendingMessage}
             />
           </div>
           <Button

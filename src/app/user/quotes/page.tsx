@@ -170,14 +170,10 @@ type UserQuoteOffer = {
     make?: string | null;
     model?: string | null;
     yearOfManufacture?: string | null;
-    user?: {
-      id: string;
-      email?: string;
-      fullName?: string;
-    } | null;
   } | null;
   supplier?: {
     id: string;
+    userId?: string | null;
     businessName?: string | null;
     tradingAs?: string | null;
     city?: string | null;
@@ -202,6 +198,7 @@ type NormalizedQuote = ComponentProps<typeof QuoteCard>["quote"] & {
 
 const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
   const supplierId = offer.supplier?.id ?? `supplier-${offer.id}`;
+  const supplierChatId = offer.supplier?.userId ?? supplierId;
   const supplierName =
     offer.supplier?.businessName || offer.supplier?.tradingAs || "Supplier";
   const priceValue =
@@ -218,6 +215,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
   const cardQuote: ComponentProps<typeof QuoteCard>["quote"] = {
     id: offer.id,
     supplierId,
+    supplierChatId,
     supplierName,
     supplierLogo: FALLBACK_SUPPLIER_IMAGE,
     price: Number.isFinite(priceValue) ? Number(priceValue) : 0,
@@ -244,8 +242,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
     requestId: offer.quoteRequest?.id,
     sentAt: offer.createdAt ?? undefined,
     notes: offer.notes ?? undefined,
-    customer:
-      offer.quoteRequest?.user?.fullName || offer.quoteRequest?.user?.email,
+    customer: undefined,
     supplierDetails: buildSupplierDetails(
       supplierId,
       supplierName,
@@ -255,7 +252,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
       offer.supplier?.categories,
       offer.estimatedTime,
       offer.supplier?.phone,
-      offer.quoteRequest?.user?.email,
+      undefined,
     ),
   };
 };

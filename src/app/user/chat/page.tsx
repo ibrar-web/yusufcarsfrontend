@@ -84,7 +84,7 @@ export default function Chat() {
   const [chatError, setChatError] = useState<string | null>(null);
 
   useEffect(() => {
-    const supplierParam = searchParams.get("supplier");
+  const supplierParam = searchParams.get("supplier");
     if (supplierParam) {
       setSelectedSupplierId(supplierParam);
     }
@@ -158,6 +158,11 @@ export default function Chat() {
     const targetId = selectedSupplierId ?? conversations[0]?.id;
     return conversations.find((c) => c.id === targetId) ?? conversations[0];
   }, [selectedSupplierId, conversations]);
+  const chatSupplierId =
+    supplierParam ??
+    currentConversation?.chatId ??
+    currentConversation?.id ??
+    undefined;
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -254,6 +259,7 @@ export default function Chat() {
               : null
           }
           enableChatApi
+          supplierIdForChat={chatSupplierId}
         />
       </div>
     </div>

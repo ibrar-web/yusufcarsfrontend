@@ -30,21 +30,22 @@ interface ChatPageProps {
   onNavigate: (page: string, supplierId?: string) => void;
   conversation?: ConversationSummary | null;
   enableChatApi?: boolean;
+  supplierIdForChat?: string;
 }
 
 type ApiMessage = {
   id: string;
   content: string;
-  senderId: string;
+  sender?: {
+    id: string;
+    role?: string | null;
+  };
   createdAt: string;
   isRead?: boolean;
 };
 
 type ChatMessagesResponse = {
-  data?: {
-    data?: ApiMessage[];
-    messages?: ApiMessage[];
-  };
+  data?: ApiMessage[];
 };
 
 type RenderMessage = {
@@ -79,6 +80,7 @@ export function ChatPage({
   onNavigate,
   conversation,
   enableChatApi = false,
+  supplierIdForChat,
 }: ChatPageProps) {
   const [message, setMessage] = useState("");
   const [showTyping, setShowTyping] = useState(false);
@@ -92,21 +94,22 @@ export function ChatPage({
   const currentConversation = conversation ?? FALLBACK_CONVERSATION;
   const displayName = currentConversation.supplierName?.trim() || "Supplier";
   const supplierIdentifier = currentConversation.id;
-  const chatIdentifier = currentConversation.chatId ?? supplierIdentifier;
-  const shouldUseChatApi = enableChatApi && Boolean(chatIdentifier);
+  const chatSupplierId =
+    supplierIdForChat ?? currentConversation.chatId ?? currentConversation.id;
+  const shouldUseChatApi = enableChatApi && Boolean(chatSupplierId);
 
   const normalizedMessages = useMemo<RenderMessage[]>(() => {
     return messages.map((msg) => ({
       id: msg.id,
       content: msg.content ?? "",
       timestamp: new Date(msg.createdAt ?? Date.now()),
-      sent: supplierIdentifier ? msg.senderId !== supplierIdentifier : false,
+      sent: msg.sender?.role?.toLowerCase() === "user",
       read: msg.isRead ?? false,
     }));
-  }, [messages, supplierIdentifier]);
+  }, [messages]);
 
   const fetchMessages = useCallback(async () => {
-    if (!shouldUseChatApi || !chatIdentifier) {
+    if (!shouldUseChatApi || !chatSupplierId) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -118,15 +121,13 @@ export function ChatPage({
       setMessageError(null);
       const endpoint = `${ensureEndpoint(
         apiRoutes.user.chat.chatmessage
-      )}?supplierId=${encodeURIComponent(chatIdentifier)}`;
+      )}?supplierId=${encodeURIComponent(chatSupplierId)}`;
       const response = await apiGet<ChatMessagesResponse>(endpoint);
       const raw =
-        (Array.isArray(response?.data?.data)
-          ? response?.data?.data
-          : Array.isArray(response?.data?.messages)
-          ? response?.data?.messages
-          : Array.isArray(response?.data)
-          ? (response?.data as ApiMessage[])
+        (Array.isArray(response?.data)
+          ? response?.data
+          : Array.isArray(response as unknown as ApiMessage[])
+          ? (response as unknown as ApiMessage[])
           : []) ?? [];
       setMessages(raw);
     } catch (error) {
@@ -136,7 +137,7 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [chatIdentifier, shouldUseChatApi]);
+  }, [chatSupplierId, shouldUseChatApi]);
 
   useEffect(() => {
     fetchMessages();
@@ -144,21 +145,21 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!shouldUseChatApi || !chatIdentifier) {
+    if (!shouldUseChatApi || !chatSupplierId) {
       setMessage("");
       return;
     }
     try {
       setSendingMessage(true);
       const payload = {
-        supplierId: chatIdentifier,
+        supplierId: chatSupplierId,
         message: message.trim(),
       };
       await apiPost(ensureEndpoint(apiRoutes.user.chat.chatmessage), payload);
       const optimisticMessage: ApiMessage = {
         id: crypto.randomUUID(),
         content: payload.message,
-        senderId: supplierIdentifier ? `${supplierIdentifier}-user` : "user",
+        sender: { id: "user", role: "user" },
         createdAt: new Date().toISOString(),
         isRead: false,
       };
@@ -174,7 +175,7 @@ export function ChatPage({
   };
 
   const displayedMessages = normalizedMessages;
-  const showSelectPrompt = enableChatApi && !chatIdentifier;
+  const showSelectPrompt = enableChatApi && !chatSupplierId;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -275,7 +276,7 @@ export function ChatPage({
               placeholder="Type your message..."
               className="resize-none"
               disabled={
-                shouldUseChatApi && (!chatIdentifier || sendingMessage)
+                shouldUseChatApi && (!chatSupplierId || sendingMessage)
               }
             />
           </div>
@@ -283,7 +284,7 @@ export function ChatPage({
             onClick={handleSend}
             disabled={
               !message.trim() ||
-              (shouldUseChatApi && (!chatIdentifier || sendingMessage))
+              (shouldUseChatApi && (!chatSupplierId || sendingMessage))
             }
             className="shrink-0"
           >

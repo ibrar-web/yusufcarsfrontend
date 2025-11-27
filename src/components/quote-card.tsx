@@ -8,6 +8,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 interface Quote {
   id: string;
   supplierId: string;
+  supplierChatId?: string;
   supplierName: string;
   supplierLogo?: string;
   price: number;
@@ -257,7 +258,11 @@ export function QuoteCard({
               style={{ fontSize: "13px" }}
               asChild
             >
-              <Link href={`/user/chat?supplier=${quote.supplierId}&quote=${quote.id}`}>
+              <Link
+                href={`/user/chat?supplier=${
+                  quote.supplierChatId ?? quote.supplierId
+                }&quote=${quote.id}`}
+              >
                 Message
               </Link>
             </Button>

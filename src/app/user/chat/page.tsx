@@ -246,12 +246,14 @@ export default function Chat() {
             currentConversation
               ? {
                   id: currentConversation.id,
+                  chatId: currentConversation.chatId,
                   supplierName: currentConversation.name,
                   online: currentConversation.online,
                   rating: currentConversation.rating,
                 }
               : null
           }
+          enableChatApi
         />
       </div>
     </div>

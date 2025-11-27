@@ -61,6 +61,10 @@ type ChatMessagesResponse = {
   statusCode?: number;
   message?: string;
   data?: {
+    chat?: {
+      id?: string;
+    };
+    chatId?: string;
     supplier?: ParticipantApiPayload | null;
     user?: ParticipantApiPayload | null;
     messages?: ApiMessage[];
@@ -161,6 +165,7 @@ export function ChatPage({
   supplierId,
   userId,
   role,
+  chatId,
 }: ChatPageProps) {
   const normalizedRole: "user" | "supplier" =
     role === "supplier" ? "supplier" : "user";
@@ -178,11 +183,15 @@ export function ChatPage({
   const isSupplierPerspective = normalizedRole === "supplier";
   const normalizedSupplierId = supplierId?.trim() || undefined;
   const normalizedUserId = userId?.trim() || undefined;
+  const [resolvedChatId, setResolvedChatId] = useState<string | undefined>(
+    chatId?.trim() || undefined
+  );
   const counterpartId = isSupplierPerspective
     ? normalizedUserId
     : normalizedSupplierId;
   const hasCounterpart = Boolean(counterpartId);
-  const lacksSendContext = !counterpartId;
+  const hasChatIdentifier = Boolean(resolvedChatId);
+  const lacksSendContext = !counterpartId || !resolvedChatId;
   const displayName =
     participant.name?.trim() ??
     FALLBACK_PARTICIPANT[normalizedRole].name ??
@@ -201,10 +210,13 @@ export function ChatPage({
   useEffect(() => {
     setParticipant(FALLBACK_PARTICIPANT[normalizedRole]);
   }, [normalizedRole, counterpartId]);
+  useEffect(() => {
+    setResolvedChatId(chatId?.trim() || undefined);
+  }, [chatId]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    if (!hasCounterpart) {
+    if (!hasCounterpart && !hasChatIdentifier) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -224,10 +236,14 @@ export function ChatPage({
       const endpoint = `${ensureEndpoint(route)}${
         identifier ? `?${identifier}` : ""
       }`;
-      console.log(endpoint);
       const response = await apiGet<ChatMessagesResponse>(endpoint);
       const payload = response?.data;
       const messageList = payload?.messages;
+      const fetchedChatId =
+        payload?.chat?.id ?? payload?.chatId ?? resolvedChatId ?? undefined;
+      if (fetchedChatId) {
+        setResolvedChatId(fetchedChatId);
+      }
       const normalizedList = Array.isArray(messageList) ? messageList : [];
       setMessages(sortMessagesByDate(normalizedList));
       const participantPayload = isSupplierPerspective
@@ -249,7 +265,14 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [counterpartId, hasCounterpart, isSupplierPerspective, normalizedRole]);
+  }, [
+    counterpartId,
+    hasCounterpart,
+    hasChatIdentifier,
+    isSupplierPerspective,
+    normalizedRole,
+    resolvedChatId,
+  ]);
 
   useEffect(() => {
     fetchMessages();
@@ -257,7 +280,7 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!counterpartId) {
+    if (!counterpartId || !resolvedChatId) {
       setMessage("");
       return;
     }
@@ -269,6 +292,7 @@ export function ChatPage({
         : apiRoutes.user.chat.chatmessage;
       const payload: Record<string, string> = {
         message: trimmed,
+        chatId: resolvedChatId,
       };
       await apiPost(ensureEndpoint(route), payload);
       const optimisticMessage: ApiMessage = {

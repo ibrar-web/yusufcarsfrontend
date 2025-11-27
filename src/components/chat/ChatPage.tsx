@@ -17,20 +17,20 @@ import { RatingDialog } from "@/components/rating-dialog";
 import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { toast } from "sonner";
+import type { UserRole } from "@/utils/api";
 
-interface ConversationSummary {
-  id: string;
-  chatId?: string;
-  supplierName: string;
+type ParticipantProfile = {
+  name: string;
   online?: boolean;
   rating?: number;
-}
+};
 
 interface ChatPageProps {
   onNavigate: (page: string, supplierId?: string) => void;
-  conversation?: ConversationSummary | null;
+  supplierId?: string;
+  userId?: string;
+  role?: UserRole | null;
   enableChatApi?: boolean;
-  supplierIdForChat?: string;
 }
 
 type ApiMessage = {
@@ -44,8 +44,26 @@ type ApiMessage = {
   isRead?: boolean;
 };
 
+type ParticipantApiPayload = {
+  businessName?: string | null;
+  tradingAs?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+  rating?: number | null;
+  averageRating?: number | null;
+  online?: boolean | null;
+};
+
 type ChatMessagesResponse = {
-  data?: ApiMessage[];
+  data?: unknown;
+  chat?: {
+    supplier?: ParticipantApiPayload | null;
+    customer?: ParticipantApiPayload | null;
+  };
+  supplier?: ParticipantApiPayload | null;
+  customer?: ParticipantApiPayload | null;
+  messages?: ApiMessage[];
 };
 
 type RenderMessage = {
@@ -56,11 +74,17 @@ type RenderMessage = {
   read?: boolean;
 };
 
-const FALLBACK_CONVERSATION: ConversationSummary = {
-  id: "",
-  supplierName: "Supplier",
-  online: false,
-  rating: 0,
+const FALLBACK_PARTICIPANT: Record<"user" | "supplier", ParticipantProfile> = {
+  user: {
+    name: "Supplier",
+    online: false,
+    rating: 0,
+  },
+  supplier: {
+    name: "Customer",
+    online: false,
+    rating: 0,
+  },
 };
 
 const getInitials = (value?: string) => {
@@ -76,12 +100,114 @@ const getInitials = (value?: string) => {
 const ensureEndpoint = (path: string) =>
   path.startsWith("/") ? path : `/${path}`;
 
+const toNonEmptyString = (value?: string | null) => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+};
+
+const buildParticipantName = (payload?: ParticipantApiPayload | null) => {
+  if (!payload) return undefined;
+  const resolved =
+    toNonEmptyString(payload.businessName) ??
+    toNonEmptyString(payload.tradingAs) ??
+    toNonEmptyString(payload.fullName);
+  if (resolved) {
+    return resolved;
+  }
+  const first = toNonEmptyString(payload.firstName);
+  const last = toNonEmptyString(payload.lastName);
+  const composed = [first, last].filter(Boolean).join(" ").trim();
+  return composed || first;
+};
+
+const extractParticipantDetails = (
+  payload: unknown,
+  perspective: "user" | "supplier"
+): Partial<ParticipantProfile> => {
+  if (!payload || typeof payload !== "object") {
+    return {};
+  }
+
+  const container = payload as {
+    chat?: {
+      supplier?: ParticipantApiPayload | null;
+      customer?: ParticipantApiPayload | null;
+    };
+    supplier?: ParticipantApiPayload | null;
+    customer?: ParticipantApiPayload | null;
+    data?: unknown;
+  };
+
+  const chatTarget =
+    perspective === "user"
+      ? container.chat?.supplier
+      : container.chat?.customer;
+  const directTarget =
+    perspective === "user" ? container.supplier : container.customer;
+  const resolvedTarget = chatTarget ?? directTarget;
+
+  if (resolvedTarget) {
+    const rating =
+      typeof resolvedTarget.rating === "number"
+        ? resolvedTarget.rating
+        : typeof resolvedTarget.averageRating === "number"
+        ? resolvedTarget.averageRating
+        : undefined;
+
+    return {
+      name: buildParticipantName(resolvedTarget),
+      online:
+        typeof resolvedTarget.online === "boolean"
+          ? resolvedTarget.online
+          : undefined,
+      rating,
+    };
+  }
+
+  if ("data" in container) {
+    return extractParticipantDetails(container.data, perspective);
+  }
+
+  return {};
+};
+
+const coerceMessageArray = (payload: unknown): ApiMessage[] => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) {
+    return payload.filter(
+      (item): item is ApiMessage => typeof item === "object" && item !== null
+    );
+  }
+  if (typeof payload === "object") {
+    const container = payload as { data?: unknown; messages?: unknown };
+    if (Array.isArray(container.data)) {
+      return coerceMessageArray(container.data);
+    }
+    if (container.data) {
+      const nested = coerceMessageArray(container.data);
+      if (nested.length) return nested;
+    }
+    if (Array.isArray(container.messages)) {
+      return coerceMessageArray(container.messages);
+    }
+    if (container.messages) {
+      const nestedMessages = coerceMessageArray(container.messages);
+      if (nestedMessages.length) return nestedMessages;
+    }
+  }
+  return [];
+};
+
 export function ChatPage({
   onNavigate,
-  conversation,
+  supplierId,
+  userId,
+  role,
   enableChatApi = false,
-  supplierIdForChat,
 }: ChatPageProps) {
+  const normalizedRole: "user" | "supplier" =
+    role === "supplier" ? "supplier" : "user";
   const [message, setMessage] = useState("");
   const [showTyping, setShowTyping] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
@@ -90,26 +216,38 @@ export function ChatPage({
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
-
-  const currentConversation = conversation ?? FALLBACK_CONVERSATION;
-  const displayName = currentConversation.supplierName?.trim() || "Supplier";
-  const supplierIdentifier = currentConversation.id;
-  const chatSupplierId =
-    supplierIdForChat ?? currentConversation.chatId ?? currentConversation.id;
-  const shouldUseChatApi = enableChatApi && Boolean(chatSupplierId);
+  const [participant, setParticipant] = useState<ParticipantProfile>(
+    FALLBACK_PARTICIPANT[normalizedRole]
+  );
+  const isSupplierPerspective = normalizedRole === "supplier";
+  const normalizedSupplierId = supplierId?.trim() || undefined;
+  const normalizedUserId = userId?.trim() || undefined;
+  const counterpartId = isSupplierPerspective
+    ? normalizedUserId
+    : normalizedSupplierId;
+  const missingIdentifier = !counterpartId;
+  const shouldUseChatApi = Boolean(enableChatApi && !missingIdentifier);
+  const displayName =
+    participant.name?.trim() ??
+    FALLBACK_PARTICIPANT[normalizedRole].name ??
+    (isSupplierPerspective ? "Customer" : "Supplier");
 
   const normalizedMessages = useMemo<RenderMessage[]>(() => {
     return messages.map((msg) => ({
       id: msg.id,
       content: msg.content ?? "",
       timestamp: new Date(msg.createdAt ?? Date.now()),
-      sent: msg.sender?.role?.toLowerCase() === "user",
+      sent: msg.sender?.role?.toLowerCase() === normalizedRole,
       read: msg.isRead ?? false,
     }));
-  }, [messages]);
+  }, [messages, normalizedRole]);
+
+  useEffect(() => {
+    setParticipant(FALLBACK_PARTICIPANT[normalizedRole]);
+  }, [normalizedRole, counterpartId]);
 
   const fetchMessages = useCallback(async () => {
-    if (!shouldUseChatApi || !chatSupplierId) {
+    if (!shouldUseChatApi || !counterpartId) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
@@ -119,17 +257,31 @@ export function ChatPage({
     try {
       setLoadingMessages(true);
       setMessageError(null);
+      const route = isSupplierPerspective
+        ? apiRoutes.supplier.chat.chatmessage
+        : apiRoutes.user.chat.chatmessage;
+      const queryKey = isSupplierPerspective ? "userId" : "supplierId";
       const endpoint = `${ensureEndpoint(
-        apiRoutes.user.chat.chatmessage
-      )}?supplierId=${encodeURIComponent(chatSupplierId)}`;
+        route
+      )}?${queryKey}=${encodeURIComponent(counterpartId)}`;
       const response = await apiGet<ChatMessagesResponse>(endpoint);
-      const raw =
-        (Array.isArray(response?.data)
-          ? response?.data
-          : Array.isArray(response as unknown as ApiMessage[])
-          ? (response as unknown as ApiMessage[])
-          : []) ?? [];
-      setMessages(raw);
+      const rawMessages = coerceMessageArray(response);
+      setMessages(rawMessages);
+      const profileUpdate = extractParticipantDetails(
+        response,
+        normalizedRole
+      );
+      if (
+        profileUpdate.name ||
+        typeof profileUpdate.online === "boolean" ||
+        typeof profileUpdate.rating === "number"
+      ) {
+        setParticipant((prev) => ({
+          ...prev,
+          ...profileUpdate,
+          name: profileUpdate.name ?? prev.name,
+        }));
+      }
     } catch (error) {
       setMessageError(
         error instanceof Error ? error.message : "Failed to load messages"
@@ -137,7 +289,7 @@ export function ChatPage({
     } finally {
       setLoadingMessages(false);
     }
-  }, [chatSupplierId, shouldUseChatApi]);
+  }, [counterpartId, shouldUseChatApi, isSupplierPerspective, normalizedRole]);
 
   useEffect(() => {
     fetchMessages();
@@ -145,21 +297,37 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!shouldUseChatApi || !chatSupplierId) {
+    if (!shouldUseChatApi || !counterpartId) {
       setMessage("");
       return;
     }
     try {
       setSendingMessage(true);
-      const payload = {
-        supplierId: chatSupplierId,
-        message: message.trim(),
+      const trimmed = message.trim();
+      const route = isSupplierPerspective
+        ? apiRoutes.supplier.chat.chatmessage
+        : apiRoutes.user.chat.chatmessage;
+      const payload: Record<string, string> = {
+        message: trimmed,
       };
-      await apiPost(ensureEndpoint(apiRoutes.user.chat.chatmessage), payload);
+      const primaryKey = isSupplierPerspective ? "userId" : "supplierId";
+      payload[primaryKey] = counterpartId;
+      if (isSupplierPerspective && normalizedSupplierId) {
+        payload.supplierId = normalizedSupplierId;
+      }
+      if (!isSupplierPerspective && normalizedUserId) {
+        payload.userId = normalizedUserId;
+      }
+      await apiPost(ensureEndpoint(route), payload);
       const optimisticMessage: ApiMessage = {
         id: crypto.randomUUID(),
-        content: payload.message,
-        sender: { id: "user", role: "user" },
+        content: trimmed,
+        sender: {
+          id:
+            (isSupplierPerspective ? normalizedSupplierId : normalizedUserId) ??
+            normalizedRole,
+          role: normalizedRole,
+        },
         createdAt: new Date().toISOString(),
         isRead: false,
       };
@@ -175,7 +343,7 @@ export function ChatPage({
   };
 
   const displayedMessages = normalizedMessages;
-  const showSelectPrompt = enableChatApi && !chatSupplierId;
+  const showSelectPrompt = enableChatApi && missingIdentifier;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -195,7 +363,7 @@ export function ChatPage({
                 {getInitials(displayName)}
               </AvatarFallback>
             </Avatar>
-            {currentConversation.online && (
+            {participant.online && (
               <div className="absolute bottom-0 right-0 h-3 w-3 bg-success rounded-full border-2 border-background" />
             )}
           </div>
@@ -203,9 +371,9 @@ export function ChatPage({
             <h2 className="font-semibold">{displayName}</h2>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Star className="h-3 w-3 fill-warning text-warning" />
-              <span>{currentConversation.rating}</span>
+              <span>{participant.rating ?? 0}</span>
               <span>•</span>
-              <span>{currentConversation.online ? "Online" : "Offline"}</span>
+              <span>{participant.online ? "Online" : "Offline"}</span>
             </div>
           </div>
         </div>
@@ -276,7 +444,7 @@ export function ChatPage({
               placeholder="Type your message..."
               className="resize-none"
               disabled={
-                shouldUseChatApi && (!chatSupplierId || sendingMessage)
+                shouldUseChatApi && (missingIdentifier || sendingMessage)
               }
             />
           </div>
@@ -284,7 +452,7 @@ export function ChatPage({
             onClick={handleSend}
             disabled={
               !message.trim() ||
-              (shouldUseChatApi && (!chatSupplierId || sendingMessage))
+              (shouldUseChatApi && (missingIdentifier || sendingMessage))
             }
             className="shrink-0"
           >

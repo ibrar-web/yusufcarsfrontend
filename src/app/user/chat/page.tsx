@@ -75,20 +75,26 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, handleBack, openSignupDialog, selectedSupplierId } =
-    useAppState();
+  const {
+    handleNavigate,
+    handleBack,
+    openSignupDialog,
+    selectedSupplierId,
+    userRole,
+    userId,
+  } = useAppState();
   const { setSelectedSupplierId } = useAppStore();
   const searchParams = useSearchParams();
+  const supplierParam = searchParams.get("supplier");
   const [conversations, setConversations] = useState<UserConversation[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
 
   useEffect(() => {
-  const supplierParam = searchParams.get("supplier");
     if (supplierParam) {
       setSelectedSupplierId(supplierParam);
     }
-  }, [searchParams, setSelectedSupplierId]);
+  }, [supplierParam, setSelectedSupplierId]);
 
   useEffect(() => {
     let ignore = false;
@@ -117,7 +123,9 @@ export default function Chat() {
               avatar: supplierName.charAt(0),
               lastMessage: latest?.content ?? "No messages yet",
               timestampLabel:
-                latest?.createdAt ?? item.chat?.createdAt ?? new Date().toISOString(),
+                latest?.createdAt ??
+                item.chat?.createdAt ??
+                new Date().toISOString(),
               unread: latest && !latest.isRead ? 1 : 0,
               online: false,
               rating: 0,
@@ -191,7 +199,9 @@ export default function Chat() {
           </div>
           <div className="h-full overflow-y-auto">
             {loadingChats ? (
-              <div className="p-4 text-sm text-muted-foreground">Loading chats...</div>
+              <div className="p-4 text-sm text-muted-foreground">
+                Loading chats...
+              </div>
             ) : chatError ? (
               <div className="p-4 text-sm text-destructive">{chatError}</div>
             ) : conversations.length === 0 ? (
@@ -247,19 +257,10 @@ export default function Chat() {
 
         <ChatPage
           onNavigate={handleNavigate}
-          conversation={
-            currentConversation
-              ? {
-                  id: currentConversation.id,
-                  chatId: currentConversation.chatId,
-                  supplierName: currentConversation.name,
-                  online: currentConversation.online,
-                  rating: currentConversation.rating,
-                }
-              : null
-          }
           enableChatApi
-          supplierIdForChat={chatSupplierId}
+          supplierId={chatSupplierId}
+          userId={userId ?? undefined}
+          role={userRole ?? "user"}
         />
       </div>
     </div>

@@ -93,6 +93,10 @@ export const apiRoutes = {
       listoffers: "supplier/quote/offer",
       sendoffer: "supplier/quote/offer",
     },
+    chat: {
+      listchats: "supplier/chat/list",
+      chatmessage: "supplier/chat",
+    },
   },
   admin: {
     users: {

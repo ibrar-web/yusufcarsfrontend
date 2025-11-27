@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChatPage } from "@/components/chat/ChatPage";
 import { Header } from "@/components/header";
 import { BackButton } from "@/components/back-button";
@@ -11,10 +11,12 @@ import { useAppState } from "@/hooks/use-app-state";
 import { useAppStore } from "@/stores/app-store";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { supplierMessages } from "@/page-components/supplier-dashboard/data";
+import { apiRoutes } from "@/utils/apiroutes";
+import { apiGet } from "@/utils/apiconfig/http";
 
 type UserConversation = {
   id: string;
+  chatId: string;
   name: string;
   avatar?: string;
   lastMessage: string;
@@ -23,6 +25,32 @@ type UserConversation = {
   online: boolean;
   rating: number;
 };
+
+type ChatListResponse = {
+  data?: {
+    data?: Array<{
+      chat: {
+        id: string;
+        createdAt?: string;
+        supplier?: {
+          id: string;
+          businessName?: string;
+          firstName?: string;
+        };
+      };
+      latestMessage?: {
+        id: string;
+        content: string;
+        senderId: string;
+        createdAt: string;
+        isRead: boolean;
+      } | null;
+    }>;
+  };
+};
+
+const ensureEndpoint = (path: string) =>
+  path.startsWith("/") ? path : `/${path}`;
 
 const formatTime = (value: string) => {
   const parsed = new Date(value);
@@ -51,6 +79,9 @@ export default function Chat() {
     useAppState();
   const { setSelectedSupplierId } = useAppStore();
   const searchParams = useSearchParams();
+  const [conversations, setConversations] = useState<UserConversation[]>([]);
+  const [loadingChats, setLoadingChats] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
 
   useEffect(() => {
     const supplierParam = searchParams.get("supplier");
@@ -59,20 +90,68 @@ export default function Chat() {
     }
   }, [searchParams, setSelectedSupplierId]);
 
-  const conversations = useMemo<UserConversation[]>(
-    () =>
-      supplierMessages.map((message, index) => ({
-        id: message.id,
-        name: message.customer,
-        avatar: message.avatar,
-        lastMessage: message.lastMessage,
-        timestampLabel: message.timestamp,
-        unread: message.unread,
-        online: index % 2 === 0,
-        rating: 4.5,
-      })),
-    []
-  );
+  useEffect(() => {
+    let ignore = false;
+    const fetchChats = async () => {
+      try {
+        setLoadingChats(true);
+        setChatError(null);
+        const endpoint = ensureEndpoint(apiRoutes.user.chat.listchats);
+        const response = await apiGet<ChatListResponse>(endpoint);
+        const payload = response?.data?.data ?? [];
+        const normalized: UserConversation[] = payload
+          .map((item) => {
+            const supplierName =
+              item.chat?.supplier?.businessName ||
+              item.chat?.supplier?.firstName ||
+              "Supplier";
+            const supplierId = item.chat?.supplier?.id || item.chat?.id;
+            if (!supplierId) {
+              return null;
+            }
+            const latest = item.latestMessage;
+            return {
+              id: supplierId,
+              chatId: item.chat?.id ?? supplierId,
+              name: supplierName,
+              avatar: supplierName.charAt(0),
+              lastMessage: latest?.content ?? "No messages yet",
+              timestampLabel:
+                latest?.createdAt ?? item.chat?.createdAt ?? new Date().toISOString(),
+              unread: latest && !latest.isRead ? 1 : 0,
+              online: false,
+              rating: 0,
+            };
+          })
+          .filter((conv): conv is UserConversation => Boolean(conv));
+        if (!ignore) {
+          setConversations(normalized);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setChatError(
+            error instanceof Error ? error.message : "Failed to load chats"
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setLoadingChats(false);
+        }
+      }
+    };
+
+    fetchChats();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSupplierId && conversations.length) {
+      setSelectedSupplierId(conversations[0].id);
+    }
+  }, [selectedSupplierId, conversations, setSelectedSupplierId]);
 
   const currentConversation = useMemo(() => {
     if (!conversations.length) return null;
@@ -106,48 +185,58 @@ export default function Chat() {
             <h2 className="font-semibold text-lg">Messages</h2>
           </div>
           <div className="h-full overflow-y-auto">
-            {conversations.map((conv) => {
-              const avatarLabel = conv.avatar ?? conv.name.charAt(0);
-              return (
-                <button
-                  key={conv.id}
-                  className={cn(
-                    "w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors border-b border-border",
-                    currentConversation?.id === conv.id && "bg-muted"
-                  )}
-                  onClick={() => setSelectedSupplierId(conv.id)}
-                >
-                  <div className="relative">
-                    <Avatar>
-                      <AvatarFallback className="bg-primary text-white">
-                        {avatarLabel}
-                      </AvatarFallback>
-                    </Avatar>
-                    {conv.online && (
-                      <div className="absolute bottom-0 right-0 h-3 w-3 bg-success rounded-full border-2 border-background" />
+            {loadingChats ? (
+              <div className="p-4 text-sm text-muted-foreground">Loading chats...</div>
+            ) : chatError ? (
+              <div className="p-4 text-sm text-destructive">{chatError}</div>
+            ) : conversations.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">
+                No conversations yet.
+              </div>
+            ) : (
+              conversations.map((conv) => {
+                const avatarLabel = conv.avatar ?? conv.name.charAt(0);
+                return (
+                  <button
+                    key={conv.id}
+                    className={cn(
+                      "w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors border-b border-border",
+                      currentConversation?.id === conv.id && "bg-muted"
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-medium truncate">{conv.name}</h3>
-                      <span className="text-xs text-muted-foreground shrink-0 ml-2">
-                        {formatTime(conv.timestampLabel)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-muted-foreground truncate flex-1">
-                        {conv.lastMessage}
-                      </p>
-                      {conv.unread > 0 && (
-                        <Badge className="h-5 min-w-5 px-1.5 bg-primary text-white">
-                          {conv.unread}
-                        </Badge>
+                    onClick={() => setSelectedSupplierId(conv.id)}
+                  >
+                    <div className="relative">
+                      <Avatar>
+                        <AvatarFallback className="bg-primary text-white">
+                          {avatarLabel}
+                        </AvatarFallback>
+                      </Avatar>
+                      {conv.online && (
+                        <div className="absolute bottom-0 right-0 h-3 w-3 bg-success rounded-full border-2 border-background" />
                       )}
                     </div>
-                  </div>
-                </button>
-              );
-            })}
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-medium truncate">{conv.name}</h3>
+                        <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                          {formatTime(conv.timestampLabel)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground truncate flex-1">
+                          {conv.lastMessage}
+                        </p>
+                        {conv.unread > 0 && (
+                          <Badge className="h-5 min-w-5 px-1.5 bg-primary text-white">
+                            {conv.unread}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 

@@ -82,6 +82,10 @@ export const apiRoutes = {
       listoffers: "user/quotes",
       requestQuote: "/user/quotes",
     },
+    chat: {
+      listchats: "user/chat/list",
+      chatmessage: "user/chat",
+    },
   },
   supplier: {
     quote: {

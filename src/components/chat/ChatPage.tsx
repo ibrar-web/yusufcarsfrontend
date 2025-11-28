@@ -18,7 +18,7 @@ import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { toast } from "sonner";
 import type { UserRole } from "@/utils/api";
-import { CHAT_MESSAGE_EVENT } from "@/utils/chat-socket";
+import { CHAT_MESSAGE_EVENT } from "@/utils/socket/chatSocket";
 
 type ParticipantProfile = {
   name: string;

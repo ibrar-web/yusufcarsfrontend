@@ -6,7 +6,8 @@ import {
   CHAT_MESSAGE_EVENT,
   initChatSocket,
   teardownChatSocket,
-} from "@/utils/chat-socket";
+} from "@/utils/socket/chatSocket";
+import { disconnectSocket } from "@/utils/socket";
 
 export function SocketManager() {
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
@@ -15,6 +16,7 @@ export function SocketManager() {
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       teardownChatSocket();
+      disconnectSocket();
       return;
     }
 
@@ -32,6 +34,7 @@ export function SocketManager() {
 
     return () => {
       teardownChatSocket();
+      disconnectSocket();
     };
   }, [isAuthenticated, userId]);
 

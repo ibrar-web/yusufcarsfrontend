@@ -18,6 +18,7 @@ import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { toast } from "sonner";
 import type { UserRole } from "@/utils/api";
+import { CHAT_MESSAGE_EVENT } from "@/utils/chat-socket";
 
 type ParticipantProfile = {
   name: string;
@@ -77,6 +78,18 @@ type RenderMessage = {
   timestamp: Date;
   sent: boolean;
   read?: boolean;
+};
+
+type SocketChatMessagePayload = {
+  id?: string;
+  chatId?: string;
+  content?: string;
+  createdAt?: string;
+  isRead?: boolean;
+  sender?: {
+    id?: string;
+    role?: string | null;
+  };
 };
 
 const FALLBACK_PARTICIPANT: Record<"user" | "supplier", ParticipantProfile> = {
@@ -197,6 +210,62 @@ export function ChatPage({
     FALLBACK_PARTICIPANT[normalizedRole].name ??
     (isSupplierPerspective ? "Customer" : "Supplier");
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleSocketMessage = (event: Event) => {
+      const detail = (event as CustomEvent<SocketChatMessagePayload>).detail;
+      if (!detail) {
+        return;
+      }
+
+      if (detail.chatId && resolvedChatId && detail.chatId !== resolvedChatId) {
+        return;
+      }
+
+      const messageId =
+        detail.id ??
+        (typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`);
+
+      setMessages((prev) => {
+        if (prev.some((entry) => entry.id === messageId)) {
+          return prev;
+        }
+
+        const nextMessage: ApiMessage = {
+          id: messageId,
+          content: detail.content ?? "",
+          createdAt: detail.createdAt ?? new Date().toISOString(),
+          isRead: detail.isRead,
+          sender: detail.sender?.id
+            ? {
+                id: detail.sender.id,
+                role: detail.sender.role ?? null,
+              }
+            : undefined,
+        };
+
+        return [...prev, nextMessage];
+      });
+    };
+
+    window.addEventListener(
+      CHAT_MESSAGE_EVENT,
+      handleSocketMessage as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        CHAT_MESSAGE_EVENT,
+        handleSocketMessage as EventListener,
+      );
+    };
+  }, [resolvedChatId]);
+
   const normalizedMessages = useMemo<RenderMessage[]>(() => {
     return messages.map((msg) => ({
       id: msg.id,
@@ -294,7 +363,8 @@ export function ChatPage({
         message: trimmed,
         chatId: resolvedChatId,
       };
-      await apiPost(ensureEndpoint(route), payload);
+      const res = await apiPost(ensureEndpoint(route), payload);
+      console.log(res)
       const optimisticMessage: ApiMessage = {
         id: crypto.randomUUID(),
         content: trimmed,

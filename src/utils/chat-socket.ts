@@ -3,6 +3,7 @@
 import { io, type Socket } from "socket.io-client";
 
 const CHAT_SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+export const CHAT_MESSAGE_EVENT = "chat:message";
 
 export type ChatMessagePayload = Record<string, unknown>;
 
@@ -53,9 +54,9 @@ export function initChatSocket(options: InitChatSocketOptions) {
 }
 
 function registerHandlers(socket: Socket, options: InitChatSocketOptions) {
-  socket.off("chat:message");
+  socket.off(CHAT_MESSAGE_EVENT);
   if (options.onMessageReceived) {
-    socket.on("chat:message", options.onMessageReceived);
+    socket.on(CHAT_MESSAGE_EVENT, options.onMessageReceived);
   }
 }
 
@@ -70,4 +71,3 @@ export function teardownChatSocket() {
 export function getChatSocket() {
   return chatSocket;
 }
-

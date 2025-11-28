@@ -2,7 +2,11 @@
 
 import { useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
-import { initChatSocket, teardownChatSocket } from "@/utils/chat-socket";
+import {
+  CHAT_MESSAGE_EVENT,
+  initChatSocket,
+  teardownChatSocket,
+} from "@/utils/chat-socket";
 
 export function SocketManager() {
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
@@ -18,6 +22,11 @@ export function SocketManager() {
       userId,
       onMessageReceived: (payload) => {
         console.info("[chat] message received", payload);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent(CHAT_MESSAGE_EVENT, { detail: payload }),
+          );
+        }
       },
     });
 

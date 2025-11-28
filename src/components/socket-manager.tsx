@@ -7,7 +7,7 @@ import {
   initChatSocket,
   teardownChatSocket,
 } from "@/utils/socket/chatSocket";
-import { disconnectSocket } from "@/utils/socket";
+import { connectSocket, disconnectSocket } from "@/utils/socket";
 
 export function SocketManager() {
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
@@ -20,8 +20,18 @@ export function SocketManager() {
       return;
     }
 
+    const socket = connectSocket({
+      query: { userId },
+    });
+
+    if (!socket) {
+      return () => {
+        teardownChatSocket();
+        disconnectSocket();
+      };
+    }
+
     initChatSocket({
-      userId,
       onMessageReceived: (payload) => {
         console.info("[chat] message received", payload);
         if (typeof window !== "undefined") {

@@ -1,27 +1,19 @@
 "use client";
 
-import { connectSocket, getSocket } from "./index";
+import { getSocket } from "./index";
 
 export const CHAT_MESSAGE_EVENT = "chat:message";
 
 export type ChatMessagePayload = Record<string, unknown>;
 
 export type InitChatSocketOptions = {
-  userId: string;
   onMessageReceived?: (payload: ChatMessagePayload) => void;
 };
 
 let chatMessageListener: ((payload: ChatMessagePayload) => void) | null = null;
 
-export function initChatSocket(options: InitChatSocketOptions) {
-  if (!options.userId) {
-    return null;
-  }
-
-  const socket = connectSocket({
-    query: { userId: options.userId },
-  });
-
+export function initChatSocket(options: InitChatSocketOptions = {}) {
+  const socket = getSocket();
   if (!socket) {
     return null;
   }

@@ -23,10 +23,17 @@ export function initChatSocket(options: InitChatSocketOptions = {}) {
     chatMessageListener = null;
   }
 
-  if (options.onMessageReceived) {
-    chatMessageListener = options.onMessageReceived;
-    socket.on(CHAT_MESSAGE_EVENT, chatMessageListener);
-  }
+  chatMessageListener = (payload: ChatMessagePayload) => {
+    console.info("[chat] message received", payload);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent(CHAT_MESSAGE_EVENT, { detail: payload }),
+      );
+    }
+    options.onMessageReceived?.(payload);
+  };
+
+  socket.on(CHAT_MESSAGE_EVENT, chatMessageListener);
 
   return socket;
 }

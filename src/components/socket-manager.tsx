@@ -2,11 +2,7 @@
 
 import { useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
-import {
-  CHAT_MESSAGE_EVENT,
-  initChatSocket,
-  teardownChatSocket,
-} from "@/utils/socket/chatSocket";
+import { initChatSocket, teardownChatSocket } from "@/utils/socket/chatSocket";
 import { connectSocket, disconnectSocket } from "@/utils/socket";
 
 export function SocketManager() {
@@ -31,16 +27,7 @@ export function SocketManager() {
       };
     }
 
-    initChatSocket({
-      onMessageReceived: (payload) => {
-        console.info("[chat] message received", payload);
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent(CHAT_MESSAGE_EVENT, { detail: payload }),
-          );
-        }
-      },
-    });
+    initChatSocket();
 
     return () => {
       teardownChatSocket();

@@ -64,11 +64,21 @@ type ChatMessagesResponse = {
   data?: {
     chat?: {
       id?: string;
+      createdAt?: string;
+      userId?: string;
+      supplierId?: string;
     };
     chatId?: string;
     supplier?: ParticipantApiPayload | null;
     user?: ParticipantApiPayload | null;
     messages?: ApiMessage[];
+    meta?: {
+      page?: number;
+      limit?: number;
+      total?: number;
+      totalPages?: number;
+      hasNextPage?: boolean;
+    };
   };
 };
 
@@ -90,7 +100,14 @@ type SocketChatMessagePayload = {
     id?: string;
     role?: string | null;
   };
+  chat?: {
+    id?: string;
+    userId?: string;
+    supplierId?: string;
+  };
 };
+
+const MESSAGE_PAGE_SIZE = 30;
 
 const FALLBACK_PARTICIPANT: Record<"user" | "supplier", ParticipantProfile> = {
   user: {
@@ -173,6 +190,15 @@ const sortMessagesByDate = (list: ApiMessage[]): ApiMessage[] =>
     return aTime - bTime;
   });
 
+const dedupeMessages = (list: ApiMessage[]): ApiMessage[] => {
+  const map = new Map<string, ApiMessage>();
+  list.forEach((item) => {
+    const key = item.id || `${item.createdAt}-${item.content}`;
+    map.set(key, item);
+  });
+  return Array.from(map.values());
+};
+
 export function ChatPage({
   onNavigate,
   supplierId,
@@ -188,8 +214,11 @@ export function ChatPage({
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [messages, setMessages] = useState<ApiMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
+  const [messagePage, setMessagePage] = useState(1);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [participant, setParticipant] = useState<ParticipantProfile>(
     FALLBACK_PARTICIPANT[normalizedRole]
   );
@@ -221,7 +250,19 @@ export function ChatPage({
         return;
       }
 
-      if (detail.chatId && resolvedChatId && detail.chatId !== resolvedChatId) {
+      const incomingChatId = detail.chatId ?? detail.chat?.id;
+
+      if (incomingChatId && resolvedChatId && incomingChatId !== resolvedChatId) {
+        const senderRole = detail.sender?.role?.toLowerCase();
+        const toastLabel =
+          senderRole === "supplier"
+            ? "New supplier message"
+            : senderRole === "user"
+            ? "New customer message"
+            : "New message";
+        toast.info(toastLabel, {
+          description: detail.content ?? "Open the conversation to view it.",
+        });
         return;
       }
 
@@ -284,26 +325,47 @@ export function ChatPage({
   }, [chatId]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchMessages = useCallback(async () => {
+  type FetchMessagesOptions = {
+    page?: number;
+    append?: boolean;
+  };
+
+  const fetchMessages = useCallback(async (options?: FetchMessagesOptions) => {
     if (!hasCounterpart && !hasChatIdentifier) {
       setMessages([]);
       setMessageError(null);
       setLoadingMessages(false);
+      setLoadingOlderMessages(false);
+      setHasMoreMessages(false);
       return;
     }
 
+    const targetPage = options?.page ?? 1;
+    const appendMode = Boolean(options?.append && targetPage > 1);
+
     try {
-      setLoadingMessages(true);
+      if (appendMode) {
+        setLoadingOlderMessages(true);
+      } else {
+        setLoadingMessages(true);
+      }
       setMessageError(null);
       const route = isSupplierPerspective
         ? apiRoutes.supplier.chat.chatmessage
         : apiRoutes.user.chat.chatmessage;
       const queryKey = isSupplierPerspective ? "userId" : "supplierId";
-      const identifier = counterpartId
-        ? `${queryKey}=${encodeURIComponent(counterpartId)}`
-        : "";
+      const params = new URLSearchParams();
+      if (counterpartId) {
+        params.set(queryKey, counterpartId);
+      }
+      if (resolvedChatId) {
+        params.set("chatId", resolvedChatId);
+      }
+      params.set("page", String(targetPage));
+      params.set("limit", String(MESSAGE_PAGE_SIZE));
+      const queryString = params.toString();
       const endpoint = `${ensureEndpoint(route)}${
-        identifier ? `?${identifier}` : ""
+        queryString ? `?${queryString}` : ""
       }`;
       const response = await apiGet<ChatMessagesResponse>(endpoint);
       const payload = response?.data;
@@ -314,7 +376,14 @@ export function ChatPage({
         setResolvedChatId(fetchedChatId);
       }
       const normalizedList = Array.isArray(messageList) ? messageList : [];
-      setMessages(sortMessagesByDate(normalizedList));
+      setMessages((prev) => {
+        const combined = appendMode ? [...prev, ...normalizedList] : normalizedList;
+        return sortMessagesByDate(dedupeMessages(combined));
+      });
+      const hasNextPage =
+        payload?.meta?.hasNextPage ?? normalizedList.length === MESSAGE_PAGE_SIZE;
+      setHasMoreMessages(hasNextPage);
+      setMessagePage(targetPage);
       const participantPayload = isSupplierPerspective
         ? payload?.user
         : payload?.supplier;
@@ -333,6 +402,7 @@ export function ChatPage({
       );
     } finally {
       setLoadingMessages(false);
+      setLoadingOlderMessages(false);
     }
   }, [
     counterpartId,
@@ -344,8 +414,24 @@ export function ChatPage({
   ]);
 
   useEffect(() => {
-    fetchMessages();
+    setMessagePage(1);
+    setHasMoreMessages(true);
+    fetchMessages({ page: 1 });
   }, [fetchMessages]);
+
+  const handleLoadOlderMessages = useCallback(() => {
+    if (loadingOlderMessages || loadingMessages || !hasMoreMessages) {
+      return;
+    }
+    const nextPage = messagePage + 1;
+    fetchMessages({ page: nextPage, append: true });
+  }, [
+    fetchMessages,
+    hasMoreMessages,
+    loadingMessages,
+    loadingOlderMessages,
+    messagePage,
+  ]);
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -458,6 +544,18 @@ export function ChatPage({
             <p className="text-sm text-muted-foreground mb-3">
               Loading messages...
             </p>
+          )}
+          {!loadingMessages && !messageError && hasMoreMessages && messages.length > 0 && (
+            <div className="flex justify-center mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadOlderMessages}
+                disabled={loadingOlderMessages}
+              >
+                {loadingOlderMessages ? "Loading more..." : "Load previous messages"}
+              </Button>
+            </div>
           )}
           {messageError && (
             <p className="text-sm text-destructive mb-3">{messageError}</p>

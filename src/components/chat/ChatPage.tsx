@@ -99,6 +99,9 @@ type SocketChatMessagePayload = {
   sender?: {
     id?: string;
     role?: string | null;
+    email?: string | null;
+    fullName?: string | null;
+    createdAt?: string | null;
   };
   chat?: {
     id?: string;
@@ -208,6 +211,7 @@ export function ChatPage({
 }: ChatPageProps) {
   const normalizedRole: "user" | "supplier" =
     role === "supplier" ? "supplier" : "user";
+  const trimmedChatId = chatId?.trim() || undefined;
   const [message, setMessage] = useState("");
   const [showTyping, setShowTyping] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
@@ -226,14 +230,15 @@ export function ChatPage({
   const normalizedSupplierId = supplierId?.trim() || undefined;
   const normalizedUserId = userId?.trim() || undefined;
   const [resolvedChatId, setResolvedChatId] = useState<string | undefined>(
-    chatId?.trim() || undefined
+    trimmedChatId
   );
+  const activeChatId = resolvedChatId ?? trimmedChatId;
   const counterpartId = isSupplierPerspective
     ? normalizedUserId
     : normalizedSupplierId;
   const hasCounterpart = Boolean(counterpartId);
-  const hasChatIdentifier = Boolean(resolvedChatId);
-  const lacksSendContext = !counterpartId || !resolvedChatId;
+  const hasChatIdentifier = Boolean(activeChatId);
+  const lacksSendContext = !counterpartId || !activeChatId;
   const displayName =
     participant.name?.trim() ??
     FALLBACK_PARTICIPANT[normalizedRole].name ??
@@ -251,8 +256,24 @@ export function ChatPage({
       }
 
       const incomingChatId = detail.chatId ?? detail.chat?.id;
+      const incomingCounterpartId = isSupplierPerspective
+        ? detail.sender?.id ?? detail.chat?.userId
+        : detail.chat?.supplierId ??
+          (detail.sender?.role?.toLowerCase() === "supplier"
+            ? detail.sender?.id
+            : undefined);
 
-      if (incomingChatId && resolvedChatId && incomingChatId !== resolvedChatId) {
+      const chatMismatch =
+        incomingChatId && activeChatId && incomingChatId !== activeChatId;
+      const counterpartMismatch =
+        !incomingChatId &&
+        Boolean(
+          counterpartId &&
+            incomingCounterpartId &&
+            incomingCounterpartId !== counterpartId
+        );
+
+      if (chatMismatch || counterpartMismatch) {
         const senderRole = detail.sender?.role?.toLowerCase();
         const toastLabel =
           senderRole === "supplier"
@@ -296,16 +317,16 @@ export function ChatPage({
 
     window.addEventListener(
       CHAT_MESSAGE_EVENT,
-      handleSocketMessage as EventListener,
+      handleSocketMessage as EventListener
     );
 
     return () => {
       window.removeEventListener(
         CHAT_MESSAGE_EVENT,
-        handleSocketMessage as EventListener,
+        handleSocketMessage as EventListener
       );
     };
-  }, [resolvedChatId]);
+  }, [activeChatId, counterpartId, isSupplierPerspective]);
 
   const normalizedMessages = useMemo<RenderMessage[]>(() => {
     return messages.map((msg) => ({
@@ -321,8 +342,8 @@ export function ChatPage({
     setParticipant(FALLBACK_PARTICIPANT[normalizedRole]);
   }, [normalizedRole, counterpartId]);
   useEffect(() => {
-    setResolvedChatId(chatId?.trim() || undefined);
-  }, [chatId]);
+    setResolvedChatId(trimmedChatId);
+  }, [trimmedChatId]);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   type FetchMessagesOptions = {
@@ -330,88 +351,95 @@ export function ChatPage({
     append?: boolean;
   };
 
-  const fetchMessages = useCallback(async (options?: FetchMessagesOptions) => {
-    if (!hasCounterpart && !hasChatIdentifier) {
-      setMessages([]);
-      setMessageError(null);
-      setLoadingMessages(false);
-      setLoadingOlderMessages(false);
-      setHasMoreMessages(false);
-      return;
-    }
+  const fetchMessages = useCallback(
+    async (options?: FetchMessagesOptions) => {
+      if (!hasCounterpart && !hasChatIdentifier) {
+        setMessages([]);
+        setMessageError(null);
+        setLoadingMessages(false);
+        setLoadingOlderMessages(false);
+        setHasMoreMessages(false);
+        return;
+      }
 
-    const targetPage = options?.page ?? 1;
-    const appendMode = Boolean(options?.append && targetPage > 1);
+      const targetPage = options?.page ?? 1;
+      const appendMode = Boolean(options?.append && targetPage > 1);
 
-    try {
-      if (appendMode) {
-        setLoadingOlderMessages(true);
-      } else {
-        setLoadingMessages(true);
-      }
-      setMessageError(null);
-      const route = isSupplierPerspective
-        ? apiRoutes.supplier.chat.chatmessage
-        : apiRoutes.user.chat.chatmessage;
-      const queryKey = isSupplierPerspective ? "userId" : "supplierId";
-      const params = new URLSearchParams();
-      if (counterpartId) {
-        params.set(queryKey, counterpartId);
-      }
-      if (resolvedChatId) {
-        params.set("chatId", resolvedChatId);
-      }
-      params.set("page", String(targetPage));
-      params.set("limit", String(MESSAGE_PAGE_SIZE));
-      const queryString = params.toString();
-      const endpoint = `${ensureEndpoint(route)}${
-        queryString ? `?${queryString}` : ""
-      }`;
-      const response = await apiGet<ChatMessagesResponse>(endpoint);
-      const payload = response?.data;
-      const messageList = payload?.messages;
-      const fetchedChatId =
-        payload?.chat?.id ?? payload?.chatId ?? resolvedChatId ?? undefined;
-      if (fetchedChatId) {
-        setResolvedChatId(fetchedChatId);
-      }
-      const normalizedList = Array.isArray(messageList) ? messageList : [];
-      setMessages((prev) => {
-        const combined = appendMode ? [...prev, ...normalizedList] : normalizedList;
-        return sortMessagesByDate(dedupeMessages(combined));
-      });
-      const hasNextPage =
-        payload?.meta?.hasNextPage ?? normalizedList.length === MESSAGE_PAGE_SIZE;
-      setHasMoreMessages(hasNextPage);
-      setMessagePage(targetPage);
-      const participantPayload = isSupplierPerspective
-        ? payload?.user
-        : payload?.supplier;
-      if (participantPayload) {
-        setParticipant((prev) =>
-          buildParticipantProfile(
-            participantPayload,
-            prev,
-            FALLBACK_PARTICIPANT[normalizedRole]
-          )
+      try {
+        if (appendMode) {
+          setLoadingOlderMessages(true);
+        } else {
+          setLoadingMessages(true);
+        }
+        setMessageError(null);
+        const route = isSupplierPerspective
+          ? apiRoutes.supplier.chat.chatmessage
+          : apiRoutes.user.chat.chatmessage;
+        const queryKey = isSupplierPerspective ? "userId" : "supplierId";
+        const params = new URLSearchParams();
+        if (counterpartId) {
+          params.set(queryKey, counterpartId);
+        }
+        if (activeChatId) {
+          params.set("chatId", activeChatId);
+        }
+        params.set("page", String(targetPage));
+        params.set("limit", String(MESSAGE_PAGE_SIZE));
+        const queryString = params.toString();
+        const endpoint = `${ensureEndpoint(route)}${
+          queryString ? `?${queryString}` : ""
+        }`;
+        const response = await apiGet<ChatMessagesResponse>(endpoint);
+        const payload = response?.data;
+        const messageList = payload?.messages;
+        const fetchedChatId =
+          payload?.chat?.id ?? payload?.chatId ?? resolvedChatId ?? undefined;
+        if (fetchedChatId) {
+          setResolvedChatId(fetchedChatId);
+        }
+        const normalizedList = Array.isArray(messageList) ? messageList : [];
+        setMessages((prev) => {
+          const combined = appendMode
+            ? [...prev, ...normalizedList]
+            : normalizedList;
+          return sortMessagesByDate(dedupeMessages(combined));
+        });
+        const hasNextPage =
+          payload?.meta?.hasNextPage ??
+          normalizedList.length === MESSAGE_PAGE_SIZE;
+        setHasMoreMessages(hasNextPage);
+        setMessagePage(targetPage);
+        const participantPayload = isSupplierPerspective
+          ? payload?.user
+          : payload?.supplier;
+        if (participantPayload) {
+          setParticipant((prev) =>
+            buildParticipantProfile(
+              participantPayload,
+              prev,
+              FALLBACK_PARTICIPANT[normalizedRole]
+            )
+          );
+        }
+      } catch (error) {
+        setMessageError(
+          error instanceof Error ? error.message : "Failed to load messages"
         );
+      } finally {
+        setLoadingMessages(false);
+        setLoadingOlderMessages(false);
       }
-    } catch (error) {
-      setMessageError(
-        error instanceof Error ? error.message : "Failed to load messages"
-      );
-    } finally {
-      setLoadingMessages(false);
-      setLoadingOlderMessages(false);
-    }
-  }, [
-    counterpartId,
-    hasCounterpart,
-    hasChatIdentifier,
-    isSupplierPerspective,
-    normalizedRole,
-    resolvedChatId,
-  ]);
+    },
+    [
+      counterpartId,
+      hasCounterpart,
+      hasChatIdentifier,
+      isSupplierPerspective,
+      normalizedRole,
+      resolvedChatId,
+      activeChatId,
+    ]
+  );
 
   useEffect(() => {
     setMessagePage(1);
@@ -435,7 +463,7 @@ export function ChatPage({
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!counterpartId || !resolvedChatId) {
+    if (!counterpartId || !activeChatId) {
       setMessage("");
       return;
     }
@@ -447,10 +475,10 @@ export function ChatPage({
         : apiRoutes.user.chat.chatmessage;
       const payload: Record<string, string> = {
         message: trimmed,
-        chatId: resolvedChatId,
+        chatId: activeChatId,
       };
       const res = await apiPost(ensureEndpoint(route), payload);
-      console.log(res)
+      console.log(res);
       const optimisticMessage: ApiMessage = {
         id: crypto.randomUUID(),
         content: trimmed,
@@ -545,18 +573,23 @@ export function ChatPage({
               Loading messages...
             </p>
           )}
-          {!loadingMessages && !messageError && hasMoreMessages && messages.length > 0 && (
-            <div className="flex justify-center mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLoadOlderMessages}
-                disabled={loadingOlderMessages}
-              >
-                {loadingOlderMessages ? "Loading more..." : "Load previous messages"}
-              </Button>
-            </div>
-          )}
+          {!loadingMessages &&
+            !messageError &&
+            hasMoreMessages &&
+            messages.length > 0 && (
+              <div className="flex justify-center mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadOlderMessages}
+                  disabled={loadingOlderMessages}
+                >
+                  {loadingOlderMessages
+                    ? "Loading more..."
+                    : "Load previous messages"}
+                </Button>
+              </div>
+            )}
           {messageError && (
             <p className="text-sm text-destructive mb-3">{messageError}</p>
           )}

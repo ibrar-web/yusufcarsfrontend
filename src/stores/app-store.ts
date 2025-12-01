@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { create } from "zustand";
 import type { UserRole } from "@/utils/api";
@@ -90,7 +90,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   "admin-dashboard": "/admin/overview",
   auth: "/auth",
   "how-it-works": "/how-it-works",
-  suppliers: "/suppliers",
+  suppliers: "/new-supplier",
   "suppliers-list": "/suppliers-list",
   about: "/about",
   contact: "/contact",

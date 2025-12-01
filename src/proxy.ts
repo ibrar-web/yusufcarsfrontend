@@ -38,6 +38,7 @@ export default async function middleware(req: NextRequest) {
     "/products",
     "/request-flow",
     "/vehicle-confirmation",
+    "/new-supplier",
   ];
 
   const isPublic = publicPaths.some(

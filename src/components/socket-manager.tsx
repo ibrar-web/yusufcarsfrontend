@@ -3,6 +3,14 @@
 import { useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
 import { initChatSocket, teardownChatSocket } from "@/utils/socket/chatSocket";
+import {
+  initQuoteRequestSocket,
+  teardownQuoteRequestSocket,
+} from "@/utils/socket/quoteRequestSocket";
+import {
+  initQuoteOfferSocket,
+  teardownQuoteOfferSocket,
+} from "@/utils/socket/quoteOfferSocket";
 import { connectSocket, disconnectSocket } from "@/utils/socket";
 
 export function SocketManager() {
@@ -12,6 +20,8 @@ export function SocketManager() {
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       teardownChatSocket();
+      teardownQuoteRequestSocket();
+      teardownQuoteOfferSocket();
       disconnectSocket();
       return;
     }
@@ -23,14 +33,20 @@ export function SocketManager() {
     if (!socket) {
       return () => {
         teardownChatSocket();
+        teardownQuoteRequestSocket();
+        teardownQuoteOfferSocket();
         disconnectSocket();
       };
     }
 
     initChatSocket();
+    initQuoteRequestSocket();
+    initQuoteOfferSocket();
 
     return () => {
       teardownChatSocket();
+      teardownQuoteRequestSocket();
+      teardownQuoteOfferSocket();
       disconnectSocket();
     };
   }, [isAuthenticated, userId]);

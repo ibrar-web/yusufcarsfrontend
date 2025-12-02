@@ -16,6 +16,7 @@ export type VehicleData = {
   registrationNumber?: string;
   postcode?: string;
   localRequest?: boolean;
+  requestType?: "local" | "national";
   make?: string;
   model?: string;
   yearOfManufacture?: string;

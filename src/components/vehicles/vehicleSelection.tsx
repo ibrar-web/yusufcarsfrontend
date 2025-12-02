@@ -106,6 +106,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
   const buildVehiclePayload = (): VehicleData => {
     const isRegistration = inputMode === "registration";
+    const requestType = localRequest ? "local" : "national";
     const lookupYear = lookupDetails?.yearOfManufacture
       ? String(lookupDetails.yearOfManufacture)
       : undefined;
@@ -120,6 +121,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
         registrationNumber || lookupDetails?.registrationNumber || undefined,
       postcode: postcode || undefined,
       localRequest,
+      requestType,
       make: isRegistration
         ? lookupDetails?.make || undefined
         : vehicleMake || undefined,

@@ -6,13 +6,9 @@ export const CHAT_MESSAGE_EVENT = "chat:message";
 
 export type ChatMessagePayload = Record<string, unknown>;
 
-export type InitChatSocketOptions = {
-  onMessageReceived?: (payload: ChatMessagePayload) => void;
-};
-
 let chatMessageListener: ((payload: ChatMessagePayload) => void) | null = null;
 
-export function initChatSocket(options: InitChatSocketOptions = {}) {
+export function initChatSocket() {
   const socket = getSocket();
   if (!socket) {
     return null;
@@ -30,7 +26,6 @@ export function initChatSocket(options: InitChatSocketOptions = {}) {
         new CustomEvent(CHAT_MESSAGE_EVENT, { detail: payload }),
       );
     }
-    options.onMessageReceived?.(payload);
   };
 
   socket.on(CHAT_MESSAGE_EVENT, chatMessageListener);

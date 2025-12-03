@@ -12,9 +12,7 @@ export type InitQuoteOfferSocketOptions = {
 
 let quoteOfferListener: ((payload: QuoteOfferPayload) => void) | null = null;
 
-export function initQuoteOfferSocket(
-  options: InitQuoteOfferSocketOptions = {}
-) {
+export function initQuoteOfferSocket() {
   const socket = getSocket();
   if (!socket) {
     return null;
@@ -32,7 +30,6 @@ export function initQuoteOfferSocket(
         new CustomEvent(QUOTE_OFFER_EVENT, { detail: payload })
       );
     }
-    options.onOfferReceived?.(payload);
   };
 
   socket.on(QUOTE_OFFER_EVENT, quoteOfferListener);

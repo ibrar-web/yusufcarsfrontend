@@ -46,6 +46,7 @@ interface QuoteCardProps {
   onSelect?: (quoteId: string) => void;
   showCompare?: boolean;
   onSupplierClick?: (supplierId: string) => void;
+  accepting?: boolean;
 }
 
 // Default part images based on quote ID for variety
@@ -78,6 +79,7 @@ export function QuoteCard({
   onSelect,
   showCompare,
   onSupplierClick,
+  accepting = false,
 }: QuoteCardProps) {
   // Get product image - use provided image or default based on ID
   const partImage =
@@ -343,9 +345,10 @@ export function QuoteCard({
             <Button
               className="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-['Roboto'] font-semibold rounded-full shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 transition-all hover:scale-[1.02] group flex items-center justify-center whitespace-nowrap"
               onClick={() => onAccept?.(quote.id)}
+              disabled={accepting}
               style={{ fontSize: "13px" }}
             >
-              Accept
+              {accepting ? "Processing..." : "Accept"}
             </Button>
           </div>
         </div>

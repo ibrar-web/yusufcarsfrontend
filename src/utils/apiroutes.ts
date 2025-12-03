@@ -79,8 +79,11 @@ export const apiRoutes = {
   },
   user: {
     quote: {
-      listoffers: "user/quotes",
-      requestQuote: "/user/quotes",
+      listoffers: "user/quote/offer",
+      acceptoffer: (offerId: string) => {
+        return `user/quote/offer/${offerId}/accept`;
+      },
+      requestQuote: "/user/quote/request",
     },
     chat: {
       listchats: "user/chat/list",

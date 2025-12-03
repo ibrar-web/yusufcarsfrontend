@@ -46,7 +46,7 @@ import {
 import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
 import { apiRoutes } from "@/utils/apiroutes";
-import { apiGet } from "@/utils/apiconfig/http";
+import { apiGet, apiPost } from "@/utils/apiconfig/http";
 
 const FALLBACK_SUPPLIER_IMAGE =
   "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=200&fit=crop";
@@ -322,6 +322,7 @@ export default function QuotesPage() {
     useState<NormalizedQuote | null>(null);
   const [supplierDetailsOpen, setSupplierDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [acceptingQuoteId, setAcceptingQuoteId] = useState<string | null>(null);
 
   useEffect(() => {
     const endpoint = ensureEndpoint(apiRoutes.user.quote.listoffers);
@@ -375,6 +376,38 @@ export default function QuotesPage() {
     if (!quote) return;
     setSelectedSupplierQuote(quote);
     setSupplierDetailsOpen(true);
+  };
+
+  const handleAcceptQuote = async (quote: NormalizedQuote) => {
+    const endpoint = ensureEndpoint(
+      apiRoutes.user.quote.acceptoffer(quote.id)
+    );
+    setAcceptingQuoteId(quote.id);
+    try {
+      await apiPost(endpoint);
+      const orderNumber = `ORD-${Date.now().toString().slice(-8)}`;
+      setQuotes((prev) => prev.filter((item) => item.id !== quote.id));
+      setSelectedQuotes((prev) => prev.filter((id) => id !== quote.id));
+      if (selectedSupplierQuote?.id === quote.id) {
+        setSelectedSupplierQuote(null);
+        setSupplierDetailsOpen(false);
+      }
+      setOrderDetails({
+        supplierName: quote.supplierName,
+        partName: quote.partName ?? quote.requestSummary,
+        price: quote.price,
+        eta: quote.eta,
+        orderNumber,
+      });
+      setOrderDialogOpen(true);
+      toast.success("Quote accepted successfully");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to accept quote"
+      );
+    } finally {
+      setAcceptingQuoteId(null);
+    }
   };
 
   const requestSummary = quotes[0]?.requestSummary ?? "your request";
@@ -704,22 +737,13 @@ export default function QuotesPage() {
               key={quote.id}
               quote={quote}
               variant={viewMode}
-              onAccept={() => {
-                const orderNumber = `ORD-${Date.now().toString().slice(-8)}`;
-                setOrderDetails({
-                  supplierName: quote.supplierName,
-                  partName: quote.partName ?? quote.requestSummary,
-                  price: quote.price,
-                  eta: quote.eta,
-                  orderNumber,
-                });
-                setOrderDialogOpen(true);
-              }}
+              onAccept={() => handleAcceptQuote(quote)}
               onViewProfile={(id) => handleNavigate("supplier-profile", id)}
               selected={selectedQuotes.includes(quote.id)}
               onSelect={handleSelectQuote}
               showCompare
               onSupplierClick={handleSupplierClick}
+              accepting={acceptingQuoteId === quote.id}
             />
           ))}
         </div>

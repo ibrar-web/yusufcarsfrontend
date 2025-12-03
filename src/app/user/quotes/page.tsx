@@ -24,8 +24,25 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Grid, List, Search, X, Check, Star, MapPin, Clock, Shield } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Grid,
+  List,
+  Search,
+  X,
+  Check,
+  Star,
+  MapPin,
+  Clock,
+  Shield,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
 import { apiRoutes } from "@/utils/apiroutes";
@@ -56,7 +73,10 @@ const DEFAULT_PART_IMAGES = [
   "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=600&q=80",
 ];
 
-const getPartImageForServices = (services?: string[] | null, fallbackId?: string) => {
+const getPartImageForServices = (
+  services?: string[] | null,
+  fallbackId?: string
+) => {
   if (services && services.length > 0) {
     for (const service of services) {
       const key = service.toLowerCase();
@@ -81,7 +101,8 @@ function hashCode(value: string) {
   return hash;
 }
 
-const ensureEndpoint = (path: string) => (path.startsWith("/") ? path : `/${path}`);
+const ensureEndpoint = (path: string) =>
+  path.startsWith("/") ? path : `/${path}`;
 
 const formatTitleCase = (value?: string | null) => {
   if (!value) return "";
@@ -110,12 +131,6 @@ const formatServices = (services?: string[] | null) => {
 const buildServiceLabels = (services?: string[] | null) =>
   services?.map(formatTitleCase) ?? [];
 
-const formatVehicleSummary = (
-  year?: string | null,
-  make?: string | null,
-  model?: string | null,
-) => [year, make, model].filter(Boolean).join(" ");
-
 const buildSupplierDetails = (
   supplierId: string,
   supplierName: string,
@@ -125,7 +140,7 @@ const buildSupplierDetails = (
   categories?: string[] | null,
   eta?: string | null,
   phone?: string | null,
-  email?: string | null,
+  email?: string | null
 ): ComponentProps<typeof SupplierDetailsDialog>["supplier"] => ({
   id: supplierId,
   name: supplierName,
@@ -158,24 +173,25 @@ const buildSupplierDetails = (
 
 type UserQuoteOffer = {
   id: string;
+  partName?: string | null;
+  brand?: string | null;
+  offers?: unknown;
   price?: string | number | null;
   estimatedTime?: string | null;
   partCondition?: string | null;
   notes?: string | null;
   status?: string | null;
   createdAt?: string | null;
-  quoteRequest?: {
-    id: string;
-    services?: string[] | null;
-    make?: string | null;
-    model?: string | null;
-    yearOfManufacture?: string | null;
-  } | null;
+  updatedAt?: string | null;
+  expiresAt?: string | null;
+  quoteRequestId?: string | null;
   supplier?: {
     id: string;
     userId?: string | null;
     businessName?: string | null;
     tradingAs?: string | null;
+    fullName?: string | null;
+    email?: string | null;
     city?: string | null;
     description?: string | null;
     categories?: string[] | null;
@@ -183,6 +199,19 @@ type UserQuoteOffer = {
     phone?: string | null;
     postCode?: string | null;
   } | null;
+};
+
+type UserQuotesResponse = {
+  statusCode?: number;
+  message?: string;
+  data?: {
+    data?: UserQuoteOffer[];
+    meta?: {
+      total?: number;
+      page?: number;
+      limit?: number;
+    };
+  };
 };
 
 type NormalizedQuote = ComponentProps<typeof QuoteCard>["quote"] & {
@@ -197,27 +226,40 @@ type NormalizedQuote = ComponentProps<typeof QuoteCard>["quote"] & {
 };
 
 const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
-  const supplierId = offer.supplier?.id ?? `supplier-${offer.id}`;
+  const supplierId = offer.supplier?.id ?? offer.quoteRequestId ?? offer.id;
   const supplierChatId = offer.supplier?.userId ?? supplierId;
   const supplierName =
-    offer.supplier?.businessName || offer.supplier?.tradingAs || "Supplier";
+    offer.supplier?.businessName ||
+    offer.supplier?.tradingAs ||
+    offer.supplier?.fullName ||
+    "Supplier";
+  const supplierSummary = {
+    id: supplierId,
+    name: supplierName,
+    email: offer.supplier?.email ?? undefined,
+  };
   const priceValue =
     typeof offer.price === "string"
       ? parseFloat(offer.price)
       : offer.price ?? 0;
-  const servicesLabel = formatServices(offer.quoteRequest?.services);
-  const servicesArray = buildServiceLabels(offer.quoteRequest?.services);
-  const vehicleSummary = formatVehicleSummary(
-    offer.quoteRequest?.yearOfManufacture,
-    offer.quoteRequest?.make,
-    offer.quoteRequest?.model,
-  );
+  const serviceTokens = offer.partName ? [offer.partName] : undefined;
+  const normalizedPartName = offer.partName
+    ? formatTitleCase(offer.partName)
+    : undefined;
+  const normalizedBrand = offer.brand
+    ? formatTitleCase(offer.brand)
+    : undefined;
+  const servicesLabel = formatServices(serviceTokens);
+  const servicesArray = buildServiceLabels(serviceTokens);
+  const vehicleSummary = offer.brand ? formatTitleCase(offer.brand) : "";
+  const currentStatus = (offer.status || "pending").toLowerCase();
   const cardQuote: ComponentProps<typeof QuoteCard>["quote"] = {
     id: offer.id,
     supplierId,
     supplierChatId,
     supplierName,
     supplierLogo: FALLBACK_SUPPLIER_IMAGE,
+    supplier: supplierSummary,
     price: Number.isFinite(priceValue) ? Number(priceValue) : 0,
     originalPrice: undefined,
     rating: 4.6,
@@ -230,16 +272,20 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
       ? `Estimated delivery: ${offer.estimatedTime}`
       : "Standard delivery available",
     verified: offer.supplier?.approvalStatus === "approved",
-    partImage: getPartImageForServices(offer.quoteRequest?.services, offer.id),
+    partImage: getPartImageForServices(serviceTokens, offer.id),
     serviceLabels: servicesArray,
+    partName: normalizedPartName,
+    brand: normalizedBrand,
+    notes: offer.notes ?? undefined,
+    status: currentStatus,
+    expiresAt: offer.expiresAt ?? undefined,
   };
 
   return {
     ...cardQuote,
-    status: (offer.status || "pending").toLowerCase(),
     requestSummary: servicesLabel,
-    vehicleSummary: vehicleSummary || "Vehicle request",
-    requestId: offer.quoteRequest?.id,
+    vehicleSummary: vehicleSummary || "",
+    requestId: offer.quoteRequestId ?? undefined,
     sentAt: offer.createdAt ?? undefined,
     notes: offer.notes ?? undefined,
     customer: undefined,
@@ -252,13 +298,14 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
       offer.supplier?.categories,
       offer.estimatedTime,
       offer.supplier?.phone,
-      undefined,
+      offer.supplier?.email ?? undefined
     ),
   };
 };
 
 export default function QuotesPage() {
-  const { handleNavigate, openSignupDialog, showOrderConfirmation } = useAppState();
+  const { handleNavigate, openSignupDialog, showOrderConfirmation } =
+    useAppState();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
@@ -282,14 +329,12 @@ export default function QuotesPage() {
     const fetchQuotes = async () => {
       try {
         setLoadingQuotes(true);
-        const response = await apiGet<{
-          data?: { data?: UserQuoteOffer[] };
-        }>(endpoint);
+        const response = await apiGet<UserQuotesResponse>(endpoint);
         const payload = response?.data?.data ?? [];
         setQuotes(payload.map(normalizeOffer));
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to load quotes",
+          error instanceof Error ? error.message : "Failed to load quotes"
         );
       } finally {
         setLoadingQuotes(false);
@@ -302,14 +347,15 @@ export default function QuotesPage() {
   const filteredQuotes = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return quotes;
-    return quotes.filter((quote) =>
-      quote.supplierName.toLowerCase().includes(term) ||
-      quote.deliveryOption.toLowerCase().includes(term),
+    return quotes.filter(
+      (quote) =>
+        quote.supplierName.toLowerCase().includes(term) ||
+        quote.deliveryOption.toLowerCase().includes(term)
     );
   }, [quotes, searchTerm]);
 
   const selectedQuoteData = quotes.filter((quote) =>
-    selectedQuotes.includes(quote.id),
+    selectedQuotes.includes(quote.id)
   );
 
   const handleSelectQuote = (quoteId: string) => {
@@ -338,11 +384,7 @@ export default function QuotesPage() {
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Header
-        onNavigate={handleNavigate}
-        currentPage="quotes"
-        onSignupClick={openSignupDialog}
-      />
+      <Header />
 
       <div className="max-w-[1400px] mx-auto px-6 py-8">
         <div className="mb-8">
@@ -377,7 +419,9 @@ export default function QuotesPage() {
                 size="sm"
                 onClick={() => setViewMode("grid")}
                 className={`h-9 px-4 ${
-                  viewMode === "grid" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                  viewMode === "grid"
+                    ? "bg-white shadow-sm"
+                    : "hover:bg-white/50"
                 }`}
               >
                 <Grid className="h-4 w-4 mr-2" />
@@ -418,7 +462,8 @@ export default function QuotesPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-[#0F172A]">
-                    {selectedQuotes.length} quote{selectedQuotes.length > 1 ? "s" : ""} selected
+                    {selectedQuotes.length} quote
+                    {selectedQuotes.length > 1 ? "s" : ""} selected
                   </p>
                   {selectedQuotes.length < 3 && (
                     <p className="text-sm text-[#64748B]">
@@ -427,7 +472,11 @@ export default function QuotesPage() {
                   )}
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedQuotes([])}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedQuotes([])}
+              >
                 <X className="h-4 w-4 mr-2" />
                 Clear
               </Button>
@@ -473,10 +522,41 @@ export default function QuotesPage() {
                         </TableHeader>
                         <TableBody>
                           <TableRow className="bg-[#F8FAFC]">
-                            <TableCell className="font-semibold">Price</TableCell>
+                            <TableCell className="font-semibold">
+                              Price
+                            </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`price-${quote.id}`} className="text-center text-primary font-semibold">
+                              <TableCell
+                                key={`price-${quote.id}`}
+                                className="text-center text-primary font-semibold"
+                              >
                                 £{quote.price.toFixed(2)}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-semibold">
+                              Part
+                            </TableCell>
+                            {selectedQuoteData.map((quote) => (
+                              <TableCell
+                                key={`part-${quote.id}`}
+                                className="text-center"
+                              >
+                                {quote.partName || quote.requestSummary}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                          <TableRow className="bg-[#F8FAFC]">
+                            <TableCell className="font-semibold">
+                              Brand
+                            </TableCell>
+                            {selectedQuoteData.map((quote) => (
+                              <TableCell
+                                key={`brand-${quote.id}`}
+                                className="text-center capitalize"
+                              >
+                                {quote.brand || "Not specified"}
                               </TableCell>
                             ))}
                           </TableRow>
@@ -488,7 +568,10 @@ export default function QuotesPage() {
                               </div>
                             </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`rating-${quote.id}`} className="text-center">
+                              <TableCell
+                                key={`rating-${quote.id}`}
+                                className="text-center"
+                              >
                                 <div className="flex items-center justify-center gap-1">
                                   <Star className="h-4 w-4 fill-[#F59E0B] text-[#F59E0B]" />
                                   <span>{quote.rating}</span>
@@ -504,7 +587,10 @@ export default function QuotesPage() {
                               </div>
                             </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`distance-${quote.id}`} className="text-center">
+                              <TableCell
+                                key={`distance-${quote.id}`}
+                                className="text-center"
+                              >
                                 {quote.distance} mi
                               </TableCell>
                             ))}
@@ -517,15 +603,23 @@ export default function QuotesPage() {
                               </div>
                             </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`eta-${quote.id}`} className="text-center">
+                              <TableCell
+                                key={`eta-${quote.id}`}
+                                className="text-center"
+                              >
                                 {quote.eta}
                               </TableCell>
                             ))}
                           </TableRow>
                           <TableRow className="bg-[#F8FAFC]">
-                            <TableCell className="font-semibold">Part Condition</TableCell>
+                            <TableCell className="font-semibold">
+                              Part Condition
+                            </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`condition-${quote.id}`} className="text-center">
+                              <TableCell
+                                key={`condition-${quote.id}`}
+                                className="text-center"
+                              >
                                 <Badge className="capitalize bg-white border border-[#E5E7EB]">
                                   {quote.partCondition}
                                 </Badge>
@@ -533,19 +627,51 @@ export default function QuotesPage() {
                             ))}
                           </TableRow>
                           <TableRow>
-                            <TableCell className="font-semibold">Verified</TableCell>
+                            <TableCell className="font-semibold">
+                              Expires
+                            </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`verified-${quote.id}`} className="text-center">
+                              <TableCell
+                                key={`expires-${quote.id}`}
+                                className="text-center"
+                              >
+                                {quote.expiresAt
+                                  ? new Date(
+                                      quote.expiresAt
+                                    ).toLocaleDateString()
+                                  : "—"}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-semibold">
+                              Verified
+                            </TableCell>
+                            {selectedQuoteData.map((quote) => (
+                              <TableCell
+                                key={`verified-${quote.id}`}
+                                className="text-center"
+                              >
                                 {quote.verified ? "Yes" : "No"}
                               </TableCell>
                             ))}
                           </TableRow>
                           <TableRow className="bg-[#F8FAFC]">
-                            <TableCell className="font-semibold">Action</TableCell>
+                            <TableCell className="font-semibold">
+                              Action
+                            </TableCell>
                             {selectedQuoteData.map((quote) => (
-                              <TableCell key={`action-${quote.id}`} className="text-center">
-                                <Button className="w-full bg-primary hover:bg-primary-hover" asChild>
-                                  <Link href={`/user/chat?supplier=${quote.supplierId}&quote=${quote.id}`}>
+                              <TableCell
+                                key={`action-${quote.id}`}
+                                className="text-center"
+                              >
+                                <Button
+                                  className="w-full bg-primary hover:bg-primary-hover"
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/user/chat?supplier=${quote.supplier?.id}&quote=${quote.id}`}
+                                  >
                                     Chat with Supplier
                                   </Link>
                                 </Button>
@@ -582,7 +708,7 @@ export default function QuotesPage() {
                 const orderNumber = `ORD-${Date.now().toString().slice(-8)}`;
                 setOrderDetails({
                   supplierName: quote.supplierName,
-                  partName: quote.requestSummary,
+                  partName: quote.partName ?? quote.requestSummary,
                   price: quote.price,
                   eta: quote.eta,
                   orderNumber,
@@ -590,7 +716,7 @@ export default function QuotesPage() {
                 setOrderDialogOpen(true);
               }}
               onViewProfile={(id) => handleNavigate("supplier-profile", id)}
-              selected={selectedQuotes.includes(quote.id)} 
+              selected={selectedQuotes.includes(quote.id)}
               onSelect={handleSelectQuote}
               showCompare
               onSupplierClick={handleSupplierClick}

@@ -5,12 +5,19 @@ import { Button } from "./ui/button";
 import { Star, MapPin, Clock, Shield } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
+interface SupplierSummary {
+  id: string;
+  name: string;
+  email?: string | null;
+}
+
 interface Quote {
   id: string;
   supplierId: string;
   supplierChatId?: string;
   supplierName: string;
   supplierLogo?: string;
+  supplier?: SupplierSummary;
   price: number;
   originalPrice?: number;
   rating: number;
@@ -23,6 +30,11 @@ interface Quote {
   verified?: boolean;
   partImage?: string;
   serviceLabels?: string[];
+  partName?: string | null;
+  brand?: string | null;
+  notes?: string | null;
+  status?: string | null;
+  expiresAt?: string | null;
 }
 
 interface QuoteCardProps {
@@ -44,6 +56,19 @@ const defaultPartImages = [
   "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdXRvbW90aXZlJTIwcGFydHN8ZW58MXx8fHwxNzU5MjY4NDYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
 ];
 
+const getDefaultPartImage = (id: string) => {
+  if (!id) {
+    return defaultPartImages[0];
+  }
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash << 5) - hash + id.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % defaultPartImages.length;
+  return defaultPartImages[index];
+};
+
 export function QuoteCard({
   quote,
   variant = "list",
@@ -57,7 +82,22 @@ export function QuoteCard({
   // Get product image - use provided image or default based on ID
   const partImage =
     quote.partImage ||
-    defaultPartImages[parseInt(quote.id) % defaultPartImages.length];
+    getDefaultPartImage(quote.id);
+  const statusLabel = quote.status
+    ? quote.status.charAt(0).toUpperCase() + quote.status.slice(1)
+    : "Pending";
+  const expiresAtLabel = (() => {
+    if (!quote.expiresAt) return null;
+    const date = new Date(quote.expiresAt);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  })();
 
   // Both variants now use the same square card design with grid layout
   return (
@@ -188,6 +228,40 @@ export function QuoteCard({
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Part Summary */}
+        <div className="mb-3 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">
+              Part Details
+            </p>
+            {statusLabel && (
+              <Badge className="capitalize bg-white text-[#0F172A] border border-[#CBD5F5] px-2 py-0.5">
+                {statusLabel}
+              </Badge>
+            )}
+          </div>
+          <p className="font-['Inter'] text-[#0F172A] font-semibold mb-0.5 text-sm">
+            {quote.partName || quote.serviceLabels?.[0] || "Vehicle part"}
+          </p>
+          <p className="text-[12px] text-[#475569]">
+            Brand:{" "}
+            <span className="font-medium text-[#0F172A]">
+              {quote.brand || "Not specified"}
+            </span>
+          </p>
+          {quote.notes && (
+            <p className="text-[12px] text-[#475569] mt-1">
+              {quote.notes}
+            </p>
+          )}
+          {expiresAtLabel && (
+            <div className="flex items-center gap-1.5 text-[11px] text-[#475569] mt-2">
+              <Clock className="h-3.5 w-3.5 text-[#94A3B8]" />
+              Expires {expiresAtLabel}
+            </div>
+          )}
         </div>
 
         {/* Savings Indicator */}

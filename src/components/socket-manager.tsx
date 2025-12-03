@@ -25,7 +25,6 @@ export function SocketManager() {
       disconnectSocket();
       return;
     }
-
     const socket = connectSocket({
       query: { userId },
     });
@@ -38,7 +37,7 @@ export function SocketManager() {
         disconnectSocket();
       };
     }
-
+    console.log("socket connect", "userId :", userId);
     initChatSocket();
     initQuoteRequestSocket();
     initQuoteOfferSocket();

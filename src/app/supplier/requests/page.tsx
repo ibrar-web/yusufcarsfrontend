@@ -49,44 +49,50 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+type QuoteRequestUser = {
+  id: string;
+  email?: string | null;
+  fullName?: string | null;
+  postCode?: string | null;
+};
+
+type QuoteRequestDetails = {
+  id: string;
+  user?: QuoteRequestUser | null;
+  registrationNumber?: string | null;
+  postcode?: string | null;
+  make?: string | null;
+  model?: string | null;
+  engineSize?: string | null;
+  services?: string[] | null;
+};
+
 type SupplierQuoteRequestApi = {
   id: string;
-  user?: {
-    id: string;
-    email?: string;
-    fullName?: string;
-    postCode?: string | null;
-  } | null;
-  model?: string | null;
-  make?: string | null;
-  registrationNumber?: string | null;
-  taxStatus?: string | null;
-  taxDueDate?: string | null;
-  motStatus?: string | null;
-  yearOfManufacture?: string | null;
-  fuelType?: string | null;
-  engineSize?: string | null;
-  engineCapacity?: number | null;
-  services?: string[] | null;
-  postcode?: string | null;
-  requestType?: string | null;
+  supplierId?: string | null;
+  requestId?: string | null;
+  request?: QuoteRequestDetails | null;
   status?: string | null;
   expiresAt?: string | null;
+  quotedAt?: string | null;
+  rejectionReason?: string | null;
   createdAt?: string | null;
-  monthOfFirstRegistration?: string | null;
-  colour?: string | null;
+  updatedAt?: string | null;
 };
 
 type SupplierQuoteRequest = {
   id: string;
+  requestId: string;
+  supplierId?: string;
   customerName: string;
   customerEmail?: string;
   vehicleDisplay?: string;
   registrationNumber?: string;
   partDescription: string;
   detailSummary: string;
+  engineSize?: string;
+  services?: string[];
   status: string;
-  requestType?: string;
   postcode?: string;
   createdAt?: string;
   createdRelative?: string;
@@ -150,15 +156,13 @@ const toDisplayLabel = (value?: string | null) => {
 const normalizeQuoteRequest = (
   payload: SupplierQuoteRequestApi
 ): SupplierQuoteRequest => {
-  const serviceNames = payload.services?.map(toDisplayLabel).filter(Boolean) ?? [];
+  const requestData = payload.request ?? {};
+  const serviceNames =
+    requestData.services?.map(toDisplayLabel).filter(Boolean) ?? [];
   const partDescription = serviceNames.length
     ? serviceNames.join(", ")
     : "General service request";
-  const vehicleDisplay = [
-    payload.yearOfManufacture,
-    payload.make,
-    payload.model,
-  ]
+  const vehicleDisplay = [requestData.make, requestData.model]
     .filter(Boolean)
     .join(" ");
   const expiresAtDate = payload.expiresAt ? new Date(payload.expiresAt) : null;
@@ -167,27 +171,31 @@ const normalizeQuoteRequest = (
     : undefined;
 
   const detailSummaryParts = [
-    payload.requestType ? `Request type: ${toDisplayLabel(payload.requestType)}` : null,
-    payload.colour ? `Colour: ${payload.colour}` : null,
-    payload.monthOfFirstRegistration
-      ? `Registered: ${payload.monthOfFirstRegistration}`
+    requestData.engineSize ? `Engine: ${requestData.engineSize}` : null,
+    payload.rejectionReason
+      ? `Rejection reason: ${payload.rejectionReason}`
       : null,
   ].filter(Boolean);
 
   return {
     id: payload.id,
+    requestId: payload.requestId ?? requestData.id ?? payload.id,
+    supplierId: payload.supplierId ?? undefined,
     customerName:
-      payload.user?.fullName || payload.user?.email || "Unknown customer",
-    customerEmail: payload.user?.email || undefined,
+      requestData.user?.fullName ||
+      requestData.user?.email ||
+      "Unknown customer",
+    customerEmail: requestData.user?.email || undefined,
     vehicleDisplay: vehicleDisplay || undefined,
-    registrationNumber: payload.registrationNumber || undefined,
+    registrationNumber: requestData.registrationNumber || undefined,
     partDescription,
     detailSummary:
-      detailSummaryParts.join(" • ") ||
-      "No additional details provided",
+      detailSummaryParts.join(" • ") || "No additional details provided",
+    engineSize: requestData.engineSize || undefined,
+    services: serviceNames,
     status: (payload.status || "pending").toLowerCase(),
-    requestType: payload.requestType || undefined,
-    postcode: payload.postcode || payload.user?.postCode || undefined,
+    requestType: undefined,
+    postcode: requestData.postcode || requestData.user?.postCode || undefined,
     createdAt: payload.createdAt || undefined,
     createdRelative: formatRelativeTime(payload.createdAt),
     expiresAt: payload.expiresAt || undefined,
@@ -198,6 +206,8 @@ const normalizeQuoteRequest = (
 export default function SupplierRequestsPage() {
   const [quoteAmount, setQuoteAmount] = useState("");
   const [quoteNotes, setQuoteNotes] = useState("");
+  const [partName, setPartName] = useState("");
+  const [brand, setBrand] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("1-2");
   const [requestsToShow, setRequestsToShow] = useState(2);
   const [showQuoteSentDialog, setShowQuoteSentDialog] = useState(false);
@@ -206,7 +216,9 @@ export default function SupplierRequestsPage() {
   const [isLoadingRequests, setIsLoadingRequests] = useState(false);
   const [openRequestId, setOpenRequestId] = useState<string | null>(null);
   const [submittingQuote, setSubmittingQuote] = useState(false);
-  const newRequestsEndpoint = apiRoutes.supplier.quote.newrequests.startsWith("/")
+  const newRequestsEndpoint = apiRoutes.supplier.quote.newrequests.startsWith(
+    "/"
+  )
     ? apiRoutes.supplier.quote.newrequests
     : `/${apiRoutes.supplier.quote.newrequests}`;
   const sendOfferEndpoint = apiRoutes.supplier.quote.sendoffer.startsWith("/")
@@ -251,6 +263,16 @@ export default function SupplierRequestsPage() {
       toast.error("Please enter a valid quote amount");
       return;
     }
+    const trimmedPartName = partName.trim();
+    const trimmedBrand = brand.trim();
+    if (!trimmedPartName) {
+      toast.error("Part name is required");
+      return;
+    }
+    if (!trimmedBrand) {
+      toast.error("Brand is required");
+      return;
+    }
 
     const estimatedTime = deliveryTimeMap[deliveryTime] ?? deliveryTime;
     const expiresAt = request.expiresAt
@@ -265,6 +287,8 @@ export default function SupplierRequestsPage() {
         price: priceValue,
         estimatedTime,
         partCondition: partCondition === "new" ? "New" : "Used",
+        partName: trimmedPartName,
+        brand: trimmedBrand,
         notes: trimmedNotes ? trimmedNotes : undefined,
         expiresAt,
       });
@@ -273,6 +297,8 @@ export default function SupplierRequestsPage() {
       setOpenRequestId(null);
       setQuoteAmount("");
       setQuoteNotes("");
+      setPartName("");
+      setBrand("");
       setDeliveryTime("1-2");
       setPartCondition("new");
       await loadRequests();
@@ -289,7 +315,8 @@ export default function SupplierRequestsPage() {
 
   const renderRequestStatusBadge = (status: string) => {
     const normalized = status?.toLowerCase?.() ?? "pending";
-    const config = requestStatusConfig[normalized] ?? requestStatusConfig.pending;
+    const config =
+      requestStatusConfig[normalized] ?? requestStatusConfig.pending;
     return (
       <Badge className={`${config.className} px-4 py-1.5`}>
         {config.label}
@@ -368,21 +395,31 @@ export default function SupplierRequestsPage() {
                               request.timeRemaining
                             )} mins ago`
                           : request.timeRemaining !== undefined
-                            ? `${request.timeRemaining} mins left`
-                            : "No expiry"}
+                          ? `${request.timeRemaining} mins left`
+                          : "No expiry"}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-start justify-between">
                     {renderRequestStatusBadge(request.status)}
-                    <div className="text-right">
-                      <p className="text-xs text-[#475569] font-['Roboto'] mb-0.5">
-                        Request ID
-                      </p>
-                      <p className="text-sm font-['Inter'] text-[#0F172A]">
-                        {request.id}
-                      </p>
+                    <div className="text-right space-y-2">
+                      <div>
+                        <p className="text-xs text-[#475569] font-['Roboto'] mb-0.5">
+                          Request ID
+                        </p>
+                        <p className="text-sm font-['Inter'] text-[#0F172A]">
+                          {request.requestId}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#475569] font-['Roboto'] mb-0.5">
+                          Quote Ref
+                        </p>
+                        <p className="text-sm font-['Inter'] text-[#0F172A]">
+                          {request.id}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -411,7 +448,8 @@ export default function SupplierRequestsPage() {
                             For Vehicle
                           </p>
                           <p className="text-sm font-['Roboto'] text-[#0F172A]">
-                            {request.vehicleDisplay || "Vehicle details not provided"}
+                            {request.vehicleDisplay ||
+                              "Vehicle details not provided"}
                           </p>
                           <p className="text-xs text-[#475569] font-['Roboto'] mt-0.5">
                             {request.registrationNumber || "No registration"}
@@ -485,73 +523,76 @@ export default function SupplierRequestsPage() {
                     <DialogContent className="max-w-lg border border-[#E5E7EB]">
                       <DialogHeader>
                         <DialogTitle className="font-['Inter'] text-[#0F172A] text-2xl">
-                          Request Details - {request.id}
+                          Request Details - {request.requestId}
                         </DialogTitle>
                         <DialogDescription className="font-['Roboto'] text-[#475569]">
                           Review details and submit your quote
                         </DialogDescription>
+                        <p className="text-sm font-['Roboto'] text-[#94A3B8]">
+                          Quote Reference: {request.id}
+                        </p>
                       </DialogHeader>
 
                       <div className="space-y-3 py-2">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label className="text-[#475569] font-['Roboto']">
-                              Customer
-                            </Label>
-                            <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.customerName}
-                          </p>
-                        </div>
-                          <div>
-                            <Label className="text-[#475569] font-['Roboto']">
-                              Postcode
-                          </Label>
-                          <p className="font-['Roboto'] text-[#0F172A]">
-                            {request.postcode || "Unknown"}
-                          </p>
-                          </div>
-                          <div>
-                            <Label className="text-[#475569] font-['Roboto']">
-                              Vehicle
-                            </Label>
-                            <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.vehicleDisplay || "Not provided"}
-                          </p>
-                          </div>
-                          <div>
-                            <Label className="text-[#475569] font-['Roboto']">
-                              Registration
-                            </Label>
-                            <p className="font-['Roboto'] text-[#0F172A]">
-                              {request.registrationNumber || "Not provided"}
-                          </p>
-                          </div>
-                        </div>
-
                         <div>
                           <Label className="text-[#475569] font-['Roboto']">
                             Requested Services
                           </Label>
-                          <p className="font-['Roboto'] text-[#0F172A]">
-                            {request.partDescription}
-                          </p>
+                          {request.services && request.services.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {request.services.map((service) => (
+                                <Badge
+                                  key={`${request.id}-${service}`}
+                                  className="bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0]"
+                                >
+                                  {service}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="font-['Roboto'] text-[#0F172A]">
+                              {request.partDescription}
+                            </p>
+                          )}
                         </div>
-
-                        <div>
-                          <Label className="text-[#475569] font-['Roboto']">
-                            Additional Details
-                          </Label>
-                          <p className="font-['Roboto'] text-[#0F172A] text-sm">
-                            {request.detailSummary}
-                          </p>
-                        </div>
-
-                        <Separator />
 
                         <div className="space-y-3">
                           <h4 className="font-['Inter'] text-[#0F172A]">
                             Submit Your Quote
                           </h4>
+
+                          <div className="space-y-1.5">
+                            <Label
+                              htmlFor={`partName-${request.id}`}
+                              className="font-['Roboto'] text-[#475569]"
+                            >
+                              Part Name{" "}
+                              <span className="text-[#F02801]">*</span>
+                            </Label>
+                            <Input
+                              id={`partName-${request.id}`}
+                              placeholder="e.g. Brake pads"
+                              value={partName}
+                              onChange={(e) => setPartName(e.target.value)}
+                              className="font-['Roboto']"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label
+                              htmlFor={`brand-${request.id}`}
+                              className="font-['Roboto'] text-[#475569]"
+                            >
+                              Brand <span className="text-[#F02801]">*</span>
+                            </Label>
+                            <Input
+                              id={`brand-${request.id}`}
+                              placeholder="e.g. Bosch"
+                              value={brand}
+                              onChange={(e) => setBrand(e.target.value)}
+                              className="font-['Roboto']"
+                            />
+                          </div>
 
                           <div className="space-y-1.5">
                             <Label

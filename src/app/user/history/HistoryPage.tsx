@@ -4,19 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-import { 
-  Search, 
-  Filter, 
-  Package, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  TruckIcon,
-  Calendar,
-  Download,
-  Eye,
-  MessageSquare
-} from "lucide-react";
+import { Search, Package, Clock, CheckCircle, XCircle, TruckIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -29,12 +17,6 @@ import { OrderDetailsDialog } from "@/components/order/order-details-dialog";
 
 interface HistoryPageProps {
   onNavigate: (page: string) => void;
-  onSignupClick?: () => void;
-  isAuthenticated?: boolean;
-  onSignOut?: () => void;
-  onProfileClick?: () => void;
-  onNotificationClick?: () => void;
-  onTrackOrderClick?: () => void;
 }
 
 type OrderStatus = "completed" | "in-progress" | "cancelled" | "delivered";
@@ -55,6 +37,64 @@ interface OrderHistoryItem {
   vehicleMake: string;
   vehicleModel: string;
 }
+
+const dialogStatusMap: Record<OrderStatus, "delivered" | "in-transit" | "processing" | "cancelled"> = {
+  delivered: "delivered",
+  "in-progress": "in-transit",
+  completed: "delivered",
+  cancelled: "cancelled",
+};
+
+const toDialogOrder = (
+  order: OrderHistoryItem | null
+):
+  | {
+      orderId: string;
+      orderNumber: string;
+      date: string;
+      status: "delivered" | "in-transit" | "processing" | "cancelled";
+      partName: string;
+      partCategory: string;
+      partCondition?: string;
+      warranty?: string;
+      supplierName: string;
+      supplierRating?: number;
+      supplierLocation?: string;
+      supplierPhone?: string;
+      supplierEmail?: string;
+      vehicleMake: string;
+      vehicleModel: string;
+      vehicleYear?: string;
+      vehicleReg: string;
+      price: number;
+      deliveryDate?: string;
+      deliveryAddress?: string;
+      trackingNumber?: string;
+      notes?: string;
+    }
+  | null => {
+  if (!order) return null;
+  return {
+    orderId: order.orderId,
+    orderNumber: order.orderNumber,
+    date: order.date,
+    status: dialogStatusMap[order.status] ?? "processing",
+    partName: order.partName,
+    partCategory: order.partCategory,
+    partCondition: "New",
+    warranty: "12 months",
+    supplierName: order.supplierName,
+    vehicleMake: order.vehicleMake,
+    vehicleModel: order.vehicleModel,
+    vehicleYear: undefined,
+    vehicleReg: order.vehicleReg,
+    price: order.price,
+    deliveryDate: order.deliveryDate,
+    deliveryAddress: "Customer provided address",
+    trackingNumber: order.orderNumber,
+    notes: undefined,
+  };
+};
 
 const mockOrderHistory: OrderHistoryItem[] = [
   {
@@ -148,20 +188,13 @@ const mockOrderHistory: OrderHistoryItem[] = [
   },
 ];
 
-export function HistoryPage({
-  onNavigate,
-  onSignupClick,
-  isAuthenticated = true,
-  onSignOut,
-  onProfileClick,
-  onNotificationClick,
-  onTrackOrderClick
-}: HistoryPageProps) {
+export function HistoryPage({ onNavigate }: HistoryPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+  const dialogOrder = toDialogOrder(selectedOrder);
 
   const getStatusBadge = (status: OrderStatus) => {
     const statusConfig = {
@@ -217,17 +250,7 @@ export function HistoryPage({
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header
-        onNavigate={onNavigate}
-        currentPage="history"
-        sticky
-        onSignupClick={onSignupClick}
-        isAuthenticated={isAuthenticated}
-        onSignOut={onSignOut}
-        onProfileClick={onProfileClick}
-        onNotificationClick={onNotificationClick}
-        onTrackOrderClick={onTrackOrderClick}
-      />
+      <Header />
 
       {/* Hero Section */}
       <div className="bg-[#F1F5F9] pt-24 pb-12">
@@ -393,7 +416,7 @@ export function HistoryPage({
       <OrderDetailsDialog
         open={isOrderDetailsOpen}
         onOpenChange={setIsOrderDetailsOpen}
-        order={selectedOrder}
+        order={dialogOrder}
         onNavigate={onNavigate}
         onOrderAgain={() => {
           // Handle order again logic

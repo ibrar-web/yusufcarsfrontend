@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
-import { useAppState } from "@/hooks/use-app-state";
 import {
   adminAbuseReports,
   adminInquiries,
@@ -34,7 +33,6 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
-  const { handleNavigate, isAuthenticated } = useAppState();
 
   const navBadges: Record<string, number | undefined> = {
     suppliers: adminPendingSuppliers.length || undefined,
@@ -45,7 +43,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FEF3F2] via-white to-[#FEF3F2]">
-      <Header onNavigate={handleNavigate} currentPage="admin-dashboard" isAuthenticated={isAuthenticated} />
+      <Header />
       <div className="flex mt-[72px]">
         <aside className="w-64 border-r border-[#E5E7EB] min-h-[calc(100vh-72px)] bg-gradient-to-b from-[#FEF3F2] to-[#FEE2E2]/50 sticky top-[72px] h-[calc(100vh-72px)]">
           <div className="p-6">

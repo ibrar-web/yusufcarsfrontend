@@ -8,7 +8,6 @@ import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings } from "luc
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAppState } from "@/hooks/use-app-state";
 import { supplierMessages, supplierQuotes, supplierRequests } from "@/page-components/supplier-dashboard/data";
 
 interface SupplierLayoutProps {
@@ -17,7 +16,6 @@ interface SupplierLayoutProps {
 
 export default function SupplierLayout({ children }: SupplierLayoutProps) {
   const pathname = usePathname();
-  const { handleNavigate, isAuthenticated } = useAppState();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems = useMemo(
@@ -61,11 +59,7 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
-      <Header
-        onNavigate={handleNavigate}
-        currentPage="supplier-dashboard"
-        isAuthenticated={isAuthenticated}
-      />
+      <Header />
 
       <div className="flex pt-20">
         <aside

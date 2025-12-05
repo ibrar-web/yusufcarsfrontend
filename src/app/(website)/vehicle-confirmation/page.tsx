@@ -227,7 +227,7 @@ function VehicleConfirmationPage({
               </Button>
 
               <Button
-                onClick={() => onNavigate("products", undefined, vehicleData ?? undefined)}
+                onClick={() => onNavigate("products")}
                 className="flex-1 h-14 bg-primary hover:bg-primary-hover text-white font-['Roboto'] font-semibold rounded-full transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden"
                 style={{ fontSize: "15px" }}
               >

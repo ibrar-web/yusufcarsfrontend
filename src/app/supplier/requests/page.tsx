@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet, apiPost } from "@/utils/apiconfig/http";
@@ -156,7 +155,16 @@ const toDisplayLabel = (value?: string | null) => {
 const normalizeQuoteRequest = (
   payload: SupplierQuoteRequestApi
 ): SupplierQuoteRequest => {
-  const requestData = payload.request ?? {};
+  const requestData: QuoteRequestDetails = payload.request ?? {
+    id: payload.requestId ?? payload.id,
+    user: null,
+    registrationNumber: null,
+    postcode: null,
+    make: null,
+    model: null,
+    engineSize: null,
+    services: null,
+  };
   const serviceNames =
     requestData.services?.map(toDisplayLabel).filter(Boolean) ?? [];
   const partDescription = serviceNames.length
@@ -194,7 +202,6 @@ const normalizeQuoteRequest = (
     engineSize: requestData.engineSize || undefined,
     services: serviceNames,
     status: (payload.status || "pending").toLowerCase(),
-    requestType: undefined,
     postcode: requestData.postcode || requestData.user?.postCode || undefined,
     createdAt: payload.createdAt || undefined,
     createdRelative: formatRelativeTime(payload.createdAt),

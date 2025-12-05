@@ -37,7 +37,7 @@ import { authApi, type UserRole } from "@/utils/api";
 import { SignInDialog } from "@/components/auth/signin-dialog";
 
 export default function SupplierOnboardingPage() {
-  const { handleNavigate, handleAuthSuccess } = useAppState();
+  const { handleAuthSuccess } = useAppState();
   const [currentStep, setCurrentStep] = useState(0);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
@@ -193,7 +193,10 @@ export default function SupplierOnboardingPage() {
       if (formData.insuranceDoc instanceof File) {
         formDataToSend.append("insuranceDoc", formData.insuranceDoc);
       }
-      const response = await authApi.signup(formDataToSend);
+      const signupResponse = await authApi.signup(formDataToSend);
+      if (!signupResponse) {
+        throw new Error("Failed to submit supplier onboarding form");
+      }
       toast.success(
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
@@ -211,7 +214,7 @@ export default function SupplierOnboardingPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <Header currentPage="supplier-onboarding" />
+      <Header />
 
       <div className="max-w-[800px] mx-auto px-6 py-12">
         {/* Progress Header */}

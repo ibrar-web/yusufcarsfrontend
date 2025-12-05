@@ -13,15 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  ArrowLeft,
-  Building2,
-  CheckCircle,
-  FileText,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { ArrowLeft, Building2, FileText, Mail, MapPin, Phone } from "lucide-react";
 import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import {

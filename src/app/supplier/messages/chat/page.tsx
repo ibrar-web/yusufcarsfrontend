@@ -98,8 +98,8 @@ export default function Chat() {
         const endpoint = ensureEndpoint(apiRoutes.supplier.chat.listchats);
         const response = await apiGet<SupplierChatListResponse>(endpoint);
         const payload = response?.data?.data ?? [];
-        const normalized: SupplierConversation[] = payload
-          .map((item) => {
+        const normalized: SupplierConversation[] = payload.reduce(
+          (acc: SupplierConversation[], item) => {
             const userName =
               item.chat?.user?.fullName ||
               item.chat?.user?.firstName ||
@@ -107,14 +107,14 @@ export default function Chat() {
               "Customer";
             const userId = item.chat?.user?.id;
             if (!userId) {
-              return null;
+              return acc;
             }
             const latest = item.latestMessage;
             const timestampValue =
               latest?.createdAt ??
               item.chat?.createdAt ??
               new Date().toISOString();
-            return {
+            acc.push({
               id: userId,
               chatId: item.chat?.id ?? userId,
               name: userName,
@@ -122,9 +122,11 @@ export default function Chat() {
               lastMessage: latest?.content ?? "No messages yet",
               timestampValue,
               unread: latest && !latest.isRead ? 1 : 0,
-            };
-          })
-          .filter((conv): conv is SupplierConversation => Boolean(conv));
+            });
+            return acc;
+          },
+          []
+        );
         if (!ignore) {
           setConversations(normalized);
           setSelectedConversationId(

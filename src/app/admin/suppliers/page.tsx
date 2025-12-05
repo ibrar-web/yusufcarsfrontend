@@ -81,6 +81,8 @@ type SupplierRecord = {
   updatedAt?: string | null;
 };
 
+type PendingSupplier = (typeof adminPendingSuppliers)[number];
+
 export default function AdminSuppliersPage() {
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [totalSuppliers, setTotalSuppliers] = useState(0);

@@ -33,6 +33,7 @@ type ChatListResponse = {
         createdAt?: string;
         supplier?: {
           id: string;
+          userId?: string;
           businessName?: string;
           firstName?: string;
         };
@@ -100,18 +101,18 @@ export default function Chat() {
         const endpoint = ensureEndpoint(apiRoutes.user.chat.listchats);
         const response = await apiGet<ChatListResponse>(endpoint);
         const payload = response?.data?.data ?? [];
-        const normalized: UserConversation[] = payload
-          .map((item) => {
+        const normalized: UserConversation[] = payload.reduce(
+          (acc: UserConversation[], item) => {
             const supplierName =
               item.chat?.supplier?.businessName ||
               item.chat?.supplier?.firstName ||
               "Supplier";
             const supplierId = item.chat?.supplier?.userId;
             if (!supplierId) {
-              return null;
+              return acc;
             }
             const latest = item.latestMessage;
-            return {
+            acc.push({
               id: supplierId,
               chatId: item.chat?.id ?? supplierId,
               name: supplierName,
@@ -124,9 +125,11 @@ export default function Chat() {
               unread: latest && !latest.isRead ? 1 : 0,
               online: false,
               rating: 0,
-            };
-          })
-          .filter((conv): conv is UserConversation => Boolean(conv));
+            });
+            return acc;
+          },
+          []
+        );
         if (!ignore) {
           setConversations(normalized);
         }

@@ -18,12 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { adminInquiries } from "@/page-components/admin-dashboard/data";
-import {
-  Calendar,
-  CheckCircle,
-  Mail,
-  Users,
-} from "lucide-react";
+import { CheckCircle, Mail, Users } from "lucide-react";
 
 type InquiryStatus = "all" | "unread" | "read";
 type Inquiry = (typeof adminInquiries)[number];

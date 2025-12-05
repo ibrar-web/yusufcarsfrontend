@@ -283,6 +283,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
 
   return {
     ...cardQuote,
+    status: cardQuote.status ?? currentStatus,
     requestSummary: servicesLabel,
     vehicleSummary: vehicleSummary || "",
     requestId: offer.quoteRequestId ?? undefined,
@@ -304,7 +305,7 @@ const normalizeOffer = (offer: UserQuoteOffer): NormalizedQuote => {
 };
 
 export default function QuotesPage() {
-  const { handleNavigate, openSignupDialog, showOrderConfirmation } =
+  const { handleNavigate, showOrderConfirmation } =
     useAppState();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);

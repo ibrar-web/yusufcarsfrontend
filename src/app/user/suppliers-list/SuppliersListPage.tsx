@@ -19,20 +19,12 @@ import {
   Clock, 
   Truck, 
   MessageSquare,
-  Award,
-  Shield,
-  Package
+  Award
 } from "lucide-react";
 import { toast } from "sonner";
 interface SuppliersListPageProps {
   onNavigate: (page: string) => void;
   onBack?: () => void;
-  onSignupClick?: () => void;
-  isAuthenticated?: boolean;
-  onSignOut?: () => void;
-  onProfileClick?: () => void;
-  onNotificationClick?: () => void;
-  onTrackOrderClick?: () => void;
   partData?: {
     name: string;
     category: string;
@@ -43,12 +35,7 @@ interface SuppliersListPageProps {
 
 export function SuppliersListPage({ 
   onNavigate, 
-  onSignupClick, 
-  isAuthenticated, 
-  onSignOut, 
-  onProfileClick,
-  onNotificationClick,
-  onTrackOrderClick,
+  onBack,
   partData 
 }: SuppliersListPageProps) {
   const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
@@ -142,23 +129,14 @@ export function SuppliersListPage({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header 
-        onNavigate={onNavigate} 
-        currentPage="suppliers-list"
-        onSignupClick={onSignupClick}
-        isAuthenticated={isAuthenticated}
-        onSignOut={onSignOut}
-        onProfileClick={onProfileClick}
-        onNotificationClick={onNotificationClick}
-        onTrackOrderClick={onTrackOrderClick}
-      />
+      <Header />
 
       {/* Page Header */}
       <section className="bg-white border-b border-[#E5E7EB] pt-24 pb-8">
         <div className="max-w-[1200px] mx-auto px-6">
           {/* Back Button */}
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => (onBack ? onBack() : onNavigate("home"))}
             className="flex items-center gap-2 text-[#64748B] hover:text-[#F02801] transition-colors duration-200 mb-6 group"
           >
             <ArrowLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-1" />

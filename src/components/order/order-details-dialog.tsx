@@ -319,18 +319,10 @@ export function OrderDetailsDialog({
             {order.status === "delivered" && (
               <Button
                 onClick={() => {
-                  // Generate new order number
-                  const newOrderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
-                  
                   // Calculate ETA (3-5 business days from now)
                   const daysToAdd = Math.floor(Math.random() * 3) + 3;
                   const etaDate = new Date();
                   etaDate.setDate(etaDate.getDate() + daysToAdd);
-                  const eta = etaDate.toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  });
                   
                   // Close the details dialog
                   onOpenChange(false);

@@ -129,7 +129,7 @@ export function SignupDialog({
     setIsSubmitting(true);
 
     try {
-      const response = await authApi.signup({
+      await authApi.signup({
         fullName: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),

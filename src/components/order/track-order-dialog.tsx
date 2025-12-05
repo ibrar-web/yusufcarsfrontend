@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,15 +17,13 @@ import {
   Truck, 
   CheckCircle, 
   MapPin, 
-  Phone, 
   MessageSquare,
   FileText,
   Shield,
   ChevronDown,
   Store,
   Flag,
-  AlertCircle,
-  X
+  AlertCircle
 } from "lucide-react";
 
 interface TrackOrderDialogProps {
@@ -353,7 +351,7 @@ export function TrackOrderDialog({
                   </div>
 
                   {/* Steps */}
-                  {steps.map((step, index) => {
+                  {steps.map((step) => {
                     const Icon = step.icon;
                     const isDone = step.status === 'done';
                     const isCurrent = step.status === 'current';

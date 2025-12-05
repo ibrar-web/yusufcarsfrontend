@@ -64,27 +64,6 @@ export function AdminSignInDialog({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateSignIn = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!signInData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signInData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (!signInData.password) {
-      newErrors.password = "Password is required";
-    }
-
-    if (!signInData.accessCode) {
-      newErrors.accessCode = "Admin access code is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

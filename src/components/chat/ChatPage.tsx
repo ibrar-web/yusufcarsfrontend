@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChatBubble, TypingIndicator } from "@/components/chat-bubble";
+import { ChatBubble } from "@/components/chat-bubble";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -213,7 +213,6 @@ export function ChatPage({
     role === "supplier" ? "supplier" : "user";
   const trimmedChatId = chatId?.trim() || undefined;
   const [message, setMessage] = useState("");
-  const [showTyping, setShowTyping] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [messages, setMessages] = useState<ApiMessage[]>([]);
@@ -603,7 +602,6 @@ export function ChatPage({
           {displayedMessages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} />
           ))}
-          {showTyping && <TypingIndicator />}
         </div>
       </div>
       <div className="p-4 border-t border-border bg-card">

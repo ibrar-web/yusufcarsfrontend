@@ -4,18 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import {
-  Search,
-  X,
-  Filter,
-  Wrench,
-  Settings,
-  Zap,
-  Package,
-  Truck,
-  BadgeCheck,
-  ShoppingCart,
-} from "lucide-react";
+import { Search, X, Package, Truck, BadgeCheck, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductsDialogProps {
@@ -23,16 +12,6 @@ interface ProductsDialogProps {
   onOpenChange: (open: boolean) => void;
   onRequestPart: (product: any) => void;
 }
-
-const categories = [
-  { id: "all", name: "All Parts", icon: Package, count: 245 },
-  { id: "engine", name: "Engine", icon: Settings, count: 58 },
-  { id: "brakes", name: "Brakes", icon: Zap, count: 42 },
-  { id: "suspension", name: "Suspension", icon: Wrench, count: 35 },
-  { id: "electrical", name: "Electrical", icon: Package, count: 67 },
-  { id: "bodywork", name: "Bodywork", icon: Truck, count: 28 },
-  { id: "interior", name: "Interior", icon: BadgeCheck, count: 15 },
-];
 
 const products = [
   {

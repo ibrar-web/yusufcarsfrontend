@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Search, X, Package, Truck, BadgeCheck, ShoppingCart } from "lucide-react";
+import { Search, X, Package, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductsDialogProps {
@@ -97,13 +97,11 @@ const products = [
 ];
 
 export function ProductsDialog({ open, onOpenChange, onRequestPart }: ProductsDialogProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
 
   const handleRequestQuote = (product: any) => {

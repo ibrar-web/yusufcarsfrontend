@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +14,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import {
   FileText,
   MessageSquare,
@@ -28,7 +26,6 @@ import {
   Package,
   Truck,
   BadgeCheck,
-  ChevronDown,
   ShoppingCart,
   X,
 } from "lucide-react";
@@ -79,7 +76,6 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  const [scrollY, setScrollY] = useState(0);
 
   // Product detail dialog state
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -98,65 +94,65 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const [lookupFuelType, setLookupFuelType] = useState("");
   const [lookupEngineSize, setLookupEngineSize] = useState("");
 
+  const featuredParts = useMemo(
+    () => [
+      {
+        id: "1",
+        name: "Front Brake Disc & Pad Set",
+        category: "Brakes",
+        price: 85.99,
+        originalPrice: 129.99,
+        image:
+          "https://images.unsplash.com/photo-1758563920433-027318cc48a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBicmFrZSUyMHN5c3RlbXxlbnwxfHx8fDE3NTkyMTg4MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+        rating: 4.8,
+        reviews: 124,
+        inStock: true,
+      },
+      {
+        id: "2",
+        name: "Engine Oil Filter Kit",
+        category: "Engine",
+        price: 24.99,
+        originalPrice: 34.99,
+        image:
+          "https://images.unsplash.com/photo-1734530901192-4b7217b00724?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBwYXJ0cyUyMGVuZ2luZXxlbnwxfHx8fDE3NTkxNDkwNzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+        rating: 4.9,
+        reviews: 256,
+        inStock: true,
+      },
+      {
+        id: "3",
+        name: "Shock Absorber Set",
+        category: "Suspension",
+        price: 149.99,
+        originalPrice: 199.99,
+        image:
+          "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBzdXNwZW5zaW9ufGVufDF8fHx8MTc1OTIxODgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+        rating: 4.7,
+        reviews: 89,
+        inStock: true,
+      },
+      {
+        id: "4",
+        name: "Headlight Assembly",
+        category: "Electrical",
+        price: 89.99,
+        originalPrice: 119.99,
+        image:
+          "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdXRvbW90aXZlJTIwcGFydHN8ZW58MXx8fHwxNzU5MTY0MzIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+        rating: 4.6,
+        reviews: 67,
+        inStock: true,
+      },
+    ],
+    []
+  );
+
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const featuredParts = [
-    {
-      id: "1",
-      name: "Front Brake Disc & Pad Set",
-      category: "Brakes",
-      price: 85.99,
-      originalPrice: 129.99,
-      image:
-        "https://images.unsplash.com/photo-1758563920433-027318cc48a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBicmFrZSUyMHN5c3RlbXxlbnwxfHx8fDE3NTkyMTg4MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.8,
-      reviews: 124,
-      inStock: true,
-    },
-    {
-      id: "2",
-      name: "Engine Oil Filter Kit",
-      category: "Engine",
-      price: 24.99,
-      originalPrice: 34.99,
-      image:
-        "https://images.unsplash.com/photo-1734530901192-4b7217b00724?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBwYXJ0cyUyMGVuZ2luZXxlbnwxfHx8fDE3NTkxNDkwNzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.9,
-      reviews: 256,
-      inStock: true,
-    },
-    {
-      id: "3",
-      name: "Shock Absorber Set",
-      category: "Suspension",
-      price: 149.99,
-      originalPrice: 199.99,
-      image:
-        "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBzdXNwZW5zaW9ufGVufDF8fHx8MTc1OTIxODgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.7,
-      reviews: 89,
-      inStock: true,
-    },
-    {
-      id: "4",
-      name: "Headlight Assembly",
-      category: "Electrical",
-      price: 89.99,
-      originalPrice: 119.99,
-      image:
-        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdXRvbW90aXZlJTIwcGFydHN8ZW58MXx8fHwxNzU5MTY0MzIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.6,
-      reviews: 67,
-      inStock: true,
-    },
-  ];
+    if (!selectedProduct && featuredParts.length > 0) {
+      setSelectedProduct(featuredParts[0]);
+    }
+  }, [featuredParts, selectedProduct]);
 
   const isLookupDisabled =
     lookupMode === "registration"

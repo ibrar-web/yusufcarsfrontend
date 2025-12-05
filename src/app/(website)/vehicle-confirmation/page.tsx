@@ -94,7 +94,7 @@ function VehicleConfirmationPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onNavigate={onNavigate} currentPage="vehicle-confirmation" />
+      <Header />
 
       <div className="max-w-[1000px] mx-auto px-6 pt-32 pb-16 min-h-[calc(100vh-80px)] flex flex-col justify-center">
         <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-white/10 fade-in-up">

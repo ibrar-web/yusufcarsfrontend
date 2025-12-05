@@ -122,8 +122,7 @@ const buildQuoteRequestPayload = (
     motExpiryDate: vehicle.motExpiryDate,
     wheelplan: vehicle.wheelplan,
     monthOfFirstRegistration: vehicle.monthOfFirstRegistration,
-    requestType:
-      vehicle.requestType ?? (vehicle.localRequest ? "local" : "national") ?? "national",
+    requestType: vehicle.requestType ?? (vehicle.localRequest ? "local" : "national"),
     expiresAt: expiryDate.toISOString(),
   };
 };

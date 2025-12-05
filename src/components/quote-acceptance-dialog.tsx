@@ -1,11 +1,9 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "./ui/dialog";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
@@ -17,7 +15,6 @@ import {
   Package,
   Clock,
   MapPin,
-  Calendar,
   CreditCard,
   ShieldCheck,
   AlertCircle,

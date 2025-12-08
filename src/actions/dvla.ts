@@ -2,7 +2,7 @@
 import { VehicleEnquiryResponse } from "@/types/dvla";
 
 export async function enquiryVehicle(
-  registrationNumber: string
+  registrationNumber: string, vehicleModel: string
 ): Promise<VehicleEnquiryResponse> {
   if (!registrationNumber) {
     throw new Error("Registration number is required.");
@@ -21,7 +21,7 @@ export async function enquiryVehicle(
       "x-api-key": apiKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ registrationNumber }),
+    body: JSON.stringify({ registrationNumber, vehicleModel }),
   });
 
   const raw = await response.text();

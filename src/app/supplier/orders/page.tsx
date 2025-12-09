@@ -10,10 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAppState } from "@/hooks/use-app-state";
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet } from "@/utils/apiconfig/http";
-import { Calendar, DollarSign, Hash, MessageSquare, Search, User, Wrench } from "lucide-react";
+import { Calendar, DollarSign, Hash, MessageSquare, User, Wrench } from "lucide-react";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import useDebounce from "@/components/debouncedSearch/debouncedSearch";
+import SearchBar from "@/components/SearchBar/SearchBar";
 
 type SupplierOrderApi = {
   id: string;
@@ -145,7 +145,7 @@ export default function SupplierOrdersPage() {
                 <CardTitle className="font-['Inter'] text-[#0F172A]">Orders</CardTitle>
                 <CardDescription className="font-['Roboto'] text-[#475569]">Status of every order you've received</CardDescription>
             </div>
-            <div className="relative flex-1 max-w-md">
+            {/* <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#475569]" />
                 <Input
                 type="text"
@@ -162,6 +162,13 @@ export default function SupplierOrdersPage() {
                     ×
                 </button>
                 )}
+            </div> */}
+            <div className="relative flex-1 max-w-md">
+              <SearchBar
+                value={userSearch}
+                onChange={setUserSearch}
+                placeholder="Search users by name, email, location or ID..."
+              />
             </div>
         </CardHeader>
         <CardContent className="p-0">

@@ -737,9 +737,7 @@ export default function QuotesPage() {
             <QuoteCard
               key={quote.id}
               quote={quote}
-              variant={viewMode}
               onAccept={() => handleAcceptQuote(quote)}
-              onViewProfile={(id) => handleNavigate("supplier-profile", id)}
               selected={selectedQuotes.includes(quote.id)}
               onSelect={handleSelectQuote}
               showCompare

@@ -1,5 +1,239 @@
 {
-  "node": {},
+  "node": {
+    "0000105d2cf57ca941e4c4fb7d1fade1e8d1e3509a": {
+      "workers": {
+        "app/(website)/about/page": {
+          "moduleId": 10692,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/contact/page": {
+          "moduleId": 71499,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/how-it-works/page": {
+          "moduleId": 82081,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/new-supplier/page": {
+          "moduleId": 33910,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/page": {
+          "moduleId": 76802,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/parts-selection/page": {
+          "moduleId": 39017,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/products/page": {
+          "moduleId": 86923,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/request-flow/page": {
+          "moduleId": 40710,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/supplier-profile/page": {
+          "moduleId": 12757,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/vehicle-confirmation/page": {
+          "moduleId": 26433,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/_not-found/page": {
+          "moduleId": 75604,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/inquiries/page": {
+          "moduleId": 96023,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/overview/page": {
+          "moduleId": 35082,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/page": {
+          "moduleId": 52053,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/reports/page": {
+          "moduleId": 9025,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/suppliers/page": {
+          "moduleId": 78240,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/suppliers/profile/page": {
+          "moduleId": 48793,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/users/page": {
+          "moduleId": 19882,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/auth/supplier-onboarding/page": {
+          "moduleId": 33720,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/analytics/page": {
+          "moduleId": 61572,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/messages/chat/page": {
+          "moduleId": 47992,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/messages/page": {
+          "moduleId": 29421,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/page": {
+          "moduleId": 91985,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/profile/page": {
+          "moduleId": 59420,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/quotes/page": {
+          "moduleId": 96387,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/requests/page": {
+          "moduleId": 92751,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/user/chat/page": {
+          "moduleId": 24739,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/user/history/page": {
+          "moduleId": 75684,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/user/quotes/page": {
+          "moduleId": 62309,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/user/suppliers-list/page": {
+          "moduleId": 22229,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        }
+      },
+      "layer": {
+        "app/(website)/about/page": "rsc",
+        "app/(website)/contact/page": "rsc",
+        "app/(website)/how-it-works/page": "rsc",
+        "app/(website)/new-supplier/page": "rsc",
+        "app/(website)/page": "rsc",
+        "app/(website)/parts-selection/page": "rsc",
+        "app/(website)/products/page": "rsc",
+        "app/(website)/request-flow/page": "rsc",
+        "app/(website)/supplier-profile/page": "rsc",
+        "app/(website)/vehicle-confirmation/page": "rsc",
+        "app/_not-found/page": "rsc",
+        "app/admin/inquiries/page": "rsc",
+        "app/admin/overview/page": "rsc",
+        "app/admin/page": "rsc",
+        "app/admin/reports/page": "rsc",
+        "app/admin/suppliers/page": "rsc",
+        "app/admin/suppliers/profile/page": "rsc",
+        "app/admin/users/page": "rsc",
+        "app/auth/supplier-onboarding/page": "rsc",
+        "app/supplier/analytics/page": "rsc",
+        "app/supplier/messages/chat/page": "rsc",
+        "app/supplier/messages/page": "rsc",
+        "app/supplier/page": "rsc",
+        "app/supplier/profile/page": "rsc",
+        "app/supplier/quotes/page": "rsc",
+        "app/supplier/requests/page": "rsc",
+        "app/user/chat/page": "rsc",
+        "app/user/history/page": "rsc",
+        "app/user/quotes/page": "rsc",
+        "app/user/suppliers-list/page": "rsc"
+      },
+      "filename": "src/actions/session.ts",
+      "exportedName": "getSessionFromCookie"
+    },
+    "408caa229a3515d71ab679e338c6cfb0c957ca6b80": {
+      "workers": {
+        "app/(website)/page": {
+          "moduleId": 76802,
+          "async": false,
+          "exportedName": "enquiryVehicle",
+          "filename": "src/actions/dvla.ts"
+        }
+      },
+      "layer": {
+        "app/(website)/page": "action-browser"
+      },
+      "filename": "src/actions/dvla.ts",
+      "exportedName": "enquiryVehicle"
+    }
+  },
   "edge": {},
-  "encryptionKey": "Xk2ythrEcB7KDEvLKsthh/lVssqEH2LW8iwxdKkiHwQ="
+  "encryptionKey": "ta1Nl2O2cGj3t0+ck/KYfuggQK/KmGA9tqW1hOKhihg="
 }

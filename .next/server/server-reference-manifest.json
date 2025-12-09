@@ -218,7 +218,7 @@
       "filename": "src/actions/session.ts",
       "exportedName": "getSessionFromCookie"
     },
-    "408caa229a3515d71ab679e338c6cfb0c957ca6b80": {
+    "608caa229a3515d71ab679e338c6cfb0c957ca6b80": {
       "workers": {
         "app/(website)/page": {
           "moduleId": 76802,

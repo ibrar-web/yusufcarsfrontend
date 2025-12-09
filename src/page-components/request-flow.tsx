@@ -140,7 +140,7 @@ export function RequestFlowPage({ onNavigate }: RequestFlowPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onNavigate={onNavigate} currentPage="request-flow" />
+      <Header />
 
       {/* Hero Section - Only shown on Step 1 */}
       {currentStep === 0 && (

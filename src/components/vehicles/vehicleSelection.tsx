@@ -48,7 +48,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     "registration"
   );
   const [registrationNumber, setRegistrationNumber] = useState("");
-  const [postcode, setPostcode] = useState("");
   const [vehicleMake, setVehicleMake] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleYear, setVehicleYear] = useState("");
@@ -119,7 +118,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       inputMode,
       registrationNumber:
         registrationNumber || lookupDetails?.registrationNumber || undefined,
-      postcode: postcode || undefined,
       localRequest,
       requestType,
       make: isRegistration

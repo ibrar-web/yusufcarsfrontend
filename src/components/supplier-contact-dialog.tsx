@@ -7,7 +7,6 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Phone, Mail, MapPin, ExternalLink } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 

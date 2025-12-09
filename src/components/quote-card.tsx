@@ -40,7 +40,6 @@ interface Quote {
 interface QuoteCardProps {
   quote: Quote;
   onAccept?: (quoteId: string) => void;
-  onViewProfile?: (supplierId: string) => void;
   selected?: boolean;
   onSelect?: (quoteId: string) => void;
   showCompare?: boolean;
@@ -72,7 +71,6 @@ const getDefaultPartImage = (id: string) => {
 export function QuoteCard({
   quote,
   onAccept,
-  onViewProfile,
   selected,
   onSelect,
   showCompare,

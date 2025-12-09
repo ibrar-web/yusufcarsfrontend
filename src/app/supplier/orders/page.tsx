@@ -13,6 +13,7 @@ import { apiGet } from "@/utils/apiconfig/http";
 import { Calendar, DollarSign, Hash, MessageSquare, Search, User, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import useDebounce from "@/components/debouncedSearch/debouncedSearch";
 
 type SupplierOrderApi = {
   id: string;
@@ -105,6 +106,7 @@ export default function SupplierOrdersPage() {
   const [orders, setOrder] = useState<SupplierOrder[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
+  const debouncedSearch = useDebounce(userSearch, 500); // 500ms delay
 
   useEffect(() => {
     const endpoint = apiRoutes?.supplier?.orders?.listorders;
@@ -112,10 +114,11 @@ export default function SupplierOrdersPage() {
     const fetchOrders = async () => {
       try {
         setIsLoading(true);
-        const response = await apiGet<{ data?: SupplierOrderApi[] }>(endpoint);
+        const response = await apiGet<{ data?: SupplierOrderApi[] }>(endpoint, {params: {search: debouncedSearch || undefined}});
         const payload = response?.data?.data ?? [];
         setOrder(payload?.map(normalizeOrder));
       } catch (error) {
+        setIsLoading(false);
         toast.error(
           error instanceof Error ? error.message : "Failed to load orders"
         );
@@ -125,7 +128,7 @@ export default function SupplierOrdersPage() {
     };
 
     fetchOrders();
-  }, []);
+  }, [debouncedSearch]);
 
   return (
     <div className="space-y-6">

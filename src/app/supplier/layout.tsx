@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings } from "lucide-react";
+import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings, Blocks } from "lucide-react";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,13 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
         href: "/supplier/quotes",
         icon: Send,
         badge: supplierQuotes.length,
+      },
+      {
+        id: "orders",
+        label: "My Orders",
+        href: "/supplier/orders",
+        icon: Blocks,
+        // badge: supplierQuotes.length,
       },
       {
         id: "analytics",

@@ -100,6 +100,9 @@ export const apiRoutes = {
       listchats: "supplier/chat/list",
       chatmessage: "supplier/chat",
     },
+    orders: {
+      listorders: "supplier/orders",
+    },
   },
   admin: {
     users: {

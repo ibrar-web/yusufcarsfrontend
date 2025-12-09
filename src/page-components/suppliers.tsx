@@ -12,8 +12,7 @@ import {
   Shield,
   TrendingUp,
   Users,
-  Star,
-  Award
+  Star
 } from "lucide-react";
 
 interface SuppliersPageProps {
@@ -95,7 +94,7 @@ export function SuppliersPage({ onNavigate }: SuppliersPageProps) {
 
   return (
     <div className="min-h-screen">
-      <Header onNavigate={onNavigate} currentPage="suppliers" />
+      <Header />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-[#0F172A] to-[#1E293B] pt-32 pb-32 overflow-hidden">

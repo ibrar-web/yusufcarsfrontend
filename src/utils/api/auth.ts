@@ -118,9 +118,16 @@ export const authApi = {
         ? { headers: { "Content-Type": "multipart/form-data" } }
         : undefined;
 
-    return apiPost<SignupResponse>(apiRoutes.auth.signup, body, config);
+    const normalizedBody = isFormDataPayload(body)
+      ? body
+      : (body as unknown as Record<string, unknown>);
+
+    return apiPost<SignupResponse>(apiRoutes.auth.signup, normalizedBody, config);
   },
   async login(payload: LoginPayload) {
-    return apiPost<LoginResponse>(apiRoutes.auth.login, payload);
+    return apiPost<LoginResponse>(
+      apiRoutes.auth.login,
+      payload as unknown as Record<string, unknown>
+    );
   },
 };

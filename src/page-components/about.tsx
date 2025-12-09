@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../components/ui/dialog";
-import { Target, Eye, Heart, CheckCircle, Users, TrendingUp, Award, Shield, Play, MapPin, Clock, Star } from "lucide-react";
+import { Target, Eye, Heart, Users, TrendingUp, Award, Shield, Play, MapPin, Clock, Star } from "lucide-react";
 
 interface AboutPageProps {
   onNavigate: (page: string) => void;

@@ -14,12 +14,16 @@ type ConnectOptions = {
 };
 
 function startHeartbeat() {
-  if (!baseSocket || heartbeatTimer) {
-    return;
-  }
+  stopHeartbeat(); // ensure no duplicate timers
+
+  if (!baseSocket) return;
+
   heartbeatTimer = setInterval(() => {
     if (baseSocket?.connected) {
-      baseSocket.emit(HEARTBEAT_EVENT);
+      baseSocket.emit(HEARTBEAT_EVENT, (ack?: string) => {
+        // optional: check server ACK
+        // console.log("heartbeat ack", ack);
+      });
     }
   }, HEARTBEAT_INTERVAL_MS);
 }
@@ -32,28 +36,18 @@ function stopHeartbeat() {
 }
 
 export function connectSocket(options: ConnectOptions = {}) {
-  if (typeof window === "undefined") {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
 
   if (!SOCKET_URL) {
-    if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "Missing NEXT_PUBLIC_SOCKET_URL; socket.io client will not initialize.",
-      );
-    }
+    console.warn("Missing NEXT_PUBLIC_SOCKET_URL");
     return null;
   }
 
-  if (baseSocket) {
-    return baseSocket;
-  }
+  if (baseSocket) return baseSocket;
 
   baseSocket = io(SOCKET_URL, {
     transports: ["websocket"],
     autoConnect: true,
-    withCredentials: false,
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -62,19 +56,41 @@ export function connectSocket(options: ConnectOptions = {}) {
     query: options.query,
   });
 
+  // main connect
   baseSocket.on("connect", () => {
     startHeartbeat();
   });
 
-  baseSocket.on("connect_error", (error) => {
-    // eslint-disable-next-line no-console
-    console.warn(`[socket] connection error: ${error.message}`);
+  // handle reconnects
+  baseSocket.io.on("reconnect", () => {
+    startHeartbeat();
   });
 
+  baseSocket.io.on("reconnect_attempt", () => {
+    stopHeartbeat();
+  });
+
+  baseSocket.io.on("reconnect_failed", () => {
+    stopHeartbeat();
+    baseSocket?.disconnect();
+    baseSocket = null;
+    connectSocket(options);
+  });
+
+  // connection errors
+  baseSocket.on("connect_error", (error) => {
+    console.warn("[socket] error:", error.message);
+  });
+
+  // handle disconnect
   baseSocket.on("disconnect", (reason) => {
     stopHeartbeat();
-    if (reason === "io server disconnect") {
-      baseSocket?.connect();
+    if (reason === "io server disconnect" || reason === "transport close") {
+      setTimeout(() => {
+        if (!baseSocket?.connected) {
+          baseSocket?.connect();
+        }
+      }, 1000);
     }
   });
 
@@ -82,9 +98,8 @@ export function connectSocket(options: ConnectOptions = {}) {
 }
 
 export function disconnectSocket() {
-  if (!baseSocket) {
-    return;
-  }
+  if (!baseSocket) return;
+
   stopHeartbeat();
   baseSocket.removeAllListeners();
   baseSocket.disconnect();

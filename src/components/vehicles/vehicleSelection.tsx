@@ -281,8 +281,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                           //   .replace(/[^A-Z0-9\s]/g, "");
                           setVehicleModel(e.target.value);
                         }}
-                        placeholder="E.G. SW1A 1AA"
-                        maxLength={8}
+                        placeholder="Model"
+                        // maxLength={8}
                         className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
                       />
                     </div>

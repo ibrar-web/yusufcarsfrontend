@@ -126,9 +126,19 @@ export default function SupplierOnboardingPage() {
     setFormData((prev) => ({ ...prev, [field]: file }));
   };
 
+  // const handleNext = () => {
+  //   if (currentStep < steps.length - 1) {
+  //     setCurrentStep(currentStep + 1);
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //   }
+  // };
+
   const handleNext = () => {
+    const isValid = validateStep(currentStep);
+    if (!isValid) return;
+
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -141,6 +151,9 @@ export default function SupplierOnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    const isValid = validateStep(currentStep);
+    if (!isValid) return;
+
     if (!formData.password || !formData.confirmPassword) {
       toast.error("Password and confirm password are required.");
       return;
@@ -204,6 +217,7 @@ export default function SupplierOnboardingPage() {
       setShowSignIn(true);
     } catch (error) {
       console.log(error);
+      toast.error(error?.toString());
     }
     // setTimeout(() => {
     //   handleNavigate("supplier-dashboard");
@@ -211,6 +225,61 @@ export default function SupplierOnboardingPage() {
   };
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100;
+
+  const validateStep = (step: number, showToast = true) => {
+    const showError = (msg: string) => {
+      if (showToast) toast.error(msg);
+      return false;
+    };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    switch (step) {
+      case 0: {
+        if (!formData?.firstName?.trim()) return showError("First name is required");
+        if (!formData?.businessName?.trim()) return showError("Business name is required");
+        if (!formData?.email?.trim()) return showError("Email is required");
+        if (showToast && !emailRegex?.test(formData?.email))
+          return showError("Please enter a valid email address");
+        if (!formData?.phone?.trim()) return showError("Phone is required");
+        if (!formData?.contactPostcode?.trim()) return showError("Postcode is required");
+        if (!formData?.password) return showError("Password is required");
+        if (showToast && formData?.password?.length < 6)
+          return showError("Password must be at least 6 characters");
+        if (!formData?.confirmPassword) return showError("Confirm password is required");
+        if (showToast && formData?.password !== formData?.confirmPassword)
+          return showError("Passwords do not match");
+        if (!formData?.categories?.length) return showError("Please select at least one category");
+        if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
+        if (!formData?.gdprConsent) return showError("You must give GDPR consent");
+        return true;
+      }
+
+      case 1: {
+        if (!formData?.tradingAs) return showError("Trading As is required");
+        if (!formData?.businessType) return showError("Business type is required");
+        if (!formData?.description?.trim()) return showError("Business description is required");
+        if (!formData?.vatNumber) return showError("VAT number is required");
+        return true;
+      }
+
+      case 2: {
+        if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
+        if (!formData?.city?.trim()) return showError("City is required");
+        if (!formData?.postcode?.trim()) return showError("Postcode is required");
+        if (!formData?.serviceRadius) return showError("Service radius is required");
+        if (!formData?.categories?.length) return showError("Please select at least one category");
+        return true;
+      }
+
+      case 3: {
+        if (!formData?.companyRegDoc) return showError("Company registration document is required");
+        if (!formData?.insuranceDoc) return showError("Insurance document is required");
+        return true;
+      }
+
+      default:
+        return true;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -497,7 +566,7 @@ export default function SupplierOnboardingPage() {
             {currentStep === 1 && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="tradingAs">Trading As (if different)</Label>
+                  <Label htmlFor="tradingAs">Trading As (if different) <span className="text-danger">*</span></Label>
                   <Input
                     id="tradingAs"
                     placeholder="e.g. AutoParts Direct"
@@ -533,7 +602,7 @@ export default function SupplierOnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="vatNumber">VAT Number</Label>
+                  <Label htmlFor="vatNumber">VAT Number <span className="text-danger">*</span></Label>
                   <Input
                     id="vatNumber"
                     placeholder="GB123456789"
@@ -933,7 +1002,7 @@ export default function SupplierOnboardingPage() {
             variant="outline"
             onClick={handleBack}
             disabled={currentStep === 0}
-            className="gap-2"
+            className="gap-2 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -948,7 +1017,8 @@ export default function SupplierOnboardingPage() {
                   handleNext();
                 }
               }}
-              className="gap-2"
+              disabled={!validateStep(currentStep, false)}
+              className="gap-2 cursor-pointer"
             >
               Continue
               <ArrowRight className="h-4 w-4" />
@@ -957,7 +1027,7 @@ export default function SupplierOnboardingPage() {
             <Button
               onClick={handleSubmit}
               disabled={!formData.termsAccepted}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               Submit Application
               <CheckCircle className="h-4 w-4" />

@@ -396,12 +396,12 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                 onOpenChange={setShowRegistrationDialog}
               >
                 <DialogTrigger asChild>
-                  <Button
+                  {/* <Button
                     className="rounded-full"
                     onClick={() => setShowRegistrationDialog(true)}
                   >
                     Start Request
-                  </Button>
+                  </Button> */}
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] bg-[#0F172A] border-[#334155]">
                   <DialogHeader>

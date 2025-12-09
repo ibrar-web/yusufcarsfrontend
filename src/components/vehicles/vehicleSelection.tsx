@@ -76,7 +76,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       }
 
       try {
-        const data = await enquiryVehicle(registrationNumber);
+        const data = await enquiryVehicle(registrationNumber, vehicleModel);
         setLookupDetails(data);
         setFilterDialogOpen(true);
       } catch (error) {
@@ -125,7 +125,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       make: isRegistration
         ? lookupDetails?.make || undefined
         : vehicleMake || undefined,
-      model: isRegistration ? undefined : vehicleModel || undefined,
+      // model: isRegistration ? undefined : vehicleModel || undefined,
+      model: vehicleModel,
       yearOfManufacture: isRegistration ? lookupYear : vehicleYear || undefined,
       fuelType: isRegistration
         ? lookupDetails?.fuelType || undefined
@@ -200,7 +201,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                 >
                   Registration
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     setInputMode("manual");
                     setLookupDetails(null);
@@ -213,7 +214,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                   style={{ fontSize: "15px" }}
                 >
                   Manual
-                </button>
+                </button> */}
               </div>
               <div
                 className="relative backdrop-blur-xl rounded-[24px] p-8 lg:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.16)] border border-white/40"
@@ -251,7 +252,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                         style={{ letterSpacing: "0.2em" }}
                       />
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
                         Your Postcode
                       </label>
@@ -263,6 +264,24 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                             .toUpperCase()
                             .replace(/[^A-Z0-9\s]/g, "");
                           setPostcode(value);
+                        }}
+                        placeholder="E.G. SW1A 1AA"
+                        maxLength={8}
+                        className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
+                      />
+                    </div> */}
+                    <div>
+                      <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
+                        Model
+                      </label>
+                      <Input
+                        type="text"
+                        value={vehicleModel}
+                        onChange={(e) => {
+                          // const value = e.target.value
+                          //   .toUpperCase()
+                          //   .replace(/[^A-Z0-9\s]/g, "");
+                          setVehicleModel(e.target.value);
                         }}
                         placeholder="E.G. SW1A 1AA"
                         maxLength={8}

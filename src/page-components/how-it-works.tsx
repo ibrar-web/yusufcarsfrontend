@@ -23,10 +23,7 @@ import {
   Play,
   Shield,
   Package,
-  HeadphonesIcon,
   Lock,
-  FileText,
-  ChevronRight,
   ThumbsUp,
   ThumbsDown,
   AlertCircle,
@@ -142,21 +139,6 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
     { id: "payments-refunds", label: "Payments & refunds", icon: Shield },
     { id: "warranty-returns", label: "Warranty & returns", icon: CheckCircle },
     { id: "account-privacy", label: "Account & privacy", icon: Lock }
-  ];
-
-  const featuredFAQs = [
-    {
-      question: "Is it free to request quotes?",
-      answer: "Yes! Requesting quotes is completely free. You only pay when you accept a quote."
-    },
-    {
-      question: "How long do I wait for quotes?",
-      answer: "Most requests receive their first quote within 9 minutes on average."
-    },
-    {
-      question: "Can I choose used or new parts?",
-      answer: "Absolutely! Specify your preference when creating a request."
-    }
   ];
 
   const faqsByCategory: Record<string, Array<{
@@ -280,7 +262,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header onNavigate={onNavigate} currentPage="how-it-works" />
+      <Header />
 
       {/* Hero Section */}
       <section className="relative bg-white pt-24 pb-16 overflow-hidden border-b border-[#E5E7EB]">
@@ -336,7 +318,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           {/* 3 Cards in One Row */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {steps.map((step, index) => {
-              const Icon = step.icon;
+              const IconComponent = step.icon;
 
               return (
                 <Card 
@@ -354,6 +336,9 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
 
                   {/* Content */}
                   <CardContent className="p-6 flex-1 flex flex-col relative z-20 justify-center text-center items-center">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                      <IconComponent className="h-8 w-8 text-white" />
+                    </div>
                     <h3 className="font-['Inter'] font-semibold text-white mb-3" style={{ fontSize: '20px', lineHeight: 1.3 }}>
                       {step.title}
                     </h3>

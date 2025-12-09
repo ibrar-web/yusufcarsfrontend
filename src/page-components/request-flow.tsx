@@ -138,13 +138,9 @@ export function RequestFlowPage({ onNavigate }: RequestFlowPageProps) {
     }
   };
 
-  const isStep0Valid = 
-    (inputMode === "registration" && numberPlate.length >= 6) ||
-    (inputMode === "manual" && vehicleMake && vehicleModel && vehicleYear);
-
   return (
     <div className="min-h-screen bg-background">
-      <Header onNavigate={onNavigate} currentPage="request-flow" />
+      <Header />
 
       {/* Hero Section - Only shown on Step 1 */}
       {currentStep === 0 && (

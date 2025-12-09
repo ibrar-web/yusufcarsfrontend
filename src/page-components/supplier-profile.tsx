@@ -107,7 +107,7 @@ export function SupplierProfilePage({ onNavigate, supplierId }: SupplierProfileP
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onNavigate={onNavigate} currentPage="supplier-profile" />
+      <Header />
 
       <div className="max-w-[1200px] mx-auto px-6 py-8">
         {/* Profile Header */}

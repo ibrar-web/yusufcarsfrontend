@@ -19,7 +19,6 @@ import {
   Gauge,
   Lightbulb,
   Cog,
-  Droplets,
 } from "lucide-react";
 import Masonry from "react-responsive-masonry";
 import {
@@ -31,11 +30,9 @@ import {
   DrawerFooter,
 } from "../components/ui/drawer";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import type { VehicleData } from "@/stores/app-store";
 
 interface PartsSelectionPageProps {
   onNavigate: (page: string) => void;
-  vehicleData?: VehicleData | null;
   onSignupClick?: () => void;
 }
 
@@ -50,7 +47,6 @@ interface PartCategory {
 
 export function PartsSelectionPage({
   onNavigate,
-  vehicleData = { make: "Volkswagen", model: "Golf", year: "2018" },
 }: PartsSelectionPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");

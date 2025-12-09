@@ -4,12 +4,11 @@ import { PartsSelectionPage } from "@/page-components/parts-selection";
 import { useAppState } from "@/hooks/use-app-state";
 
 export default function PartsSelection() {
-  const { handleNavigate, openSignupDialog, vehicleData } = useAppState();
+  const { handleNavigate, openSignupDialog } = useAppState();
 
   return (
     <PartsSelectionPage
       onNavigate={handleNavigate}
-      vehicleData={vehicleData ?? undefined}
       onSignupClick={openSignupDialog}
     />
   );

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Header } from "../components/header";
 import { Footer } from "../components/footer";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -13,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../components/ui/dialog";
-import { Target, Eye, Heart, CheckCircle, Users, TrendingUp, Award, Shield, Play, MapPin, Clock, Star } from "lucide-react";
+import { Target, Eye, Heart, Users, TrendingUp, Award, Shield, Play, MapPin } from "lucide-react";
 
 interface AboutPageProps {
   onNavigate: (page: string) => void;
@@ -133,33 +132,6 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
         value: "~9 min",
         label: "First quote"
       }
-    },
-  ];
-
-  const kpiStats = [
-    {
-      icon: Users,
-      value: "2,500+",
-      label: "Verified suppliers",
-      color: "#EF4444"
-    },
-    {
-      icon: Star,
-      value: "4.9★",
-      label: "Average rating",
-      color: "#F59E0B"
-    },
-    {
-      icon: Clock,
-      value: "~9 min",
-      label: "First quote",
-      color: "#22C55E"
-    },
-    {
-      icon: TrendingUp,
-      value: "100K+",
-      label: "Parts quoted",
-      color: "#3B82F6"
     },
   ];
 
@@ -470,7 +442,9 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
                 return (
                   <div
                     key={milestone.year}
-                    ref={(el) => (milestoneRefs.current[milestone.year] = el)}
+                    ref={(el) => {
+                      milestoneRefs.current[milestone.year] = el;
+                    }}
                     className={`grid lg:grid-cols-2 gap-8 items-center ${!isLeft ? 'lg:flex-row-reverse' : ''}`}
                   >
                     {/* Content Card */}

@@ -24,6 +24,7 @@ type SupplierOrderApi = {
     fullName: string
   } | null;
   acceptedQuote: {
+    partName: string;
     price? : string | number | null;
   };
   request: {
@@ -65,24 +66,12 @@ const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
     typeof order?.acceptedQuote?.price === "string"
       ? parseFloat(order?.acceptedQuote?.price)
       : order?.acceptedQuote?.price ?? 0;
-  const services = order.request?.services ?? [];
-  const partDescription = services.length
-    ? services
-        .map((service) =>
-          service
-            .split(/[\s_-]+/)
-            .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
-            .join(" ")
-        )
-        .join(", ")
-    : undefined;
-
   return {
     id: order.id,
     requestId: order?.request?.id,
     customer:
       order?.buyer?.fullName,
-    part: partDescription,
+    part: order.acceptedQuote?.partName,
     amount: Number.isFinite(priceValue) ? priceValue : 0,
     status: (order.status || "pending").toLowerCase(),
     sentAt: order.createdAt || undefined,

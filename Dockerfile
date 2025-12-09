@@ -1,30 +1,22 @@
-FROM node:lts-alpine AS builder
-
+FROM node:20-slim AS builder
 WORKDIR /app
 
 COPY package*.json ./
-
-# Install all dependencies (prod + dev) required for building
 RUN npm install
 
 COPY . .
-
 RUN npm run build
+RUN npm prune --production
 
-FROM node:lts-alpine AS runner
 
-ENV NODE_ENV=production
+FROM node:20-slim AS runner
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
-
-# Copy the build artifacts and any static assets needed at runtime
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/package*.json ./
 
 EXPOSE 4500
-
-CMD ["npm","run","start"]
+CMD ["npm", "start"]

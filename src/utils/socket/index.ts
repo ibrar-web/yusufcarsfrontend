@@ -20,10 +20,7 @@ function startHeartbeat() {
 
   heartbeatTimer = setInterval(() => {
     if (baseSocket?.connected) {
-      baseSocket.emit(HEARTBEAT_EVENT, (ack?: string) => {
-        // optional: check server ACK
-        // console.log("heartbeat ack", ack);
-      });
+      baseSocket.emit(HEARTBEAT_EVENT);
     }
   }, HEARTBEAT_INTERVAL_MS);
 }

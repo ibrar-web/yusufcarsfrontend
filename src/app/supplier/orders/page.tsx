@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +14,11 @@ import { Calendar, DollarSign, Hash, MessageSquare, User, Wrench } from "lucide-
 import { toast } from "sonner";
 import useDebounce from "@/components/debouncedSearch/debouncedSearch";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import { TablePagination } from "@/components/table-pagination";
 
 type SupplierOrderApi = {
+  data: {};
+  meta: {};
   id: string;
   expiresAt?: string | null;
   status?: string | null;
@@ -95,17 +98,29 @@ export default function SupplierOrdersPage() {
   const [orders, setOrder] = useState<SupplierOrder[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
-  const debouncedSearch = useDebounce(userSearch, 500); // 500ms delay
+  const debouncedSearch = useDebounce(userSearch, 500);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalOrders, setTotalOrders] = useState(0);
 
-  useEffect(() => {
-    const endpoint = apiRoutes?.supplier?.orders?.listorders;
-
-    const fetchOrders = async () => {
+  const fetchOrders = useCallback(async ({
+      page: requestedPage = 1,
+      pageSize: requestedPageSize = 20,
+    } = {}) => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const response = await apiGet<{ data?: SupplierOrderApi[] }>(endpoint, {params: {search: debouncedSearch || undefined}});
+        const params = {
+          page: requestedPage,
+          pageSize: requestedPageSize,
+          search: debouncedSearch || undefined,
+        }
+        const response = await apiGet<{ data?: SupplierOrderApi[] }>(apiRoutes?.supplier?.orders?.listorders, {params});
         const payload = response?.data?.data ?? [];
         setOrder(payload?.map(normalizeOrder));
+        setPage(requestedPage);
+        setPageSize(requestedPageSize);
+        setTotalOrders(response?.data?.meta?.total);
+        
       } catch (error) {
         setIsLoading(false);
         toast.error(
@@ -114,10 +129,21 @@ export default function SupplierOrdersPage() {
       } finally {
         setIsLoading(false);
       }
-    };
+    }, [debouncedSearch]
+  )
 
-    fetchOrders();
+  useEffect(() => {
+    fetchOrders({ page: 1, pageSize });
   }, [debouncedSearch]);
+  const handlePageChange = (nextPage: number) => {
+    fetchOrders({ page: nextPage, pageSize });
+  };
+
+  const handlePageSizeChange = (nextSize: number) => {
+    console.log({nextSize});
+    
+    fetchOrders({ page: 1, pageSize: nextSize });
+  };
 
   return (
     <div className="space-y-6">
@@ -203,6 +229,16 @@ export default function SupplierOrdersPage() {
               ))}
             </TableBody>
           </Table>
+          <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end">
+            <TablePagination
+              page={page}
+              pageSize={pageSize}
+              totalItems={totalOrders}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              className="w-full"
+            />
+          </div>           
         </CardContent>
       </Card>
 

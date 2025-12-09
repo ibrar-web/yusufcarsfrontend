@@ -8,7 +8,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Progress } from "./ui/progress";
 import {
   Star,
@@ -20,9 +20,7 @@ import {
   Mail,
   Calendar,
   Package,
-  ThumbsUp,
   CheckCircle,
-  TrendingUp,
   Users,
   MessageSquare,
   Flag,

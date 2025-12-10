@@ -2501,7 +2501,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               }
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-2 h-14 mb-8 bg-[#1E293B] border border-[#334155]">
+              {/* <TabsList className="grid w-full grid-cols-2 h-14 mb-8 bg-[#1E293B] border border-[#334155]">
                 <TabsTrigger
                   value="registration"
                   className="font-['Roboto'] font-medium data-[state=active]:bg-[#F02801] data-[state=active]:text-white text-[#94A3B8]"
@@ -2516,7 +2516,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 >
                   Manual Entry
                 </TabsTrigger>
-              </TabsList>
+              </TabsList> */}
 
               <TabsContent value="registration" className="space-y-6">
                 <div>

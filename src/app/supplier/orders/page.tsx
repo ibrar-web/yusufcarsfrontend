@@ -29,6 +29,7 @@ type SupplierOrderApi = {
   acceptedQuote: {
     partName: string;
     price? : string | number | null;
+    brand: string;
   };
   request: {
     id: string,
@@ -41,6 +42,7 @@ type SupplierOrder = {
   requestId?: string;
   customer?: string;
   part?: string;
+  brand?: string;
   amount: number;
   status: string;
   sentAt?: string;
@@ -75,6 +77,7 @@ const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
     customer:
       order?.buyer?.fullName,
     part: order.acceptedQuote?.partName,
+    brand: order?.acceptedQuote?.brand,
     amount: Number.isFinite(priceValue) ? priceValue : 0,
     status: (order.status || "pending").toLowerCase(),
     sentAt: order.createdAt || undefined,
@@ -194,6 +197,7 @@ export default function SupplierOrdersPage() {
                 <TableHead className="font-['Inter'] text-[#0F172A]">Order ID</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Customer</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Part</TableHead>
+                <TableHead className="font-['Inter'] text-[#0F172A]">Brand</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Amount</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Status</TableHead>
               </TableRow>
@@ -223,6 +227,7 @@ export default function SupplierOrdersPage() {
                   <TableCell className="font-['Roboto'] text-[#0F172A]">{order.id}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#475569]">{order.customer}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#475569]">{order.part}</TableCell>
+                  <TableCell className="font-['Roboto'] text-[#475569]">{order.brand}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#0F172A]">£{order.amount.toFixed(2)}</TableCell>
                   <TableCell>{renderOrderStatusBadge(order)}</TableCell>
                 </TableRow>

@@ -14,6 +14,7 @@ import {
   Bell,
   Package,
   History,
+  Blocks,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -355,10 +356,12 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={() => openTrackOrderDialog()}>
-                      <Package className="mr-2 h-4 w-4" />
-                      Track Order
-                    </DropdownMenuItem>
+                    <Link href="/user/orders">
+                      <DropdownMenuItem>
+                        <Blocks className="mr-2 h-4 w-4" />
+                        My Orders
+                      </DropdownMenuItem>
+                    </Link>
                     <Link href="/user/chat">
                       <DropdownMenuItem className="relative cursor-pointer">
                         <MessageSquare className="mr-2 h-4 w-4" />

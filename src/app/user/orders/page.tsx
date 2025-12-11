@@ -4,12 +4,12 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle2, Clock3, MapPin, Package, SlidersHorizontal } from "lucide-react";
+import { Calendar, CircleX, CheckCircle2, Clock3, MapPin, Package, SlidersHorizontal, Star } from "lucide-react";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useDebounce from "@/components/debouncedSearch/debouncedSearch";
 import { toast } from "sonner";
-import { apiGet } from "@/utils/apiconfig/http";
+import { apiGet, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import {
   Dialog,
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface OrderPageProps {
   onNavigate: (page: string) => void;
@@ -82,7 +83,7 @@ const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
     part: order.acceptedQuote?.partName,
     brand: order?.acceptedQuote?.brand,
     amount: Number.isFinite(priceValue) ? priceValue : 0,
-    status: (order.status || "pending").toLowerCase(),
+    status: (order.status || "in_transit").toLowerCase(),
     sentAt: order.createdAt || undefined,
   };
 };
@@ -180,6 +181,10 @@ export default function Orders(props?: OrderPageProps) {
   const [totalOrders, setTotalOrders] = useState(0);
   const [activeStatus, setActiveStatus] = useState<StatusFilterKey>("all");
   const [sortOrder, setSortOrder] = useState<"recent" | "amount_desc" | "amount_asc">("recent");
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewTargetOrder, setReviewTargetOrder] = useState<SupplierOrder | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
   const fetchOrders = useCallback(
     async ({
@@ -216,6 +221,16 @@ export default function Orders(props?: OrderPageProps) {
     fetchOrders({ page: 1, pageSize });
   }, [fetchOrders, pageSize]);
 
+  const cancelOrder = async(orderId: string) => {
+    try{
+      const params = {
+        reason: "",
+      }
+      const response = await apiPost(apiRoutes?.user?.orders?.cancelorder(orderId), { params });
+    } catch(err) {
+      console.log("err is as: ", err);
+    }
+  }
   const hasMore = orders.length < totalOrders;
   const isInitialLoading = isLoading && orders.length === 0;
 
@@ -240,6 +255,38 @@ export default function Orders(props?: OrderPageProps) {
 
     return counts;
   }, [orders]);
+
+  const handleFinishOrder = (order: SupplierOrder) => {
+    setReviewTargetOrder(order);
+    setReviewRating(0);
+    setReviewText("");
+    setReviewModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+    setReviewTargetOrder(null);
+    setReviewRating(0);
+    setReviewText("");
+    setSelectedOrderToView(null);
+    fetchOrders();
+  };
+
+  const handleSubmitReview = async(orderId: string) => {
+    try {
+      const params = {
+        rating: reviewRating,
+        comment: reviewText,
+      }
+      const response = await apiPost(apiRoutes?.user?.orders?.completeorder(orderId), {params});
+      if ((response as any)?.statusCode === 201) {
+        toast.success("Thanks for sharing your experience!");
+      }
+      closeReviewModal();
+    } catch(err) {
+      console.log("err is as: ", err);      
+    }
+  };
 
   const filteredOrders = useMemo(() => {
     if (activeStatus === "all") return orders;
@@ -487,9 +534,7 @@ export default function Orders(props?: OrderPageProps) {
                     addDays(placedOn, 7)
                   );
                   return (
-                    <div 
-                    className="space-y-4"
-                    >
+                    <div className="space-y-4">
                       <DialogHeader className="p-0">
                         <div className="flex items-start gap-3">
                           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFF1ED]">
@@ -557,26 +602,100 @@ export default function Orders(props?: OrderPageProps) {
                           <p className="text-md font-['Inter'] text-[#0F172A]">{expectedDelivery}</p>
                         </div>
                       </div>
-
-                      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-                        <Button
-                          variant="outline"
-                          className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC]"
-                          onClick={() => setSelectedOrderToView(null)}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301]"
-                          onClick={() => setSelectedOrderToView(null)}
-                        >
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Finish Order
-                        </Button>
-                      </div>
+                      {selectedOrderToView?.status === "in_transit" && 
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                          <Button
+                            variant="outline"
+                            className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
+                            onClick={() => setSelectedOrderToView(null)}
+                          >
+                            <CircleX className="mr-2 h-4 w-4" />
+                            Cancel Order
+                          </Button>
+                          <Button
+                            className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
+                            onClick={() => selectedOrderToView && handleFinishOrder(selectedOrderToView)}
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Finish Order
+                          </Button>
+                        </div>
+                      }
                     </div>
                   );
                 })()}
+              </DialogContent>
+            </Dialog>
+            <Dialog open={reviewModalOpen} onOpenChange={(open) => (open ? setReviewModalOpen(true) : closeReviewModal())}>
+              <DialogContent className="max-w-xl rounded-3xl border border-[#E5E7EB] shadow-2xl p-0">
+                <div className="space-y-8 p-8">
+                  <DialogHeader className="p-0 text-left">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF7ED]">
+                        <Star className="h-8 w-8 text-[#F59E0B]" />
+                      </div>
+                      <div>
+                        <DialogTitle className="font-['Inter'] text-2xl text-[#0F172A]">Rate Your Experience</DialogTitle>
+                        <DialogDescription className="font-['Roboto'] text-sm text-[#475569]">
+                          How was your experience with {reviewTargetOrder?.brand ?? "this supplier"}?
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+
+                  <div className="text-center">
+                    <p className="mb-4 text-sm font-['Roboto'] text-[#94A3B8]">Tap to rate</p>
+                    <div className="flex items-center justify-center gap-4">
+                      {[1, 2, 3, 4, 5].map((value) => {
+                        const isActive = value <= reviewRating;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            className="transition-transform hover:scale-105"
+                            onClick={() => setReviewRating(value)}
+                            aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                          >
+                            <Star
+                              className={`h-10 w-10 ${isActive ? "text-[#F97316]" : "text-[#E2E8F0]"}`}
+                              fill={isActive ? "#F97316" : "none"}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 w-full max-w-xl mx-auto">
+                    <p className="text-sm font-['Roboto'] font-medium text-[#0F172A]">Add a review (optional)</p>
+                    <Textarea
+                      placeholder="Share your thoughts about the product and service..."
+                      className="w-full rounded-3xl border border-[#E2E8F0] bg-[#FDFEFE] placeholder:text-[#94A3B8] text-left leading-relaxed break-words overflow-auto min-h-[100px] max-h-[50vh] p-3 md:text-sm"
+                      maxLength={500}
+                      value={reviewText}
+                      onChange={(event) => setReviewText(event.target.value)}
+                    />
+                    <div className="text-right text-xs font-['Roboto'] text-[#94A3B8]">{reviewText.length}/500 characters</div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
+                      onClick={closeReviewModal}
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      // className="flex-1 rounded-2xl bg-[#FDA08B] text-white font-['Roboto'] hover:bg-[#F97316]"
+                      className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
+                      onClick={() => handleSubmitReview(selectedOrderToView!.id)}
+                      disabled={reviewRating === 0}
+                    >
+                      Submit Review
+                    </Button>
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           </div>

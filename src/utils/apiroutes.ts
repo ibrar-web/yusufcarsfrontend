@@ -91,6 +91,12 @@ export const apiRoutes = {
     },
     orders: {
       listorders: "user/orders",
+      cancelorder: (orderId: string) => {
+        return `user/orders/${orderId}/cancel`;
+      },
+      completeorder: (orderId: string) => {
+        return `user/orders/${orderId}/complete`;
+      }
     },
   },
   supplier: {

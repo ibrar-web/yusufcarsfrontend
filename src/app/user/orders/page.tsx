@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 import { Badge } from "@/components/ui/badge";
-import { Blocks, Calendar, DollarSign, Hash, MessageSquare, Package, SlidersHorizontal, Wrench } from "lucide-react";
+import { Calendar, CheckCircle2, Clock3, MapPin, Package, SlidersHorizontal } from "lucide-react";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useDebounce from "@/components/debouncedSearch/debouncedSearch";
@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useAppState } from "@/hooks/use-app-state";
 import {
@@ -63,6 +62,14 @@ type SupplierOrderApi = {
     services: string[];
   }
 };
+
+type OrdersApiResponse = {
+  data: SupplierOrderApi[];
+  meta: {
+    total: number;
+  };
+};
+
 
 const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
   const priceValue =
@@ -132,6 +139,28 @@ const statusTabMap: Record<Exclude<StatusFilterKey, "all">, string[]> = {
   cancelled: ["cancelled"],
 };
 
+const formatDate = (value?: string) => {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getCurrencyParts = (amount?: number) => {
+  if (typeof amount !== "number" || Number.isNaN(amount)) {
+    return { whole: "£0", fraction: ".00" };
+  }
+  const [whole, fraction] = amount.toFixed(2).split(".");
+  return {
+    whole: `£${whole}`,
+    fraction: `.${fraction ?? "00"}`,
+  };
+};
+
 type FetchOptions = {
   page?: number;
   pageSize?: number;
@@ -165,7 +194,7 @@ export default function Orders(props?: OrderPageProps) {
           pageSize: requestedPageSize,
           search: debouncedSearch || undefined,
         };
-        const response = await apiGet<{ data?: SupplierOrderApi[] }>(apiRoutes?.user?.orders?.listorders, { params });
+        const response = await apiGet<{ data?: OrdersApiResponse }>(apiRoutes?.user?.orders?.listorders, { params });
         const payload = response?.data?.data ?? [];
         const normalized = payload.map(normalizeOrder);
         setOrders((prev) => (append ? [...prev, ...normalized] : normalized));
@@ -440,99 +469,109 @@ export default function Orders(props?: OrderPageProps) {
               )}
             </div>
             <Dialog open={!!selectedOrderToView} onOpenChange={(open) => !open && setSelectedOrderToView(null)}>
-              <DialogContent className="border border-[#E5E7EB] shadow-lg max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="font-['Inter'] text-[#0F172A]">Order Details</DialogTitle>
-                  <DialogDescription className="font-['Roboto'] text-[#475569]">
-                    View complete information about this order
-                  </DialogDescription>
-                </DialogHeader>
-
+              <DialogContent className="w-[600px]">
                 {selectedOrderToView && (() => {
+                  const addDays = (dateValue: Date | string, days: number): any => {
+                    const date = new Date(dateValue); 
+                    date.setDate(date.getDate() + days);
+                    return date; 
+                  };
+
+
                   const statusDetails = getStatusConfig(selectedOrderToView.status);
+                  const placedOn = formatDate(selectedOrderToView.sentAt);
+                  const { whole, fraction } = getCurrencyParts(selectedOrderToView.amount);
+                  const statusIconClass = `${statusDetails.pillClass} px-4 py-1.5 text-xs flex items-center gap-2 font-medium`;
+
+                  const expectedDelivery = formatDate(
+                    addDays(placedOn, 7)
+                  );
                   return (
-                    <div className="space-y-6 mt-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Status</p>
-                          <Badge className={`${statusDetails.pillClass} px-4 py-1.5`}>
-                            {statusDetails.label}
-                          </Badge>
+                    <div 
+                    className="space-y-4"
+                    >
+                      <DialogHeader className="p-0">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFF1ED]">
+                            <Package className="h-6 w-6 text-[#F02801]" />
+                          </div>
+                          <div>
+                            <DialogTitle className="font-['Inter'] text-2xl text-[#0F172A]">Order Details</DialogTitle>
+                            {selectedOrderToView.id && (
+                              <DialogDescription className="font-['Roboto'] text-sm text-[#94A3B8]">
+                                {selectedOrderToView.id}
+                              </DialogDescription>
+                            )}
+                          </div>
                         </div>
-                        {selectedOrderToView.id && (
-                          <div className="text-right">
-                            <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Order ID</p>
-                            <p className="font-['Inter'] text-[#0F172A]">{selectedOrderToView.id}</p>
-                          </div>
-                        )}
+                      </DialogHeader>
+
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="text-sm font-['Roboto'] text-[#94A3B8]">Status</p>
+                        </div>
+                        <Badge className={statusIconClass}>
+                          <Clock3 className="h-4 w-4" />
+                          {statusDetails.label}
+                        </Badge>
                       </div>
 
-                      <Separator className="bg-[#E5E7EB]" />
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {selectedOrderToView.part && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Wrench className="h-4 w-4 text-[#F02801]" />
-                              <p className="text-sm text-[#475569] font-['Roboto']">Part Requested</p>
-                            </div>
-                            <p className="font-['Roboto'] text-[#0F172A]">{selectedOrderToView.part}</p>
+                      <div className="rounded-3xl border border-[#E2E8F0] bg-[#F8FAFC] p-6">
+                        <p className="mb-6 text-sm font-['Roboto'] font-medium text-[#94A3B8]">Part Information</p>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between text-sm font-['Roboto']">
+                            <span className="text-[#94A3B8]">Part Name</span>
+                            <span className="text-[#0F172A] font-medium">{selectedOrderToView.part ?? "Not specified"}</span>
                           </div>
-                        )}
-                        {selectedOrderToView.brand && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Package className="h-4 w-4 text-[#F02801]" />
-                              <p className="text-sm text-[#475569] font-['Roboto']">Brand</p>
-                            </div>
-                            <p className="font-['Roboto'] text-[#0F172A]">{selectedOrderToView.brand}</p>
+                          <div className="flex items-center justify-between text-sm font-['Roboto']">
+                            <span className="text-[#94A3B8]">Supplier</span>
+                            <span className="text-[#0F172A] font-medium">{selectedOrderToView.brand ?? "Not specified"}</span>
                           </div>
-                        )}
-                        {selectedOrderToView.amount && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <DollarSign className="h-4 w-4 text-[#F02801]" />
-                              <p className="text-sm text-[#475569] font-['Roboto']">Order Amount</p>
-                            </div>
-                            <p className="font-['Inter'] text-[#0F172A]">£{selectedOrderToView.amount.toFixed(2)}</p>
+                          {/* <div className="flex items-center justify-between text-sm font-['Roboto']">
+                            <span className="text-[#94A3B8]">Quantity</span>
+                            <span className="text-[#0F172A] font-medium">1</span>
+                          </div> */}
+                        </div>
+                        <div className="mt-6 flex items-center justify-between rounded-2xl">
+                          <span className="text-sm font-['Roboto'] text-[#94A3B8]">Total Amount</span>
+                          <div className="text-[#F02801] font-['Inter'] text-2xl font-semibold">
+                            {whole}
+                            <span className="text-xl align-top">{fraction}</span>
                           </div>
-                        )}
-                        {selectedOrderToView.sentAt && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Calendar className="h-4 w-4 text-[#F02801]" />
-                              <p className="text-sm text-[#475569] font-['Roboto']">Placed</p>
-                            </div>
-                            <p className="font-['Roboto'] text-[#0F172A]">{selectedOrderToView?.sentAt}</p>
-                          </div>
-                        )}
-                        {selectedOrderToView.requestId && (
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Hash className="h-4 w-4 text-[#F02801]" />
-                              <p className="text-sm text-[#475569] font-['Roboto']">Request ID</p>
-                            </div>
-                            <p className="font-['Roboto'] text-[#0F172A]">{selectedOrderToView.requestId}</p>
-                          </div>
-                        )}
+                        </div>
                       </div>
 
-                      <div className="flex gap-3 pt-4">
-                        <Button
-                          className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-xl shadow-sm"
-                          onClick={() => {
-                            setSelectedOrderToView(null);
-                          }}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Need Help
-                        </Button>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5">
+                          <div className="mb-1 flex items-center gap-2 text-sm font-['Roboto'] text-[#94A3B8]">
+                            <Calendar className="h-4 w-4" />
+                            <span>Placed On</span>
+                          </div>
+                          <p className="text-md font-['Inter'] text-[#0F172A]">{placedOn}</p>
+                        </div>
+                        <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-5">
+                          <div className="mb-1 flex items-center gap-2 text-sm font-['Roboto'] text-[#94A3B8]">
+                            <MapPin className="h-4 w-4" />
+                            <span>Expected Delivery</span>
+                          </div>
+                          <p className="text-md font-['Inter'] text-[#0F172A]">{expectedDelivery}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                         <Button
                           variant="outline"
-                          className="flex-1 border-[#E5E7EB] text-[#0F172A] font-['Roboto'] rounded-xl hover:bg-[#F8FAFC]"
+                          className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC]"
                           onClick={() => setSelectedOrderToView(null)}
                         >
                           Close
+                        </Button>
+                        <Button
+                          className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301]"
+                          onClick={() => setSelectedOrderToView(null)}
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          Finish Order
                         </Button>
                       </div>
                     </div>

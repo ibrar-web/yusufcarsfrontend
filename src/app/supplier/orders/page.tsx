@@ -48,6 +48,13 @@ type SupplierOrder = {
   sentAt?: string;
 };
 
+type OrdersApiResponse = {
+  data: SupplierOrderApi[];
+  meta: {
+    total: number;
+  };
+};
+
 const orderStatusConfig: Record<
   string,
   { className: string; label: string }
@@ -117,12 +124,12 @@ export default function SupplierOrdersPage() {
           pageSize: requestedPageSize,
           search: debouncedSearch || undefined,
         }
-        const response = await apiGet<{ data?: SupplierOrderApi[] }>(apiRoutes?.supplier?.orders?.listorders, {params});
+        const response = await apiGet<{ data?: OrdersApiResponse }>(apiRoutes?.supplier?.orders?.listorders, {params});
         const payload = response?.data?.data ?? [];
         setOrder(payload?.map(normalizeOrder));
         setPage(requestedPage);
         setPageSize(requestedPageSize);
-        setTotalOrders(response?.data?.meta?.total);
+        setTotalOrders(response?.data?.meta?.total ?? 0);
         
       } catch (error) {
         setIsLoading(false);

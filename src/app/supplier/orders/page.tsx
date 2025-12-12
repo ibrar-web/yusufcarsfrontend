@@ -29,6 +29,7 @@ type SupplierOrderApi = {
   acceptedQuote: {
     partName: string;
     price? : string | number | null;
+    brand: string;
   };
   request: {
     id: string,
@@ -41,9 +42,17 @@ type SupplierOrder = {
   requestId?: string;
   customer?: string;
   part?: string;
+  brand?: string;
   amount: number;
   status: string;
   sentAt?: string;
+};
+
+type OrdersApiResponse = {
+  data: SupplierOrderApi[];
+  meta: {
+    total: number;
+  };
 };
 
 const orderStatusConfig: Record<
@@ -59,7 +68,7 @@ const orderStatusConfig: Record<
     label: "Cancelled",
   },
   in_transit: {
-    className: "bg-[#22C55E] text-white border-0 shadow-sm font-['Roboto']",
+    className: "bg-[#3B82F6] text-white border-0 shadow-sm font-['Roboto']",
     label: "In Transit",
   }
 };
@@ -75,6 +84,7 @@ const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
     customer:
       order?.buyer?.fullName,
     part: order.acceptedQuote?.partName,
+    brand: order?.acceptedQuote?.brand,
     amount: Number.isFinite(priceValue) ? priceValue : 0,
     status: (order.status || "pending").toLowerCase(),
     sentAt: order.createdAt || undefined,
@@ -114,12 +124,12 @@ export default function SupplierOrdersPage() {
           pageSize: requestedPageSize,
           search: debouncedSearch || undefined,
         }
-        const response = await apiGet<{ data?: SupplierOrderApi[] }>(apiRoutes?.supplier?.orders?.listorders, {params});
+        const response = await apiGet<{ data?: OrdersApiResponse }>(apiRoutes?.supplier?.orders?.listorders, {params});
         const payload = response?.data?.data ?? [];
         setOrder(payload?.map(normalizeOrder));
         setPage(requestedPage);
         setPageSize(requestedPageSize);
-        setTotalOrders(response?.data?.meta?.total);
+        setTotalOrders(response?.data?.meta?.total ?? 0);
         
       } catch (error) {
         setIsLoading(false);
@@ -194,6 +204,7 @@ export default function SupplierOrdersPage() {
                 <TableHead className="font-['Inter'] text-[#0F172A]">Order ID</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Customer</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Part</TableHead>
+                <TableHead className="font-['Inter'] text-[#0F172A]">Brand</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Amount</TableHead>
                 <TableHead className="font-['Inter'] text-[#0F172A]">Status</TableHead>
               </TableRow>
@@ -223,6 +234,7 @@ export default function SupplierOrdersPage() {
                   <TableCell className="font-['Roboto'] text-[#0F172A]">{order.id}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#475569]">{order.customer}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#475569]">{order.part}</TableCell>
+                  <TableCell className="font-['Roboto'] text-[#475569]">{order.brand}</TableCell>
                   <TableCell className="font-['Roboto'] text-[#0F172A]">£{order.amount.toFixed(2)}</TableCell>
                   <TableCell>{renderOrderStatusBadge(order)}</TableCell>
                 </TableRow>

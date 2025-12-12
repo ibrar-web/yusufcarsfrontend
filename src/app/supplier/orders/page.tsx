@@ -68,7 +68,7 @@ const orderStatusConfig: Record<
     label: "Cancelled",
   },
   in_transit: {
-    className: "bg-[#22C55E] text-white border-0 shadow-sm font-['Roboto']",
+    className: "bg-[#3B82F6] text-white border-0 shadow-sm font-['Roboto']",
     label: "In Transit",
   }
 };

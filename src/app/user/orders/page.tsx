@@ -33,7 +33,7 @@ interface OrderPageProps {
   onNavigate: (page: string) => void;
 }
 
-type SupplierOrder = {
+type UserOrder = {
   id: string;
   requestId?: string;
   part?: string;
@@ -43,7 +43,7 @@ type SupplierOrder = {
   sentAt?: string;
 };
 
-type SupplierOrderApi = {
+type UserOrderApi = {
   data: {};
   meta: {};
   id: string;
@@ -65,14 +65,14 @@ type SupplierOrderApi = {
 };
 
 type OrdersApiResponse = {
-  data: SupplierOrderApi[];
+  data: UserOrderApi[];
   meta: {
     total: number;
   };
 };
 
 
-const normalizeOrder = (order: SupplierOrderApi): SupplierOrder => {
+const normalizeOrder = (order: UserOrderApi): UserOrder => {
   const priceValue =
     typeof order?.acceptedQuote?.price === "string"
       ? parseFloat(order?.acceptedQuote?.price)
@@ -171,8 +171,8 @@ type FetchOptions = {
 export default function Orders(props?: OrderPageProps) {
   const { handleNavigate } = useAppState();
   const navigate = props?.onNavigate ?? handleNavigate;
-  const [selectedOrderToView, setSelectedOrderToView] = useState<SupplierOrder | null>(null);
-  const [orders, setOrders] = useState<SupplierOrder[]>([]);
+  const [selectedOrderToView, setSelectedOrderToView] = useState<UserOrder | null>(null);
+  const [orders, setOrders] = useState<UserOrder[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const debouncedSearch = useDebounce(userSearch, 500);
@@ -182,7 +182,7 @@ export default function Orders(props?: OrderPageProps) {
   const [activeStatus, setActiveStatus] = useState<StatusFilterKey>("all");
   const [sortOrder, setSortOrder] = useState<"recent" | "amount_desc" | "amount_asc">("recent");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [reviewTargetOrder, setReviewTargetOrder] = useState<SupplierOrder | null>(null);
+  const [reviewTargetOrder, setReviewTargetOrder] = useState<UserOrder | null>(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
 
@@ -256,12 +256,16 @@ export default function Orders(props?: OrderPageProps) {
     return counts;
   }, [orders]);
 
-  const handleFinishOrder = (order: SupplierOrder) => {
+  const handleFinishOrder = (order: UserOrder) => {
     setReviewTargetOrder(order);
     setReviewRating(0);
     setReviewText("");
     setReviewModalOpen(true);
   };
+
+  const handleCancelOrder = (order: UserOrder) => {
+
+  }
 
   const closeReviewModal = () => {
     setReviewModalOpen(false);
@@ -361,7 +365,7 @@ export default function Orders(props?: OrderPageProps) {
                   <SearchBar
                     value={userSearch}
                     onChange={setUserSearch}
-                    placeholder="Search by order number, part name, or supplier..."
+                    placeholder="Search by order number, part name, or brand..."
                   />
                 </div>
                 <div className="w-full sm:w-auto">
@@ -607,7 +611,7 @@ export default function Orders(props?: OrderPageProps) {
                           <Button
                             variant="outline"
                             className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
-                            onClick={() => setSelectedOrderToView(null)}
+                            onClick={() => selectedOrderToView && handleCancelOrder(selectedOrderToView)}
                           >
                             <CircleX className="mr-2 h-4 w-4" />
                             Cancel Order

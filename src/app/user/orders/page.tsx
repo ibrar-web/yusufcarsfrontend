@@ -185,6 +185,9 @@ export default function Orders(props?: OrderPageProps) {
   const [reviewTargetOrder, setReviewTargetOrder] = useState<UserOrder | null>(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelText, setCancelText] = useState("");
+
 
   const fetchOrders = useCallback(
     async ({
@@ -221,12 +224,17 @@ export default function Orders(props?: OrderPageProps) {
     fetchOrders({ page: 1, pageSize });
   }, [fetchOrders, pageSize]);
 
-  const cancelOrder = async(orderId: string) => {
+  const handleSubmitCancelOrder = async(orderId: string) => {
     try{
       const params = {
-        reason: "",
+        reason: cancelText,
       }
       const response = await apiPost(apiRoutes?.user?.orders?.cancelorder(orderId), { params });
+      console.log({response});
+      if ((response as any)?.statusCode === 201) {
+        toast.success("Thanks for sharing your experience!");
+      }
+      closeCancelModal();
     } catch(err) {
       console.log("err is as: ", err);
     }
@@ -263,8 +271,8 @@ export default function Orders(props?: OrderPageProps) {
     setReviewModalOpen(true);
   };
 
-  const handleCancelOrder = (order: UserOrder) => {
-
+  const handleCancelOrder = () => {
+    setCancelModalOpen(true);
   }
 
   const closeReviewModal = () => {
@@ -275,6 +283,13 @@ export default function Orders(props?: OrderPageProps) {
     setSelectedOrderToView(null);
     fetchOrders();
   };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
+    setSelectedOrderToView(null);
+    setCancelText("");
+    fetchOrders();
+  }
 
   const handleSubmitReview = async(orderId: string) => {
     try {
@@ -453,7 +468,7 @@ export default function Orders(props?: OrderPageProps) {
                               <p className="font-['Inter'] text-lg text-[#0F172A]">{order.id}</p>
                             </div>
                           </div>
-                          <Badge className={`px-3 py-1 text-xs font-medium ${statusConfig.pillClass}`}>
+                          <Badge className={`px-3 py-1 text-xs font-medium cursor-pointer ${statusConfig.pillClass}`}>
                             {statusConfig.label}
                           </Badge>
                         </div>
@@ -506,8 +521,8 @@ export default function Orders(props?: OrderPageProps) {
               {hasMore && (
                 <div className="text-center pt-4">
                   <Button
-                    className="rounded-full bg-[#F02801] px-6 py-5 font-['Roboto'] text-white hover:bg-[#D22301]"
-                    onClick={handleLoadMore}
+                    className="rounded-full bg-[#F02801] px-6 py-5 font-['Roboto'] text-white hover:bg-[#D22301] cursor-pointer"
+                    onClick={() => handleLoadMore()}
                     disabled={isLoading}
                   >
                     {isLoading ? "Loading..." : "Show More"}
@@ -611,7 +626,7 @@ export default function Orders(props?: OrderPageProps) {
                           <Button
                             variant="outline"
                             className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
-                            onClick={() => selectedOrderToView && handleCancelOrder(selectedOrderToView)}
+                            onClick={() => selectedOrderToView && handleCancelOrder()}
                           >
                             <CircleX className="mr-2 h-4 w-4" />
                             Cancel Order
@@ -686,7 +701,7 @@ export default function Orders(props?: OrderPageProps) {
                     <Button
                       variant="outline"
                       className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
-                      onClick={closeReviewModal}
+                      onClick={() => closeReviewModal()}
                     >
                       Skip
                     </Button>
@@ -697,6 +712,53 @@ export default function Orders(props?: OrderPageProps) {
                       disabled={reviewRating === 0}
                     >
                       Submit Review
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={cancelModalOpen} onOpenChange={(open) => (open ? setCancelModalOpen(true) : closeCancelModal())}>
+              <DialogContent className="max-w-xl rounded-3xl border border-[#E5E7EB] shadow-2xl p-0">
+                <div className="space-y-8 p-8">
+                  <DialogHeader className="p-0 text-left">
+                    <div className="flex items-start gap-3">
+                      <div>
+                        <DialogTitle className="font-['Inter'] text-2xl text-[#0F172A]">Reason To Cancel</DialogTitle>
+                        <DialogDescription className="font-['Roboto'] text-sm text-[#475569]">
+                          Mention the reason you want to cancel this order.
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+
+                  <div className="space-y-3 w-full max-w-xl mx-auto">
+                    <p className="text-sm font-['Roboto'] font-medium text-[#0F172A]">Type the reason here</p>
+                    <Textarea
+                      placeholder="Share your reason to cancel the order..."
+                      className="w-full rounded-3xl border border-[#E2E8F0] bg-[#FDFEFE] placeholder:text-[#94A3B8] text-left leading-relaxed break-words overflow-auto min-h-[100px] max-h-[50vh] p-3 md:text-sm"
+                      maxLength={500}
+                      value={cancelText}
+                      onChange={(event) => setCancelText(event.target.value)}
+                    />
+                    <div className="text-right text-xs font-['Roboto'] text-[#94A3B8]">{cancelText?.length}/500 characters</div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
+                      onClick={() => closeCancelModal()}
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      // className="flex-1 rounded-2xl bg-[#FDA08B] text-white font-['Roboto'] hover:bg-[#F97316]"
+                      className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
+                      onClick={() => handleSubmitCancelOrder(selectedOrderToView!.id)}
+                      disabled={cancelText === ""}
+                    >
+                      Submit
                     </Button>
                   </div>
                 </div>

@@ -40,19 +40,19 @@ function VehicleConfirmationPage({
       label: "Registration",
       value: vehicleData?.registrationNumber,
     },
-    { label: "Postcode", value: vehicleData?.postcode },
+    // { label: "Postcode", value: vehicleData?.postcode },
     {
       label: "Fuel Type",
       value: vehicleData?.fuelType,
     },
-    {
-      label: "Engine Size",
-      value:
-        vehicleData?.engineSize ??
-        (vehicleData?.engineCapacity
-          ? `${vehicleData.engineCapacity}cc`
-          : undefined),
-    },
+    // {
+    //   label: "Engine Size",
+    //   value:
+    //     vehicleData?.engineSize ??
+    //     (vehicleData?.engineCapacity
+    //       ? `${vehicleData.engineCapacity}cc`
+    //       : undefined),
+    // },
     {
       label: "Request Scope",
       value:
@@ -68,7 +68,7 @@ function VehicleConfirmationPage({
     { label: "Colour", value: vehicleData?.colour },
     { label: "Fuel", value: vehicleData?.fuelType },
     { label: "Wheelplan", value: vehicleData?.wheelplan },
-    { label: "Tax Status", value: vehicleData?.taxStatus },
+    // { label: "Tax Status", value: vehicleData?.taxStatus },
     { label: "Tax Due Date", value: vehicleData?.taxDueDate },
     { label: "MOT Status", value: vehicleData?.motStatus },
     { label: "MOT Expiry", value: vehicleData?.motExpiryDate },

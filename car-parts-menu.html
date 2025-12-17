@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Parts Menu</title>
+    <style>
+      :root {
+        font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", sans-serif;
+        color: #1b1b1b;
+      }
+
+      body {
+        margin: 0;
+        background: #f7f7f7;
+        padding: 24px;
+      }
+
+      .menu-wrapper {
+        max-width: 1080px;
+        margin: auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        overflow: hidden;
+      }
+
+      .tier2 {
+        background: #00264d;
+        color: #fff;
+        padding: 32px 24px;
+      }
+
+      .tier2 h2 {
+        font-size: 1.2rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0 0 20px;
+      }
+
+      .tier2 ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .tier2 li {
+        border-radius: 12px;
+      }
+
+      .tier2 a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        padding: 12px 14px;
+        border-radius: 12px;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+
+      .tier2 li.active,
+      .tier2 a:hover,
+      .tier2 a:focus-visible {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .tier2 span {
+        font-weight: 600;
+      }
+
+      .tier3 {
+        padding: 32px 40px;
+        background: linear-gradient(180deg, #fff 0%, #f5f7fb 100%);
+      }
+
+      .tier3-header {
+        margin-bottom: 24px;
+      }
+
+      .tier3-header p {
+        margin: 0;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #475467;
+      }
+
+      .tier3-header h2 {
+        margin: 4px 0 0;
+        font-size: 1.6rem;
+        color: #101828;
+      }
+
+      .tier3 h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .tier3 hr {
+        border: none;
+        border-top: 1px solid #e4e7ec;
+        margin: 12px 0 16px;
+      }
+
+      .tier3-groups {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 32px;
+      }
+
+      .tier3 ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .tier3 a {
+        text-decoration: none;
+        color: #0056c7;
+        font-weight: 500;
+      }
+
+      .tier3 a:hover,
+      .tier3 a:focus-visible {
+        text-decoration: underline;
+      }
+
+      .view-all {
+        margin-top: 32px;
+      }
+
+      .view-all a {
+        display: inline-flex;
+        padding: 12px 18px;
+        background: #00264d;
+        color: #fff;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .menu-wrapper {
+          grid-template-columns: 1fr;
+        }
+
+        .tier2,
+        .tier3 {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="menu-wrapper" aria-label="Car Parts Menu">
+      <aside class="tier2" aria-label="Car Parts Categories">
+        <h2>Car Parts</h2>
+        <ul>
+          <li class="active" data-category-id="service">
+            <a href="/car-service-parts">
+              <span>Car Service Parts &amp; Kits</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="brakes">
+            <a href="/brakes">
+              <span>Car Brakes</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="engine">
+            <a href="/engine-parts">
+              <span>Engine Parts</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="suspension">
+            <a href="/suspension-and-steering">
+              <span>Suspension &amp; Steering</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="transmission">
+            <a href="/car-transmission">
+              <span>Car Transmission Parts</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="cooling">
+            <a href="/car-cooling-parts-and-car-heating">
+              <span>Cooling and Heating</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="electrics">
+            <a href="/car-electrics-and-car-lighting">
+              <span>Car Electrics and Car Lighting</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="body">
+            <a href="/car-body-parts-and-car-exhaust">
+              <span>Body &amp; Exhaust Parts</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+          <li data-category-id="lubricants">
+            <a href="/car-lubricants-and-car-fluids">
+              <span>Car Lubricants and Fluids</span>
+              <span aria-hidden="true">&rsaquo;</span>
+            </a>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="tier3" id="categoryDetails" aria-live="polite">
+        <div class="tier3-header">
+          <p>Now showing</p>
+          <h2 id="tier3Heading">Car Service Parts &amp; Kits</h2>
+        </div>
+        <div class="tier3-groups" id="tier3Groups"></div>
+        <div class="view-all">
+          <a id="viewAllLink" href="/car-service-parts">View All Categories</a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const categoryData = {
+        service: {
+          label: "Car Service Parts & Kits",
+          viewAll: "/car-service-parts",
+          viewAllLabel: "View All Service Parts",
+          groups: [
+            {
+              title: "Regular Service",
+              items: [
+                { label: "Air Filters", href: "/air-filter" },
+                { label: "Anti Freeze", href: "/anti-freeze" },
+                { label: "Brake Discs", href: "/brake-discs" },
+                { label: "Brake Pads", href: "/brake-pads" },
+                { label: "Fuel Filters", href: "/fuel-filter" },
+                { label: "Glow Plugs", href: "/glow-plugs" },
+                { label: "Oil Filters", href: "/oil-filter" },
+                { label: "Other Filters", href: "/other-filters" },
+                { label: "Pollen Filters", href: "/pollenfilter" },
+                { label: "Spark Plugs", href: "/spark-plugs" },
+              ],
+            },
+            {
+              title: "Major Service",
+              items: [
+                { label: "Distributor Caps", href: "/distributor-cap" },
+                { label: "Rotor Arms", href: "/rotor-arm" },
+                {
+                  label: "Tensioners Idlers & Dampers",
+                  href: "/tensioners-idlers-dampers",
+                },
+                { label: "Timing Belt", href: "/timing-belt" },
+                { label: "Timing Belt Kits", href: "/timing-belt-kits" },
+              ],
+            },
+          ],
+        },
+        brakes: {
+          label: "Car Brakes",
+          viewAll: "/brakes",
+          viewAllLabel: "Shop All Brake Parts",
+          groups: [
+            {
+              title: "Popular Brake Parts",
+              items: [
+                { label: "Brake Discs", href: "/brake-discs" },
+                { label: "Brake Pads", href: "/brake-pads" },
+                { label: "Brake Calipers", href: "/brake-calipers" },
+                { label: "Brake Shoes", href: "/brake-shoes" },
+                { label: "Brake Drums", href: "/brake-drums" },
+                { label: "Brake Fitting Kits", href: "/brake-fitting-kits" },
+              ],
+            },
+            {
+              title: "Hydraulic Components",
+              items: [
+                { label: "Brake Hoses", href: "/brake-hoses" },
+                { label: "Master Cylinders", href: "/brake-master-cylinder" },
+                { label: "Wheel Cylinders", href: "/wheel-cylinder" },
+                { label: "ABS Sensors", href: "/abs-sensors" },
+                { label: "Brake Fluid", href: "/brake-fluid" },
+              ],
+            },
+          ],
+        },
+        engine: {
+          label: "Engine Parts",
+          viewAll: "/engine-parts",
+          viewAllLabel: "View Engine Parts",
+          groups: [
+            {
+              title: "Popular Engine Parts",
+              items: [
+                { label: "Gaskets & Seals", href: "/car-gasket-seals" },
+                { label: "Timing Belts", href: "/timing-belt" },
+                { label: "Drive Belts", href: "/car-drive-belt" },
+                { label: "Timing Chains", href: "/timing-chain" },
+                {
+                  label: "Tensioners, Idlers & Dampers",
+                  href: "/tensioners-idlers-and-dampers",
+                },
+              ],
+            },
+          ],
+        },
+        suspension: {
+          label: "Suspension & Steering",
+          viewAll: "/suspension-and-steering",
+          viewAllLabel: "View Suspension Parts",
+          groups: [
+            {
+              title: "Suspension Essentials",
+              items: [
+                { label: "Shock Absorbers", href: "/shock-absorbers" },
+                { label: "Coil Springs", href: "/coil-springs" },
+                { label: "Suspension Arms", href: "/suspension-arms" },
+                { label: "Bushes", href: "/suspension-bushes" },
+                { label: "Wheel Bearings", href: "/wheel-bearings" },
+              ],
+            },
+            {
+              title: "Steering Components",
+              items: [
+                { label: "Steering Racks", href: "/steering-rack" },
+                { label: "Track Rod Ends", href: "/track-rod-end" },
+                { label: "Power Steering Pumps", href: "/power-steering-pump" },
+                { label: "Ball Joints", href: "/ball-joint" },
+                { label: "Drop Links", href: "/drop-links" },
+              ],
+            },
+          ],
+        },
+        transmission: {
+          label: "Car Transmission Parts",
+          viewAll: "/car-transmission",
+          viewAllLabel: "View Transmission Parts",
+          groups: [
+            {
+              title: "Transmission Essentials",
+              items: [
+                { label: "Clutch Kits", href: "/clutch-kit" },
+                { label: "Flywheels", href: "/flywheel" },
+                { label: "Driveshafts", href: "/drive-shafts" },
+                { label: "Propshafts", href: "/propshaft" },
+                { label: "CV Joints", href: "/cv-joints" },
+              ],
+            },
+            {
+              title: "Gearbox & Control",
+              items: [
+                { label: "Gearboxes", href: "/gearbox" },
+                { label: "Gear Linkages", href: "/gear-linkage" },
+                { label: "Differentials", href: "/differential" },
+                { label: "Hydraulic Clutch Parts", href: "/clutch-hydraulics" },
+                { label: "Wheel Bearings", href: "/wheel-bearings" },
+              ],
+            },
+          ],
+        },
+        cooling: {
+          label: "Cooling and Heating",
+          viewAll: "/car-cooling-parts-and-car-heating",
+          viewAllLabel: "View Cooling & Heating Parts",
+          groups: [
+            {
+              title: "Cooling Essentials",
+              items: [
+                { label: "Radiators", href: "/radiator" },
+                { label: "Water Pumps", href: "/water-pump" },
+                { label: "Thermostats", href: "/thermostat" },
+                { label: "Cooling Fans", href: "/cooling-fans" },
+                { label: "Expansion Tanks", href: "/expansion-tank" },
+              ],
+            },
+            {
+              title: "Heating & Climate",
+              items: [
+                { label: "Heater Blowers", href: "/heater-blower" },
+                { label: "Heater Resistors", href: "/heater-resistor" },
+                { label: "AC Compressors", href: "/air-con-compressor" },
+                { label: "Intercoolers", href: "/intercooler" },
+                { label: "Cabin Heaters", href: "/cabin-heater" },
+              ],
+            },
+          ],
+        },
+        electrics: {
+          label: "Car Electrics and Car Lighting",
+          viewAll: "/car-electrics-and-car-lighting",
+          viewAllLabel: "View Electrical Parts",
+          groups: [
+            {
+              title: "Electrical Essentials",
+              items: [
+                { label: "Alternators", href: "/alternator" },
+                { label: "Starter Motors", href: "/starter-motor" },
+                { label: "Batteries", href: "/car-battery" },
+                { label: "Ignition Coils", href: "/ignition-coil" },
+                { label: "Sensors", href: "/car-sensors" },
+              ],
+            },
+            {
+              title: "Lighting",
+              items: [
+                { label: "Headlight Bulbs", href: "/headlight-bulbs" },
+                { label: "Tail Lights", href: "/tail-lights" },
+                { label: "Indicator Units", href: "/indicator-lights" },
+                { label: "Fog Lights", href: "/fog-lights" },
+                { label: "Daytime Running Lights", href: "/daytime-running-lights" },
+              ],
+            },
+          ],
+        },
+        body: {
+          label: "Body & Exhaust Parts",
+          viewAll: "/car-body-parts-and-car-exhaust",
+          viewAllLabel: "View Body & Exhaust Parts",
+          groups: [
+            {
+              title: "Body Panels",
+              items: [
+                { label: "Bumpers", href: "/car-bumper" },
+                { label: "Wings", href: "/car-wing" },
+                { label: "Mirrors", href: "/wing-mirror" },
+                { label: "Door Handles", href: "/door-handles" },
+                { label: "Bonnet Struts", href: "/bonnet-strut" },
+              ],
+            },
+            {
+              title: "Exhaust Components",
+              items: [
+                { label: "Exhaust Systems", href: "/exhaust-system" },
+                { label: "Catalytic Converters", href: "/catalytic-converter" },
+                { label: "DPF Filters", href: "/diesel-particulate-filter" },
+                { label: "Silencers", href: "/exhaust-silencer" },
+                { label: "Mountings", href: "/exhaust-mountings" },
+              ],
+            },
+          ],
+        },
+        lubricants: {
+          label: "Car Lubricants and Fluids",
+          viewAll: "/car-lubricants-and-car-fluids",
+          viewAllLabel: "Shop Lubricants & Fluids",
+          groups: [
+            {
+              title: "Lubricants",
+              items: [
+                { label: "Engine Oil", href: "/engine-oils" },
+                { label: "Transmission Fluid", href: "/transmission-fluid" },
+                { label: "Power Steering Fluid", href: "/power-steering-fluid" },
+                { label: "Differential Oil", href: "/differential-oil" },
+                { label: "Greases", href: "/grease" },
+              ],
+            },
+            {
+              title: "Fluids & Treatments",
+              items: [
+                { label: "Coolant", href: "/coolant" },
+                { label: "Brake Fluid", href: "/brake-fluid" },
+                { label: "AdBlue", href: "/adblue" },
+                { label: "Fuel Treatments", href: "/fuel-treatment" },
+                { label: "Screenwash", href: "/screenwash" },
+              ],
+            },
+          ],
+        },
+      };
+
+      const tier2Items = document.querySelectorAll("[data-category-id]");
+      const tier3Heading = document.getElementById("tier3Heading");
+      const tier3Groups = document.getElementById("tier3Groups");
+      const viewAllLink = document.getElementById("viewAllLink");
+      const tier3Section = document.getElementById("categoryDetails");
+
+      function renderCategory(categoryId) {
+        const data = categoryData[categoryId];
+        if (!data) return;
+
+        tier2Items.forEach((item) => {
+          const isActive = item.dataset.categoryId === categoryId;
+          item.classList.toggle("active", isActive);
+          const link = item.querySelector("a");
+          if (link) {
+            if (isActive) {
+              link.setAttribute("aria-current", "true");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+        });
+
+        tier3Heading.textContent = data.label;
+        tier3Section.setAttribute(
+          "aria-label",
+          `${data.label} subcategories`
+        );
+
+        tier3Groups.innerHTML = "";
+        data.groups.forEach((group) => {
+          const groupContainer = document.createElement("div");
+
+          const groupTitle = document.createElement("h3");
+          groupTitle.textContent = group.title;
+          groupContainer.appendChild(groupTitle);
+
+          const divider = document.createElement("hr");
+          groupContainer.appendChild(divider);
+
+          const list = document.createElement("ul");
+          group.items.forEach((item) => {
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = item.href;
+            link.textContent = item.label;
+            li.appendChild(link);
+            list.appendChild(li);
+          });
+
+          groupContainer.appendChild(list);
+          tier3Groups.appendChild(groupContainer);
+        });
+
+        viewAllLink.href = data.viewAll;
+        viewAllLink.textContent = data.viewAllLabel || `View all ${data.label}`;
+      }
+
+      tier2Items.forEach((item) => {
+        const categoryId = item.dataset.categoryId;
+        const handleHover = () => renderCategory(categoryId);
+        item.addEventListener("mouseenter", handleHover);
+        item.addEventListener("focusin", handleHover);
+      });
+
+      renderCategory("service");
+    </script>
+  </body>
+</html>

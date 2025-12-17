@@ -289,7 +289,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                     <Button
                       onClick={handleLookup}
                       disabled={isSearchDisabled}
-                      className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
+                      className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40 cursor-pointer"
                       style={{ fontSize: "16px" }}
                     >
                       FILTER
@@ -447,7 +447,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                     id="local-request"
                     checked={localRequest}
                     onCheckedChange={setLocalRequest}
-                    className="data-[state=checked]:bg-[#F02801]"
+                    className="data-[state=checked]:bg-[#F02801] cursor-pointer"
                   />
                 </div>
               </div>
@@ -455,13 +455,13 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                 <Button
                   variant="outline"
                   onClick={() => setFilterDialogOpen(false)}
-                  className="flex-1 h-12 rounded-full font-['Roboto'] border-2 border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all duration-200"
+                  className="flex-1 h-12 rounded-full font-['Roboto'] border-2 border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all duration-200 cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleConfirmFilter}
-                  className="flex-1 h-12 rounded-full font-['Roboto'] bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
+                  className="flex-1 h-12 rounded-full font-['Roboto'] bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40  cursor-pointer"
                 >
                   Apply Filters
                 </Button>
@@ -483,7 +483,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
               </p>
               <Button
                 onClick={() => onNavigate("supplier-onboarding")}
-                className="h-14 w-[140px] font-['Roboto'] font-bold bg-[#F02801] hover:bg-[#D22301] text-white rounded-full transition-all duration-300 shadow-[0_8px_24px_rgba(240,40,1,0.5)] hover:shadow-[0_12px_32px_rgba(240,40,1,0.6)] hover:scale-105 uppercase tracking-wider"
+                className="h-14 w-[140px] font-['Roboto'] font-bold bg-[#F02801] hover:bg-[#D22301] text-white rounded-full transition-all duration-300 shadow-[0_8px_24px_rgba(240,40,1,0.5)] hover:shadow-[0_12px_32px_rgba(240,40,1,0.6)] hover:scale-105 uppercase tracking-wider cursor-pointer"
                 style={{ fontSize: "15px" }}
               >
                 APPLY NOW

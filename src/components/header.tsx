@@ -277,7 +277,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   key={link.id}
                   onClick={() => navigate(link.page)}
                   className={cn(
-                    "font-['Roboto'] text-primary hover:text-subtle-ink transition-all duration-200 font-medium",
+                    "font-['Roboto'] text-primary hover:text-subtle-ink transition-all duration-200 font-medium  cursor-pointer",
                     currentPage === link.page && "text-subtle-ink"
                   )}
                 >
@@ -294,14 +294,14 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                 <Button
                   variant="outline"
                   onClick={() => setShowRoleSelection(true)}
-                  className="rounded-full"
+                  className="rounded-full  cursor-pointer"
                 >
                   Sign In
                 </Button>
               ) : hasDashboardRole ? (
                 <Button
                   variant="outline"
-                  className="rounded-lg gap-2 relative"
+                  className="rounded-lg gap-2 relative  cursor-pointer"
                   onClick={() =>
                     hasDashboardRole &&
                     navigate(isAdmin ? "admin-dashboard" : "supplier-dashboard")
@@ -318,7 +318,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="rounded-lg gap-2 relative"
+                      className="rounded-lg gap-2 relative cursor-pointer"
                     >
                       <User className="h-4 w-4" />
                       My Account

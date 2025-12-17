@@ -12,6 +12,8 @@ import {
   type QuoteNotificationsPayload,
   type VehicleData,
 } from "@/stores/app-store";
+import { apiPost } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
 
 export function useAppState() {
   const router = useRouter();
@@ -108,13 +110,19 @@ export function useAppState() {
     setQuoteNotifications(null);
   }, [setQuoteNotifications]);
 
-  const handleSignOut = useCallback(() => {
-    setIsAuthenticated(false);
-    setUserRole(null);
-    setConfirmedOrderDetails(null);
-    router.push("/");
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleSignOut = useCallback(async () => {
+    try {
+      await apiPost(apiRoutes?.auth?.logout);
+    } catch (error) {
+      console.error("Failed to call logout endpoint", error);
+    } finally {
+      setIsAuthenticated(false);
+      setUserRole(null);
+      setConfirmedOrderDetails(null);
+      router.push("/");
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   }, [
     router,

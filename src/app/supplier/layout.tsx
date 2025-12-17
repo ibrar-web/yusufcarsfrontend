@@ -4,11 +4,13 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings, Blocks } from "lucide-react";
+import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings, Blocks, LogOut } from "lucide-react";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supplierMessages, supplierQuotes, supplierRequests } from "@/page-components/supplier-dashboard/data";
+import { useAppState } from "@/hooks/use-app-state";
+import { SignOutDialog } from "@/components/signout-dialog";
 
 interface SupplierLayoutProps {
   children: ReactNode;
@@ -17,6 +19,8 @@ interface SupplierLayoutProps {
 export default function SupplierLayout({ children }: SupplierLayoutProps) {
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { handleSignOut } = useAppState();
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
   const navItems = useMemo(
     () => [
@@ -124,6 +128,16 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
               );
             })}
           </nav>
+          <div className="p-4 border-t border-[#FBD5D5] bg-[#FEF2F2]">
+            <Button
+              variant="outline"
+              className={`w-full ${sidebarCollapsed ? "justify-center" : "justify-center gap-2"} rounded-xl border-[#FBD5D5] text-[#B91C1C] hover:bg-white cursor-pointer`}
+              onClick={() => setSignOutDialogOpen(true)}
+            >
+              <LogOut className="h-4 w-4" />
+              {!sidebarCollapsed && <span>Sign Out</span>}
+            </Button>
+          </div>
         </aside>
 
         <main
@@ -134,6 +148,11 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
           <div className="p-6 overflow-hidden">{children}</div>
         </main>
       </div>
+      <SignOutDialog
+        open={signOutDialogOpen}
+        onOpenChange={setSignOutDialogOpen}
+        onConfirm={handleSignOut}
+      />
     </div>
   );
 }

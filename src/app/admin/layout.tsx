@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
@@ -16,9 +16,13 @@ import {
   LayoutDashboard,
   MessageSquare,
   Users,
-  Grid3x3
+  Grid3x3,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/components/ui/utils";
+import { Button } from "@/components/ui/button";
+import { SignOutDialog } from "@/components/signout-dialog";
+import { useAppState } from "@/hooks/use-app-state";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -35,6 +39,8 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const { handleSignOut } = useAppState();
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
   const navBadges: Record<string, number | undefined> = {
     suppliers: adminPendingSuppliers.length || undefined,
@@ -47,12 +53,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-[#FEF3F2] via-white to-[#FEF3F2]">
       <Header />
       <div className="flex mt-[72px]">
-        <aside className="w-64 border-r border-[#E5E7EB] min-h-[calc(100vh-72px)] bg-gradient-to-b from-[#FEF3F2] to-[#FEE2E2]/50 sticky top-[72px] h-[calc(100vh-72px)]">
+        <aside className="w-64 border-r border-[#E5E7EB] min-h-[calc(100vh-72px)] bg-gradient-to-b from-[#FEF3F2] to-[#FEE2E2]/50 sticky top-[72px] h-[calc(100vh-72px)] flex flex-col">
           <div className="p-6">
             <h2 className="font-['Inter'] text-[#0F172A] mb-1">Admin Dashboard</h2>
             <p className="text-sm text-[#475569] font-['Roboto']">Platform management</p>
           </div>
-          <nav className="px-3 space-y-1">
+          <nav className="px-3 space-y-1 flex-1">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname.startsWith(item.href);
@@ -81,12 +87,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               );
             })}
           </nav>
+          <div className="px-4 pb-6">
+            <Button
+              variant="outline"
+              className="w-full justify-center gap-2 rounded-full border-[#FEE2E2] text-[#B91C1C] hover:bg-[#FEF2F2] cursor-pointer"
+              onClick={() => setSignOutDialogOpen(true)}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </aside>
 
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-[1200px] mx-auto p-8 pt-12">{children}</div>
         </main>
       </div>
+      <SignOutDialog
+        open={signOutDialogOpen}
+        onOpenChange={setSignOutDialogOpen}
+        onConfirm={handleSignOut}
+      />
     </div>
   );
 }

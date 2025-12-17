@@ -47,6 +47,10 @@ import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet, apiPost } from "@/utils/apiconfig/http";
+import {
+  QUOTE_OFFER_EVENT,
+  type QuoteOfferPayload,
+} from "@/utils/socket/quoteOfferSocket";
 
 const FALLBACK_SUPPLIER_IMAGE =
   "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=200&fit=crop";
@@ -344,6 +348,33 @@ export default function QuotesPage() {
     };
 
     fetchQuotes();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const handleQuoteOffer = (event: Event) => {
+      const customEvent = event as CustomEvent<QuoteOfferPayload>;
+      const payload = customEvent.detail as UserQuoteOffer | undefined;
+      if (!payload) return;
+      const normalized = normalizeOffer(payload);
+
+      setQuotes((prev) => {
+        const existingIndex = prev.findIndex((quote) => quote.id === normalized.id);
+        if (existingIndex !== -1) {
+          const next = [...prev];
+          next[existingIndex] = normalized;
+          return next;
+        }
+        return [normalized, ...prev];
+      });
+    };
+
+    window.addEventListener(QUOTE_OFFER_EVENT, handleQuoteOffer as EventListener);
+
+    return () => {
+      window.removeEventListener(QUOTE_OFFER_EVENT, handleQuoteOffer as EventListener);
+    };
   }, []);
 
   const filteredQuotes = useMemo(() => {

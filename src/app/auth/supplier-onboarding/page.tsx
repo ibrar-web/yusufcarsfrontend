@@ -240,14 +240,14 @@ export default function SupplierOnboardingPage() {
         if (showToast && !emailRegex?.test(formData?.email))
           return showError("Please enter a valid email address");
         if (!formData?.phone?.trim()) return showError("Phone is required");
-        if (!formData?.contactPostcode?.trim()) return showError("Postcode is required");
+        // if (!formData?.contactPostcode?.trim()) return showError("Postcode is required");
         if (!formData?.password) return showError("Password is required");
         if (showToast && formData?.password?.length < 6)
           return showError("Password must be at least 6 characters");
         if (!formData?.confirmPassword) return showError("Confirm password is required");
         if (showToast && formData?.password !== formData?.confirmPassword)
           return showError("Passwords do not match");
-        if (!formData?.categories?.length) return showError("Please select at least one category");
+        // if (!formData?.categories?.length) return showError("Please select at least one category");
         if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
         if (!formData?.gdprConsent) return showError("You must give GDPR consent");
         return true;
@@ -266,13 +266,13 @@ export default function SupplierOnboardingPage() {
         if (!formData?.city?.trim()) return showError("City is required");
         if (!formData?.postcode?.trim()) return showError("Postcode is required");
         if (!formData?.serviceRadius) return showError("Service radius is required");
-        if (!formData?.categories?.length) return showError("Please select at least one category");
+        // if (!formData?.categories?.length) return showError("Please select at least one category");
         return true;
       }
 
       case 3: {
         if (!formData?.companyRegDoc) return showError("Company registration document is required");
-        if (!formData?.insuranceDoc) return showError("Insurance document is required");
+        // if (!formData?.insuranceDoc) return showError("Insurance document is required");
         return true;
       }
 
@@ -417,7 +417,7 @@ export default function SupplierOnboardingPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="contactPostcode">
                     Postcode <span className="text-danger">*</span>
                   </Label>
@@ -430,7 +430,7 @@ export default function SupplierOnboardingPage() {
                     }
                     className="h-12"
                   />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <Label htmlFor="password">
@@ -464,7 +464,7 @@ export default function SupplierOnboardingPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>
                     Categories you supply <span className="text-danger">*</span>
                   </Label>
@@ -498,7 +498,7 @@ export default function SupplierOnboardingPage() {
                   <p className="text-xs text-subtle-ink">
                     Select all categories that apply
                   </p>
-                </div>
+                </div> */}
 
                 <div className="flex flex-col gap-3 pt-2">
                   <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
@@ -721,7 +721,7 @@ export default function SupplierOnboardingPage() {
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   <Label>
                     Parts Categories <span className="text-danger">*</span>
                   </Label>
@@ -748,7 +748,7 @@ export default function SupplierOnboardingPage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </>
             )}
 
@@ -799,7 +799,7 @@ export default function SupplierOnboardingPage() {
                 <div className="space-y-3">
                   <Label htmlFor="insurance">
                     Public Liability Insurance{" "}
-                    <span className="text-danger">*</span>
+                    {/* <span className="text-danger">*</span> */}
                   </Label>
                   <p className="text-sm text-subtle-ink">
                     Proof of current public liability insurance (minimum £1M

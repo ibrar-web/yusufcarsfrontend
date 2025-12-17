@@ -118,6 +118,12 @@ export const apiRoutes = {
       list: "/admin/users",
       update: (id: string) => `/admin/users/${id}/activate`,
     },
+    categories: {
+      list: "/admin/service/categories",
+      create: "/admin/service/categories",
+      update: (id: string) => `/admin/service/categories/${id}`,
+      delete: (id: string) => `/admin/service/categories/${id}`,
+    },
     supplier: {
       list: "/admin/suppliers",
       read: (id: string) => `/admin/suppliers/${id}`,

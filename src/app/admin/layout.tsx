@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Users,
+  Grid3x3
 } from "lucide-react";
 import { cn } from "@/components/ui/utils";
 
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { id: "suppliers", label: "Suppliers", href: "/admin/suppliers", icon: Building2 },
   { id: "inquiries", label: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
   { id: "reports", label: "Reports", href: "/admin/reports", icon: FileWarning },
+  { id: "categories", label: "Categories", href: "/admin/categories", icon: Grid3x3 },
 ] as const;
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

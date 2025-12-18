@@ -33,7 +33,11 @@ export default async function RootLayout({
   const session = await getSessionFromCookie();
 
   return (
-    <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${roboto.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background text-foreground antialiased">
         <SessionHydrator session={session} />
         <SocketManager />

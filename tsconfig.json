@@ -18,6 +18,8 @@
     "incremental": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

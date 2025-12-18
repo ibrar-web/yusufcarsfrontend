@@ -50,6 +50,28 @@ interface AdminCategory {
   updatedAt?: string | null;
 }
 
+interface SubcategoriesResponse {
+  data?: {
+    subcategories?: AdminCategory[];
+    meta?: {
+      total?: number;
+      page?: number;
+      limit?: number;
+    };
+  };
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
+  total?: number;
+}
+
+type SubcategoryCreateResponse =
+  | AdminCategory
+  | { data?: AdminCategory | null }
+  | { category?: AdminCategory | null };
+
 const normalizeCategories = (payload: unknown): AdminCategory[] => {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload as AdminCategory[];
@@ -97,7 +119,7 @@ export default function AdminSubcategoriesPage() {
   const fetchSubcategories = useCallback(async (categoryId: string) => {
     setIsSubcategoryLoading(true);
     try {
-      const response = await apiGet(
+      const response = await apiGet<SubcategoriesResponse>(
         apiRoutes.admin.subcategories.list(categoryId)
       );
       const payload = response?.data?.subcategories ?? response?.data ?? response;
@@ -171,14 +193,34 @@ export default function AdminSubcategoriesPage() {
         slug: formSlug?.trim(),
         description: formDescription.trim() || undefined,
       };
-      const response = await apiPost<AdminCategory>(
+      const response = await apiPost<SubcategoryCreateResponse>(
         apiRoutes.admin.subcategories.create(parentCategoryId),
         payload
       );
       console.log("create response.  ", {response});
       
-      const created = response?.data;
-      setSubcategories((prev) => [created, ...prev]);
+    //   const created = response?.data;
+    let createdSubcategory: AdminCategory | undefined;
+      if (response && typeof response === "object") {
+        if ("data" in response && response.data) {
+          createdSubcategory = response.data as AdminCategory;
+        } else if ("category" in response && response.category) {
+          createdSubcategory = response.category as AdminCategory;
+        } else if ("id" in response) {
+          createdSubcategory = response as AdminCategory;
+        }
+      }
+
+      if (!createdSubcategory) {
+        createdSubcategory = {
+          id:
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `tmp-${Date.now()}`,
+          ...payload,
+        };
+      }
+      setSubcategories((prev) => [createdSubcategory, ...prev]);
       resetForm();
       setCreateDialogOpen(false);
       toast.success("Subcategory created");

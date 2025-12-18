@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -27,7 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { TablePagination } from "@/components/table-pagination";
+// import { TablePagination } from "@/components/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
@@ -41,7 +42,6 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import useDebounce from "@/components/debouncedSearch/debouncedSearch";
 
 interface AdminCategory {
   id: string;
@@ -98,29 +98,29 @@ const normalizeCategories = (payload: unknown): AdminCategory[] => {
   return [];
 };
 
-const formatDate = (value?: string | null) => {
-  if (!value) return "—";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-};
+// const formatDate = (value?: string | null) => {
+//   if (!value) return "—";
+//   const parsed = new Date(value);
+//   if (Number.isNaN(parsed.getTime())) return value;
+//   return parsed.toLocaleDateString("en-GB", {
+//     day: "numeric",
+//     month: "short",
+//     year: "numeric",
+//   });
+// };
 
 export default function AdminCategoriesPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [totalCategories, setTotalCategories] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce(searchTerm, 500);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // const debouncedSearch = useDebounce(searchTerm, 500);
+  // const [page, setPage] = useState(1);
+  // const [pageSize, setPageSize] = useState(20);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AdminCategory | null>(
     null
   );
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -135,29 +135,31 @@ export default function AdminCategoriesPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   const fetchCategories = useCallback(
-    async ({ requestedPage = 1, requestedPageSize = 20 } = {}) => {
+    // async ({ requestedPage = 1, requestedPageSize = 20 } = {}) => {
+    async () => {
       setIsLoading(true);
       try {
-        const params = {
-          page: requestedPage,
-          pageSize: requestedPageSize,
-          search: debouncedSearch || undefined,
-        };
+        // const params = {
+        //   page: requestedPage,
+        //   pageSize: requestedPageSize,
+        //   search: debouncedSearch || undefined,
+        // };
         const response = await apiGet<CategoriesResponse>(
-          apiRoutes.admin.categories.list,
-          { params }
+          apiRoutes.admin.categories.list
+          // ,
+          // { params }
         );
         const payload = response?.data?.data ?? response?.data ?? response;
         const normalized = normalizeCategories(payload ?? []);
-        const total =
-          response?.data?.meta?.total ??
-          response?.meta?.total ??
-          response?.total ??
-          normalized.length;
+        // const total =
+        //   response?.data?.meta?.total ??
+        //   response?.meta?.total ??
+        //   response?.total ??
+        //   normalized.length;
         setCategories(normalized);
-        setTotalCategories(total);
-        setPage(requestedPage);
-        setPageSize(requestedPageSize);
+        // setTotalCategories(total);
+        // setPage(requestedPage);
+        // setPageSize(requestedPageSize);
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : "Failed to load categories"
@@ -166,12 +168,14 @@ export default function AdminCategoriesPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearch]
+    // [debouncedSearch]
+    []
   );
-
+  
   useEffect(() => {
-    fetchCategories({ requestedPage: 1, requestedPageSize: pageSize });
-  }, [fetchCategories, pageSize]);
+    fetchCategories();
+  // }, [fetchCategories, pageSize]);
+  }, [fetchCategories]);
 
   const displayedCategories = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -181,9 +185,8 @@ export default function AdminCategoriesPage() {
     );
   }, [categories, searchTerm]);
 
-  const openViewDialog = (category: AdminCategory) => {
-    setSelectedCategory(category);
-    setViewDialogOpen(true);
+  const handleViewSubcategories = (category: AdminCategory) => {
+    router.push(`/admin/subcategories?parentId=${category.id}&name=${encodeURIComponent(category.name)}`);
   };
 
   const openEditDialog = (category: AdminCategory) => {
@@ -303,13 +306,13 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handlePageChange = (nextPage: number) => {
-    fetchCategories({ requestedPage: nextPage, requestedPageSize: pageSize });
-  };
+  // const handlePageChange = (nextPage: number) => {
+  //   fetchCategories({ requestedPage: nextPage, requestedPageSize: pageSize });
+  // };
 
-  const handlePageSizeChange = (nextSize: number) => {
-    fetchCategories({ requestedPage: 1, requestedPageSize: nextSize });
-  };
+  // const handlePageSizeChange = (nextSize: number) => {
+  //   fetchCategories({ requestedPage: 1, requestedPageSize: nextSize });
+  // };
 
   return (
     <div className="space-y-6">
@@ -450,12 +453,12 @@ export default function AdminCategoriesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right pr-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-[#E2E8F0] text-[#0F172A] cursor-pointer"
-                          onClick={() => openViewDialog(category)}
-                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-[#E2E8F0] text-[#0F172A] cursor-pointer"
+                            onClick={() => handleViewSubcategories(category)}
+                          >
                           <Eye className="h-4 w-4 mr-2" />
                           View
                         </Button>
@@ -484,7 +487,7 @@ export default function AdminCategoriesPage() {
               </TableBody>
             </Table>
           </div>
-          <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end">
+          {/* <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end">
             <TablePagination
               page={page}
               pageSize={pageSize}
@@ -493,68 +496,10 @@ export default function AdminCategoriesPage() {
               onPageSizeChange={handlePageSizeChange}
               className="w-full"
             />
-          </div>
+          </div> */}
         </CardContent>
       </Card>
 
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
-              Category Details
-            </DialogTitle>
-            <DialogDescription className="font-['Roboto'] text-[#475569]">
-              View the information stored for this category
-            </DialogDescription>
-          </DialogHeader>
-          {selectedCategory && (
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-                <p className="text-xs uppercase text-[#94A3B8] font-['Roboto']">
-                  Name
-                </p>
-                <p className="text-lg font-['Inter'] text-[#0F172A]">
-                  {selectedCategory.name}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-                <p className="text-xs uppercase text-[#94A3B8] font-['Roboto']">
-                  Category ID
-                </p>
-                <p className="font-['Inter'] text-[#0F172A]">
-                  {selectedCategory.id}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-                <p className="text-xs uppercase text-[#94A3B8] font-['Roboto']">
-                  Description
-                </p>
-                <p className="font-['Roboto'] text-[#475569]">
-                  {selectedCategory.description || "Not provided"}
-                </p>
-              </div>
-              {/* <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase text-[#94A3B8] font-['Roboto']">
-                    Created
-                  </p>
-                  <p className="font-['Inter'] text-[#0F172A]">
-                    {formatDate(selectedCategory.createdAt)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase text-[#94A3B8] font-['Roboto'] text-right">
-                    Updated
-                  </p>
-                  <p className="font-['Inter'] text-[#0F172A]">
-                    {formatDate(selectedCategory.updatedAt)}
-                  </p>
-                </div>
-              </div> */}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-md">

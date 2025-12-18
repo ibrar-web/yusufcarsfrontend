@@ -50,7 +50,6 @@ export const ServiceCategorySchema = new EntitySchema<ServiceCategoryEntity>({
       nullable: true,
     },
     sortOrder: {
-      name: "sort_order",
       type: "int",
       default: 0,
     },
@@ -86,7 +85,6 @@ export const ServiceSubcategorySchema =
         nullable: true,
       },
       sortOrder: {
-        name: "sort_order",
         type: "int",
         default: 0,
       },
@@ -96,7 +94,7 @@ export const ServiceSubcategorySchema =
         type: "many-to-one",
         target: "ServiceCategory",
         joinColumn: {
-          name: "category_id",
+          name: "categoryId",
         },
         onDelete: "CASCADE",
       },
@@ -139,7 +137,7 @@ export const ServiceItemSchema = new EntitySchema<ServiceItemEntity>({
       type: "many-to-one",
       target: "ServiceSubcategory",
       joinColumn: {
-        name: "subcategory_id",
+        name: "subcategoryId",
       },
       onDelete: "CASCADE",
     },

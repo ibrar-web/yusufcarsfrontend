@@ -204,8 +204,8 @@ export default function AdminCategoryItemsPage() {
         payload
       );
       // console.log("create response.  ", {response});
-    //   const created = response?.data;
-    let createdSubcategory: AdminCategory | undefined;
+      //   const created = response?.data;
+      let createdSubcategory: AdminCategory | undefined;
       if (response && typeof response === "object") {
         if ("data" in response && response.data) {
           createdSubcategory = response.data as AdminCategory;

@@ -203,7 +203,7 @@ export default function AdminSubcategoriesPage() {
         apiRoutes.admin.subcategories.create(parentCategoryId),
         payload
       );
-      console.log("create response.  ", {response});
+      // console.log("create response.  ", {response});
       
     //   const created = response?.data;
     let createdSubcategory: AdminCategory | undefined;

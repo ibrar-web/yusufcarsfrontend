@@ -134,6 +134,16 @@ export const apiRoutes = {
       delete: (subcategoryId: string) =>
         `/admin/service/subcategories/${subcategoryId}`,
     },
+    categoryItems: {
+      list: (id: string) =>
+        `/admin/service/subcategories/${id}`,
+      create: (id: string) =>
+        `/admin/service/subcategories/${id}/items`,
+      update: (id: string) =>
+        `/admin/service/items/${id}`,
+      delete: (id: string) =>
+        `/admin/service/items/${id}`,
+    },
     supplier: {
       list: "/admin/suppliers",
       read: (id: string) => `/admin/suppliers/${id}`,

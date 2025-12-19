@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Edit3,
+  Eye,
   FolderTree,
   Loader2,
   Search,
@@ -134,6 +135,7 @@ export default function AdminSubcategoriesPage() {
       setIsSubcategoryLoading(false);
     }
   }, []);
+
   useEffect(() => {
     if (parentCategoryId) {
       setSubcategorySearch("");
@@ -171,7 +173,7 @@ export default function AdminSubcategoriesPage() {
   const handleOpenEdit = (subcategory: AdminCategory) => {
     setSelectedSubcategory(subcategory);
     setFormName(subcategory.name);
-    setFormSlug(subcategory?.slug);
+    setFormSlug(subcategory?.slug ?? "");
     setFormDescription(subcategory.description ?? "");
     setEditDialogOpen(true);
   };
@@ -180,6 +182,10 @@ export default function AdminSubcategoriesPage() {
     setSelectedSubcategory(subcategory);
     setDeleteDialogOpen(true);
   };
+
+  const handleViewItems = (subcategory: AdminCategory) => {
+    router.push(`/admin/category-items?parentId=${subcategory.id}&name=${encodeURIComponent(subcategory.name)}`)
+  }
 
   const handleCreateSubcategory = async () => {
     if (!parentCategoryId || !formName.trim()) {
@@ -360,6 +366,8 @@ export default function AdminSubcategoriesPage() {
                     <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
                       Actions
                     </TableHead>
+                    <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -419,6 +427,17 @@ export default function AdminSubcategoriesPage() {
                             </Button>
                           </div>
                         </TableCell>
+                        <TableCell className="text-right pr-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-[#E2E8F0] text-[#0F172A] cursor-pointer"
+                            onClick={() => handleViewItems(subcategory)}
+                          >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                      </TableCell>
                       </TableRow>
                     ))
                   )}

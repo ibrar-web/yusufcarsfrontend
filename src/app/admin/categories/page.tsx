@@ -399,7 +399,6 @@ export default function AdminCategoriesPage() {
                     Actions
                   </TableHead>
                   <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
-                    
                   </TableHead>
 
                 </TableRow>

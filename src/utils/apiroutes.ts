@@ -96,7 +96,7 @@ export const apiRoutes = {
       },
       completeorder: (orderId: string) => {
         return `user/orders/${orderId}/complete`;
-      }
+      },
     },
   },
   supplier: {
@@ -125,8 +125,7 @@ export const apiRoutes = {
       delete: (id: string) => `/admin/service/categories/${id}`,
     },
     subcategories: {
-      list: (categoryId: string) =>
-        `/admin/service/categories/${categoryId}`,
+      list: (categoryId: string) => `/admin/service/categories/${categoryId}`,
       create: (categoryId: string) =>
         `/admin/service/categories/${categoryId}/subcategories`,
       update: (subcategoryId: string) =>
@@ -135,14 +134,10 @@ export const apiRoutes = {
         `/admin/service/subcategories/${subcategoryId}`,
     },
     categoryItems: {
-      list: (id: string) =>
-        `/admin/service/subcategories/${id}`,
-      create: (id: string) =>
-        `/admin/service/subcategories/${id}/items`,
-      update: (id: string) =>
-        `/admin/service/items/${id}`,
-      delete: (id: string) =>
-        `/admin/service/items/${id}`,
+      list: (id: string) => `/admin/service/subcategories/${id}`,
+      create: (id: string) => `/admin/service/subcategories/${id}/items`,
+      update: (id: string) => `/admin/service/items/${id}`,
+      delete: (id: string) => `/admin/service/items/${id}`,
     },
     supplier: {
       list: "/admin/suppliers",
@@ -155,5 +150,6 @@ export const apiRoutes = {
   },
   website: {
     heroContent: "/website/content/hero",
+    inquries: "public/inquiries",
   },
 } as const;

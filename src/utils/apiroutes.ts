@@ -139,6 +139,10 @@ export const apiRoutes = {
       update: (id: string) => `/admin/service/items/${id}`,
       delete: (id: string) => `/admin/service/items/${id}`,
     },
+    inquiries: {
+      list: "/admin/inquiries",
+      detail: (id: string) => `/admin/inquiries/${id}`,
+    },
     supplier: {
       list: "/admin/suppliers",
       read: (id: string) => `/admin/suppliers/${id}`,

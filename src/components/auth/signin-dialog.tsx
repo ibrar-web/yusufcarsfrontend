@@ -40,9 +40,9 @@ export function SignInDialog({
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      console.log("user Clicked", formData);
+      // console.log("user Clicked", formData);
       const response = await authApi.login({ ...formData });
-      console.log("response :", response);
+      // console.log("response :", response);
       toast.success("Signed in successfully!");
       setFormData({ email: "", password: "" });
       onOpenChange(false);

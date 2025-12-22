@@ -197,7 +197,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
-      console.log("role :", role);
+      // console.log("role :", role);
       setSelectedRole(role);
 
       if (role === "user" || role === "supplier") {

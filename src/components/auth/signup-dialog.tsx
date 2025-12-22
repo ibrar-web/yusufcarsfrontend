@@ -24,11 +24,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authApi, type UserRole } from "@/utils/api";
+import { useRouter } from "next/navigation";
 
 interface SignupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignInClick?: () => void;
+  setSignupDialogOpen?: (open: boolean) => void;
   onSuccess?: (role?: UserRole) => void;
 }
 
@@ -36,10 +38,13 @@ export function SignupDialog({
   open,
   onOpenChange,
   onSignInClick,
+  setSignupDialogOpen,
   onSuccess,
 }: SignupDialogProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     postCode: "",
@@ -69,8 +74,12 @@ export function SignupDialog({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Full name is required";
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.firstName = "Last name is required";
     }
 
     if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -105,7 +114,8 @@ export function SignupDialog({
 
   const resetForm = () => {
     setFormData({
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phone: "",
       postCode: "",
@@ -130,7 +140,9 @@ export function SignupDialog({
 
     try {
       await authApi.signup({
-        fullName: formData.name.trim(),
+        // fullName: formData.name.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData?.lastName?.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
         postCode: formData.postCode.trim().toUpperCase(),
@@ -163,6 +175,21 @@ export function SignupDialog({
       onSuccess?.(accountType);
     }, 1500);
   };
+
+  const selectAccountType = (role: UserRole) => {
+    try {
+      if (role === "supplier") {
+        setSignupDialogOpen?.(false);
+        router.push(`/auth/supplier-onboarding`);
+      }
+      else {
+        setAccountType(role);
+      }
+    }
+    catch(err) {
+      console.log("err is as:  ", err);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -240,7 +267,8 @@ export function SignupDialog({
                 <button
                   type="button"
                   key={role}
-                  onClick={() => setAccountType(role)}
+                  // onClick={() => setAccountType(role)}
+                  onClick={() => selectAccountType(role)}
                   className={`rounded-xl border-2 px-4 py-3 text-sm font-['Roboto'] transition-all ${
                     accountType === role
                       ? "border-[#F02801] bg-[#FFF1ED] text-[#0F172A]"
@@ -255,40 +283,78 @@ export function SignupDialog({
 
           {/* Manual Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
+            {/* First Name */}
             <div className="space-y-2">
               <Label
-                htmlFor="name"
+                htmlFor="firstName"
                 className="font-['Roboto'] text-[#0F172A]"
                 style={{ fontSize: "14px", lineHeight: "1.5" }}
               >
-                Full Name <span className="text-[#F02801]">*</span>
+                First Name <span className="text-[#F02801]">*</span>
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
                 <Input
-                  id="name"
+                  id="firstName"
                   type="text"
-                  placeholder="John Smith"
-                  value={formData.name}
+                  placeholder="John"
+                  value={formData.firstName}
                   onChange={(e) => {
-                    setFormData({ ...formData, name: e.target.value });
-                    if (errors.name) setErrors({ ...errors, name: "" });
+                    setFormData({ ...formData, firstName: e.target.value });
+                    if (errors.firstName) setErrors({ ...errors, firstName: "" });
                   }}
                   className={`pl-10 h-12 rounded-xl border-2 ${
-                    errors.name ? "border-[#F02801]" : "border-[#E5E7EB]"
+                    errors.firstName ? "border-[#F02801]" : "border-[#E5E7EB]"
                   } focus:border-[#F02801] font-['Roboto']`}
                   style={{ fontSize: "16px", lineHeight: "1.5" }}
                   required
                 />
               </div>
-              {errors.name && (
+              {errors.firstName && (
                 <p
                   className="font-['Roboto'] text-[#F02801] flex items-center gap-1"
                   style={{ fontSize: "14px", lineHeight: "1.5" }}
                 >
                   <X className="h-3 w-3" />
-                  {errors.name}
+                  {errors.firstName}
+                </p>
+              )}
+            </div>
+
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="lastName"
+                className="font-['Roboto'] text-[#0F172A]"
+                style={{ fontSize: "14px", lineHeight: "1.5" }}
+              >
+                Last Name <span className="text-[#F02801]">*</span>
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Smith"
+                  value={formData.lastName}
+                  onChange={(e) => {
+                    setFormData({ ...formData, lastName: e.target.value });
+                    if (errors.lastName) setErrors({ ...errors, lastName: "" });
+                  }}
+                  className={`pl-10 h-12 rounded-xl border-2 ${
+                    errors.lastName ? "border-[#F02801]" : "border-[#E5E7EB]"
+                  } focus:border-[#F02801] font-['Roboto']`}
+                  style={{ fontSize: "16px", lineHeight: "1.5" }}
+                  required
+                />
+              </div>
+              {errors.lastName && (
+                <p
+                  className="font-['Roboto'] text-[#F02801] flex items-center gap-1"
+                  style={{ fontSize: "14px", lineHeight: "1.5" }}
+                >
+                  <X className="h-3 w-3" />
+                  {errors.lastName}
                 </p>
               )}
             </div>

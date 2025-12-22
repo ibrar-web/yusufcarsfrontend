@@ -852,6 +852,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           setSignupDialogOpen(false);
           setShowSignIn(true);
         }}
+        setSignupDialogOpen={setSignupDialogOpen}
         onSuccess={handleAuthSuccess}
       />
 

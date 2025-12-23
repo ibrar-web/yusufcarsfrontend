@@ -118,6 +118,7 @@ export const apiRoutes = {
     },
     profile: {
       get: "/supplier/profile",
+      update: "/supplier/profile",
     }
   },
   admin: {

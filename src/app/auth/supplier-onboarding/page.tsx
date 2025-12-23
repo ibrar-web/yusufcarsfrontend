@@ -216,7 +216,7 @@ export default function SupplierOnboardingPage() {
         "Application submitted successfully! We'll review your details within 2-3 business days."
       );
       setSelectedRole("supplier");
-      setShowSignIn(true);
+      // setShowSignIn(true);
     } catch (error) {
       console.log(error);
       toast.error(error?.toString());
@@ -250,8 +250,8 @@ export default function SupplierOnboardingPage() {
         if (showToast && formData?.password !== formData?.confirmPassword)
           return showError("Passwords do not match");
         // if (!formData?.categories?.length) return showError("Please select at least one category");
-        if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
-        if (!formData?.gdprConsent) return showError("You must give GDPR consent");
+        // if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
+        // if (!formData?.gdprConsent) return showError("You must give GDPR consent");
         if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
         if (!formData?.city?.trim()) return showError("City is required");
         if (!formData?.postcode?.trim()) return showError("Postcode is required");

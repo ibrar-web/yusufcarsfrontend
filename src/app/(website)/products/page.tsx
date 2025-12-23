@@ -734,7 +734,7 @@ export default function ProductsPage() {
                 if (!isAuthenticated) {
                   openSignupDialog();
                 } else {
-                  handleNavigate("vehicle-confirmation");
+                  handleNavigate("cart");
                 }
               }}
               className="flex-1 h-12 rounded-xl bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] font-semibold transition-all duration-300 shadow-lg shadow-[#F02801]/30"

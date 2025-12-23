@@ -198,7 +198,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     if (selectedProduct) {
       toast.success(`Added ${selectedProduct.name} to your basket`);
       setProductDetailOpen(false);
-      onNavigate("vehicle-confirmation");
+    onNavigate("cart");
     }
   };
 

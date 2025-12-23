@@ -3,7 +3,15 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, FileText, ArrowRight, RefreshCcw, X } from "lucide-react";
+import {
+  ShoppingCart,
+  FileText,
+  ArrowRight,
+  RefreshCcw,
+  X,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import {
   clearCartCookies,
   loadCartSummary,
@@ -13,6 +21,9 @@ import {
   removeServiceByIndex,
 } from "@/utils/cart-storage";
 import { useAppState } from "@/hooks/use-app-state";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { VehicleSummaryCard } from "@/components/vehicles/vehicle-summary-card";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { handleNavigate } = useAppState();
@@ -20,6 +31,7 @@ export default function CartPage() {
     vehicle: null,
     services: [],
   });
+  const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
 
   useEffect(() => {
     const updateSummary = () => setCartSummary(loadCartSummary());
@@ -47,6 +59,23 @@ export default function CartPage() {
     ? cartSummary.services
     : [];
   const isEmpty = !vehicle && services.length === 0;
+
+  const openVehicleDialog = () => {
+    if (!vehicle) {
+      toast.error("Add your vehicle details before reviewing the request.");
+      return;
+    }
+    setVehicleDialogOpen(true);
+  };
+
+  const handleVehicleConfirm = () => {
+    if (!vehicle) {
+      toast.error("Add your vehicle before continuing.");
+      return;
+    }
+    setVehicleDialogOpen(false);
+    handleNavigate("products", undefined, vehicle);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -79,7 +108,7 @@ export default function CartPage() {
                 service so suppliers know what to quote for.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
-                <Button onClick={() => handleNavigate("vehicle-confirmation")}>
+                <Button onClick={() => handleNavigate("home")}>
                   Enter Vehicle Details
                 </Button>
                 <Button
@@ -189,7 +218,7 @@ export default function CartPage() {
               <div className="flex flex-wrap gap-3 pt-4">
                 <Button
                   className="flex-1 min-w-[180px]"
-                  onClick={() => handleNavigate("vehicle-confirmation")}
+                  onClick={openVehicleDialog}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   Review Request
@@ -234,6 +263,46 @@ export default function CartPage() {
             </div>
           )}
         </section>
+        <Dialog open={vehicleDialogOpen} onOpenChange={setVehicleDialogOpen}>
+          <DialogContent className="max-w-4xl bg-transparent border-none shadow-none p-0">
+            {vehicle ? (
+              <div className="space-y-6">
+                <VehicleSummaryCard
+                  vehicle={vehicle}
+                  title="Is This Your Vehicle?"
+                  subtitle="Confirm your details to proceed"
+                />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setVehicleDialogOpen(false)}
+                    className="flex-1 h-12 rounded-full border-2 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                  >
+                    <XCircle className="mr-2 h-5 w-5" />
+                    No, Go Back
+                  </Button>
+                  <Button
+                    onClick={handleVehicleConfirm}
+                    className="flex-1 h-12 rounded-full bg-primary hover:bg-primary-hover text-white font-['Roboto'] font-semibold transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <CheckCircle className="mr-2 h-5 w-5 relative z-10" />
+                    <span className="relative z-10">Yes, Continue</span>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-3xl bg-white border border-[#E2E8F0] p-8 text-center">
+                <h3 className="font-['Inter'] text-xl font-semibold text-[#0F172A] mb-2">
+                  No vehicle selected
+                </h3>
+                <p className="font-['Roboto'] text-[#475569]">
+                  Add your vehicle details first so we can confirm everything looks right.
+                </p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

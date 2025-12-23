@@ -18,8 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { enquiryVehicle } from "@/actions/dvla";
 import {
@@ -32,6 +30,7 @@ import {
 import type { VehicleData } from "@/stores/app-store";
 import type { VehicleEnquiryResponse } from "@/types/dvla";
 import { persistVehicleSelection } from "@/utils/cart-storage";
+import { VehicleSummaryCard } from "@/components/vehicles/vehicle-summary-card";
 
 type VehicleSelectionProps = {
   onNavigate: (
@@ -55,9 +54,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const [fuelType, setFuelType] = useState("");
   const [engineSize, setEngineSize] = useState("");
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [localRequest, setLocalRequest] = useState(false);
+  const [localRequest] = useState(false);
   const [lookupDetails, setLookupDetails] =
     useState<VehicleEnquiryResponse | null>(null);
+  const [previewVehicle, setPreviewVehicle] = useState<VehicleData | null>(null);
 
   const isSearchDisabled =
     inputMode === "registration"
@@ -77,7 +77,9 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
 
       try {
         const data = await enquiryVehicle(registrationNumber, vehicleModel);
+        const payload = buildVehiclePayload(data);
         setLookupDetails(data);
+        setPreviewVehicle(payload);
         setFilterDialogOpen(true);
       } catch (error) {
         setLookupDetails(null);
@@ -101,49 +103,51 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       return;
     }
 
+    const payload = buildVehiclePayload();
+    setPreviewVehicle(payload);
     setFilterDialogOpen(true);
   };
 
-  const buildVehiclePayload = (): VehicleData => {
+  const buildVehiclePayload = (details: VehicleEnquiryResponse | null = lookupDetails): VehicleData => {
     const isRegistration = inputMode === "registration";
     const requestType = localRequest ? "local" : "national";
-    const lookupYear = lookupDetails?.yearOfManufacture
-      ? String(lookupDetails.yearOfManufacture)
+    const lookupYear = details?.yearOfManufacture
+      ? String(details.yearOfManufacture)
       : undefined;
     const lookupEngine =
-      lookupDetails?.engineCapacity !== undefined
-        ? `${lookupDetails.engineCapacity}cc`
+      details?.engineCapacity !== undefined
+        ? `${details.engineCapacity}cc`
         : undefined;
 
     return {
       inputMode,
       registrationNumber:
-        registrationNumber || lookupDetails?.registrationNumber || undefined,
+        registrationNumber || details?.registrationNumber || undefined,
       localRequest,
       requestType,
       make: isRegistration
-        ? lookupDetails?.make || undefined
+        ? details?.make || undefined
         : vehicleMake || undefined,
       // model: isRegistration ? undefined : vehicleModel || undefined,
       model: vehicleModel,
       yearOfManufacture: isRegistration ? lookupYear : vehicleYear || undefined,
       fuelType: isRegistration
-        ? lookupDetails?.fuelType || undefined
+        ? details?.fuelType || undefined
         : fuelType || undefined,
       engineSize: isRegistration ? lookupEngine : engineSize || undefined,
-      engineCapacity: lookupDetails?.engineCapacity,
-      co2Emissions: lookupDetails?.co2Emissions,
-      colour: lookupDetails?.colour,
-      wheelplan: lookupDetails?.wheelplan,
-      taxStatus: lookupDetails?.taxStatus,
-      taxDueDate: lookupDetails?.taxDueDate,
-      motStatus: lookupDetails?.motStatus,
-      motExpiryDate: lookupDetails?.motExpiryDate,
-      markedForExport: lookupDetails?.markedForExport,
-      typeApproval: lookupDetails?.typeApproval,
-      revenueWeight: lookupDetails?.revenueWeight,
-      dateOfLastV5CIssued: lookupDetails?.dateOfLastV5CIssued,
-      monthOfFirstRegistration: lookupDetails?.monthOfFirstRegistration,
+      engineCapacity: details?.engineCapacity,
+      co2Emissions: details?.co2Emissions,
+      colour: details?.colour,
+      wheelplan: details?.wheelplan,
+      taxStatus: details?.taxStatus,
+      taxDueDate: details?.taxDueDate,
+      motStatus: details?.motStatus,
+      motExpiryDate: details?.motExpiryDate,
+      markedForExport: details?.markedForExport,
+      typeApproval: details?.typeApproval,
+      revenueWeight: details?.revenueWeight,
+      dateOfLastV5CIssued: details?.dateOfLastV5CIssued,
+      monthOfFirstRegistration: details?.monthOfFirstRegistration,
     };
   };
 
@@ -157,7 +161,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       const payload = buildVehiclePayload();
       persistVehicleSelection(payload);
       setFilterDialogOpen(false);
-      onNavigate("request-flow", undefined, payload);
+      setPreviewVehicle(null);
+      onNavigate("products", undefined, payload);
       return;
     }
 
@@ -175,7 +180,15 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     const payload = buildVehiclePayload();
     persistVehicleSelection(payload);
     setFilterDialogOpen(false);
-    onNavigate("request-flow", undefined, payload);
+    setPreviewVehicle(null);
+    onNavigate("products", undefined, payload);
+  };
+
+  const handleDialogToggle = (open: boolean) => {
+    setFilterDialogOpen(open);
+    if (!open) {
+      setPreviewVehicle(null);
+    }
   };
 
   return (
@@ -425,51 +438,44 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
               </div>
             </div>
           </div>
-          <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
-            <DialogContent className="sm:max-w-[500px] bg-white border-2 border-[#F1F5F9] rounded-[24px] p-8">
-              <DialogHeader>
-                <DialogTitle className="font-['Inter'] text-[#0F172A] text-[24px]">
-                  Filter Options
-                </DialogTitle>
-                <DialogDescription className="font-['Roboto'] text-[#475569] text-[16px]">
-                  Customise your supplier search preferences
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6 py-6">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-[#1E293B] border-2 border-[#334155] hover:border-[#F02801] transition-colors duration-200">
-                  <div className="flex-1 pr-4">
-                    <Label
-                      htmlFor="local-request"
-                      className="font-['Roboto'] text-[16px] text-[#F1F5F9] cursor-pointer"
-                    >
-                      Local Request
-                    </Label>
-                    <p className="font-['Roboto'] text-[14px] text-[#CBD5E1] mt-1">
-                      Only show nearby suppliers in your area
-                    </p>
-                  </div>
-                  <Switch
-                    id="local-request"
-                    checked={localRequest}
-                    onCheckedChange={setLocalRequest}
-                    className="data-[state=checked]:bg-[#F02801] cursor-pointer"
-                  />
+          <Dialog open={filterDialogOpen} onOpenChange={handleDialogToggle}>
+            <DialogContent className="sm:max-w-[600px] rounded-[12px] p-0 overflow-hidden">
+              {previewVehicle ? (
+                <VehicleSummaryCard
+                  vehicle={previewVehicle}
+                  title="Confirm Your Vehicle"
+                  subtitle="Double-check these details before continuing"
+                />
+              ) : (
+                <div className="p-10 text-center">
+                  <h3 className="font-['Inter'] text-xl font-semibold text-[#0F172A] mb-2">
+                    No vehicle selected
+                  </h3>
+                  <p className="font-['Roboto'] text-[#475569]">
+                    Enter your vehicle details first so we can display them here.
+                  </p>
                 </div>
-              </div>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setFilterDialogOpen(false)}
-                  className="flex-1 h-12 rounded-full font-['Roboto'] border-2 border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all duration-200 cursor-pointer"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleConfirmFilter}
-                  className="flex-1 h-12 rounded-full font-['Roboto'] bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40  cursor-pointer"
-                >
-                  Apply Filters
-                </Button>
+              )}
+              <div className="px-6 pb-6">
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFilterDialogOpen(false);
+                      setPreviewVehicle(null);
+                    }}
+                    className="flex-1 h-12 rounded-full font-['Roboto'] border-2 border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] hover:border-[#94A3B8] transition-all duration-200 cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleConfirmFilter}
+                    className="flex-1 h-12 rounded-full font-['Roboto'] bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40  cursor-pointer"
+                    disabled={!previewVehicle}
+                  >
+                    Confirm & Continue
+                  </Button>
+                </div>
               </div>
             </DialogContent>
           </Dialog>

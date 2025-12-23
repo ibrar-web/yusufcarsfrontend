@@ -30,6 +30,10 @@ import {
   DrawerFooter,
 } from "../components/ui/drawer";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import {
+  persistServicesSelection,
+  type CartServiceItem,
+} from "@/utils/cart-storage";
 
 interface PartsSelectionPageProps {
   onNavigate: (page: string) => void;
@@ -180,7 +184,41 @@ export function PartsSelectionPage({
     );
   };
 
+  const slugifyServiceId = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+  const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
+
+  const buildCartServicesPayload = (): CartServiceItem[] => {
+    if (selectedSubparts.length === 0) {
+      if (!selectedCategoryData) {
+        return [];
+      }
+      return [
+        {
+          id: slugifyServiceId(selectedCategoryData.id || selectedCategoryData.name),
+          label: selectedCategoryData.name,
+          category: selectedCategoryData.name,
+        },
+      ];
+    }
+
+    return selectedSubparts.map((label) => ({
+      id: slugifyServiceId(
+        `${selectedCategoryData?.id ?? selectedCategory ?? "service"}-${label}`,
+      ),
+      label,
+      category: selectedCategoryData?.name ?? undefined,
+    }));
+  };
+
   const handleContinue = () => {
+    const services = buildCartServicesPayload();
+    persistServicesSelection(services);
     onNavigate("quotes");
   };
 
@@ -194,8 +232,6 @@ export function PartsSelectionPage({
       category.name === activeFilter;
     return matchesSearch && matchesFilter;
   });
-
-  const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
 
   return (
     <div className="min-h-screen bg-white">

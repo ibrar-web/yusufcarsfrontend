@@ -31,6 +31,7 @@ import {
 } from "@/data/vehicle-options";
 import type { VehicleData } from "@/stores/app-store";
 import type { VehicleEnquiryResponse } from "@/types/dvla";
+import { persistVehicleSelection } from "@/utils/cart-storage";
 
 type VehicleSelectionProps = {
   onNavigate: (
@@ -153,8 +154,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
         return;
       }
 
+      const payload = buildVehiclePayload();
+      persistVehicleSelection(payload);
       setFilterDialogOpen(false);
-      onNavigate("request-flow", undefined, buildVehiclePayload());
+      onNavigate("request-flow", undefined, payload);
       return;
     }
 
@@ -169,8 +172,10 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       return;
     }
 
+    const payload = buildVehiclePayload();
+    persistVehicleSelection(payload);
     setFilterDialogOpen(false);
-    onNavigate("request-flow", undefined, buildVehiclePayload());
+    onNavigate("request-flow", undefined, payload);
   };
 
   return (

@@ -15,6 +15,7 @@ import {
   Package,
   History,
   Blocks,
+  ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -56,6 +57,11 @@ import { useAppStore } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
 import { UserRole } from "@/utils/api";
 import Link from "next/link";
+import {
+  loadCartSummary,
+  subscribeToCartUpdates,
+  type CartSummary,
+} from "@/utils/cart-storage";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -81,6 +87,7 @@ const PATH_TO_PAGE: Array<{
     match: (path) => path.startsWith("/vehicle-confirmation"),
     page: "vehicle-confirmation",
   },
+  { match: (path) => path.startsWith("/cart"), page: "cart" },
   { match: (path) => path.startsWith("/contact"), page: "contact" },
   { match: (path) => path.startsWith("/about"), page: "about" },
   { match: (path) => path.startsWith("/products"), page: "products" },
@@ -139,6 +146,10 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     year: "",
     fuel: "",
   });
+  const [cartSummary, setCartSummary] = useState<CartSummary>({
+    vehicle: null,
+    services: [],
+  });
 
   // Mock notification counts - in real app these would come from props or state management
   const notificationCount = 3;
@@ -146,6 +157,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   const isAdmin = userRole === "admin";
   const isSupplier = userRole === "supplier";
   const hasDashboardRole = isAdmin || isSupplier;
+  const cartItemCount =
+    (cartSummary.vehicle ? 1 : 0) +
+    (Array.isArray(cartSummary.services) ? cartSummary.services.length : 0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,6 +168,13 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateCartSummary = () => setCartSummary(loadCartSummary());
+    updateCartSummary();
+    const unsubscribe = subscribeToCartUpdates(updateCartSummary);
+    return () => unsubscribe();
   }, []);
 
   const handleRegistrationSubmit = () => {
@@ -290,6 +311,19 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           {/* Desktop Actions - Hidden on portal pages */}
           {!isPortalPage && (
             <div className="hidden lg:flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full gap-2 cursor-pointer"
+                onClick={() => navigate("cart")}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Cart
+                {cartItemCount > 0 && (
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
               {!authenticated ? (
                 <Button
                   variant="outline"
@@ -672,16 +706,30 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
           {/* Mobile Menu Button - Hidden on portal pages */}
           {!isPortalPage && (
-            <button
-              className="lg:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <button
+                className="relative p-2 rounded-full border border-border text-subtle-ink hover:text-ink hover:border-ink transition-colors"
+                onClick={() => navigate("cart")}
+                aria-label="Open cart summary"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 text-[10px] rounded-full bg-[#F02801] text-white font-semibold leading-none flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+              <button
+                className="p-2"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           )}
         </div>
 
@@ -705,6 +753,24 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                 </button>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between"
+                  onClick={() => {
+                    navigate("cart");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <ShoppingCart className="h-4 w-4" />
+                    View Cart
+                  </span>
+                  {cartItemCount > 0 && (
+                    <span className="ml-2 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </Button>
                 {!authenticated ? (
                   <Button
                     variant="outline"

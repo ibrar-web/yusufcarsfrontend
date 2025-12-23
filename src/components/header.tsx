@@ -74,8 +74,7 @@ const PATH_TO_PAGE: Array<{
   { match: (path) => path === "/", page: "home" },
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
   {
-    match: (path) =>
-      path.includes("supplier") && !path.startsWith("/supplier"),
+    match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
     page: "suppliers",
   },
   {
@@ -311,19 +310,6 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           {/* Desktop Actions - Hidden on portal pages */}
           {!isPortalPage && (
             <div className="hidden lg:flex items-center gap-3">
-              <Button
-                variant="outline"
-                className="rounded-full gap-2 cursor-pointer"
-                onClick={() => navigate("cart")}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Cart
-                {cartItemCount > 0 && (
-                  <span className="ml-1 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
               {!authenticated ? (
                 <Button
                   variant="outline"
@@ -428,6 +414,19 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+              <Button
+                variant="outline"
+                className="rounded-full gap-2 cursor-pointer"
+                onClick={() => navigate("cart")}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Cart
+                {cartItemCount > 0 && (
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
               <Dialog
                 open={showRegistrationDialog}
                 onOpenChange={setShowRegistrationDialog}

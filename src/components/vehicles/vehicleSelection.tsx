@@ -273,7 +273,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                         className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
                       />
                     </div> */}
-                    <div>
+                    {/* <div>
                       <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
                         Model
                       </label>
@@ -290,7 +290,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                         // maxLength={8}
                         className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
                       />
-                    </div>
+                    </div> */}
                     <Button
                       onClick={handleLookup}
                       disabled={isSearchDisabled}

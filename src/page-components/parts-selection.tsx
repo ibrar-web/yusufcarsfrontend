@@ -375,7 +375,7 @@ export function PartsSelectionPage({
         <div className="max-w-[1200px] mx-auto px-12 sm:px-16 lg:px-24">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <Button
-              onClick={() => onNavigate("vehicle-confirmation")}
+              onClick={() => onNavigate("cart")}
               variant="outline"
               className="w-full sm:w-auto h-12 px-8 border border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC] font-['Roboto'] font-medium rounded-xl"
             >

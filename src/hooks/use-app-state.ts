@@ -52,7 +52,7 @@ export function useAppState() {
       let targetPage = resolvePage(page);
 
       if (targetPage === "request-flow") {
-        targetPage = "vehicle-confirmation";
+        targetPage = "cart";
       }
 
       if (vehicleInfo !== undefined) {

@@ -291,7 +291,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  onClick={() => onNavigate("vehicle-confirmation")}
+                  onClick={() => onNavigate("cart")}
                   className="bg-[#EF4444] hover:bg-[#DC2626] text-white font-['Roboto'] font-semibold px-8 py-6 rounded-full shadow-lg shadow-[#EF4444]/30 transition-all h-auto"
                 >
                   Start your request

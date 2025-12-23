@@ -82,10 +82,6 @@ const PATH_TO_PAGE: Array<{
     page: "parts-selection",
   },
   { match: (path) => path.startsWith("/request-flow"), page: "request-flow" },
-  {
-    match: (path) => path.startsWith("/vehicle-confirmation"),
-    page: "vehicle-confirmation",
-  },
   { match: (path) => path.startsWith("/cart"), page: "cart" },
   { match: (path) => path.startsWith("/contact"), page: "contact" },
   { match: (path) => path.startsWith("/about"), page: "about" },
@@ -819,7 +815,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       variant="ghost"
                       className="w-full justify-start"
                       onClick={() => {
-                        navigate("vehicle-confirmation");
+                        navigate("cart");
                         setMobileMenuOpen(false);
                       }}
                     >

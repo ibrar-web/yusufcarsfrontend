@@ -631,7 +631,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
                 onClick={() => {
                   if (registrationNumber.length >= 6 && postcode.length >= 5) {
                     setRegistrationDialogOpen(false);
-                    onNavigate("vehicle-confirmation");
+                    onNavigate("cart");
                   }
                 }}
                 disabled={registrationNumber.length < 6 || postcode.length < 5}

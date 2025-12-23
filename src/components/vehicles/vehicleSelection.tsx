@@ -18,8 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { enquiryVehicle } from "@/actions/dvla";
 import {
@@ -56,7 +54,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const [fuelType, setFuelType] = useState("");
   const [engineSize, setEngineSize] = useState("");
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [localRequest, setLocalRequest] = useState(false);
+  const [localRequest] = useState(false);
   const [lookupDetails, setLookupDetails] =
     useState<VehicleEnquiryResponse | null>(null);
   const [previewVehicle, setPreviewVehicle] = useState<VehicleData | null>(null);
@@ -458,26 +456,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                   </p>
                 </div>
               )}
-              <div className="px-6 pb-6 space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-[#1E293B] border-2 border-[#334155] hover:border-[#F02801] transition-colors duration-200">
-                  <div className="flex-1 pr-4">
-                    <Label
-                      htmlFor="local-request"
-                      className="font-['Roboto'] text-[16px] text-[#F1F5F9] cursor-pointer"
-                    >
-                      Local Request
-                    </Label>
-                    <p className="font-['Roboto'] text-[14px] text-[#CBD5E1] mt-1">
-                      Only show nearby suppliers in your area
-                    </p>
-                  </div>
-                  <Switch
-                    id="local-request"
-                    checked={localRequest}
-                    onCheckedChange={setLocalRequest}
-                    className="data-[state=checked]:bg-[#F02801] cursor-pointer"
-                  />
-                </div>
+              <div className="px-6 pb-6">
                 <div className="flex gap-3">
                   <Button
                     variant="outline"

@@ -96,7 +96,7 @@ export function VehicleSummaryCard({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/95 via-[#1E293B]/90 to-[#0F172A]/95" />
       </div>
-      <div className="relative z-10 px-4 sm:px-8 lg:px-12 py-8 flex-1 flex flex-col overflow-hidden">
+      <div className="relative z-10 px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 flex-1 flex flex-col overflow-hidden">
         {(title || subtitle) && (
           <div className="text-center mb-6">
             {title && (
@@ -122,17 +122,16 @@ export function VehicleSummaryCard({
               {baseDetails.map((detail) => (
                 <div key={detail.label} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative text-center p-5 bg-[#0F172A]/40 backdrop-blur-sm rounded-xl shadow-sm border border-white/[0.03] hover:border-primary/20 transition-all min-h-[150px] flex flex-col justify-center">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-2 border border-primary/20">
-                      <Car className="h-4 w-4 text-primary/80" />
+                  <div className="relative p-4 sm:p-5 bg-[#0F172A]/45 backdrop-blur-sm rounded-2xl border border-white/[0.06] hover:border-primary/40 transition-all min-h-[120px] flex flex-col justify-center text-left shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 border border-primary/40">
+                        <Car className="h-3.5 w-3.5 text-primary/70" />
+                      </span>
+                      <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-[0.2em]">
+                        {detail.label}
+                      </p>
                     </div>
-                    <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
-                      {detail.label}
-                    </p>
-                    <p
-                      className="font-['Inter'] font-bold text-white/70"
-                      style={{ fontSize: "16px" }}
-                    >
+                    <p className="font-['Inter'] font-bold text-white/70 text-base sm:text-lg">
                       {formatValue(detail.value)}
                     </p>
                   </div>
@@ -144,8 +143,8 @@ export function VehicleSummaryCard({
               {extendedDetails.map((detail) => (
                 <div key={detail.label} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative text-center py-3 px-4 sm:p-4 bg-[#0F172A]/30 backdrop-blur-sm rounded-xl border border-white/[0.04] hover:border-primary/20 transition-all">
-                    <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
+                  <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/30 backdrop-blur-sm rounded-2xl border border-white/[0.04] hover:border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.2)]">
+                    <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-wider mb-1">
                       {detail.label}
                     </p>
                     <p className="font-['Inter'] font-semibold text-white/80 text-sm sm:text-base">
@@ -161,8 +160,8 @@ export function VehicleSummaryCard({
                 {vehicleExtras.map((detail) => (
                   <div key={detail.label} className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                    <div className="relative text-center py-3 px-4 sm:p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-xl border border-white/[0.04] hover-border-primary/20 transition-all">
-                      <p className="font-['Roboto'] text-xs text-white/40 uppercase tracking-wider mb-1">
+                    <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-2xl border border-white/[0.04] hover-border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                      <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-wider mb-1">
                         {detail.label}
                       </p>
                       <p className="font-['Inter'] font-semibold text-white/80 text-sm sm:text-base">

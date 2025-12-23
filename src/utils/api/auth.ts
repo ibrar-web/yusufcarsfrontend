@@ -4,7 +4,9 @@ import { apiPost } from "../apiconfig/http";
 export type UserRole = "user" | "supplier" | "admin" | "";
 
 export interface CustomerSignupPayload {
-  fullName: string;
+  // fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   postCode: string;

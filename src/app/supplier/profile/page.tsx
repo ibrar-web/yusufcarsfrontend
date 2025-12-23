@@ -1,40 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Award, CheckCircle, Star } from "lucide-react";
-import { toast } from "sonner";
+import { Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SupplierProfilePage() {
-  const [businessName, setBusinessName] = useState("AutoParts Direct Ltd");
-  const [contactEmail, setContactEmail] = useState("supplier@autoparts.uk");
-  const [phoneNumber, setPhoneNumber] = useState("020 1234 5678");
-  const [businessAddress, setBusinessAddress] = useState("45 High Street, London, E1 6AN");
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [editBusinessName, setEditBusinessName] = useState(businessName);
-  const [editContactEmail, setEditContactEmail] = useState(contactEmail);
-  const [editPhoneNumber, setEditPhoneNumber] = useState(phoneNumber);
-  const [editBusinessAddress, setEditBusinessAddress] = useState(businessAddress);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    tradingAs: "",
+    businessType: "",
+    vatNumber: "",
+    description: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postcode: "",
+    companyRegDoc: null as File | null,
+    insuranceDoc: null as File | null,
+  });
 
-  const handleOpenEditProfile = () => {
-    setEditBusinessName(businessName);
-    setEditContactEmail(contactEmail);
-    setEditPhoneNumber(phoneNumber);
-    setEditBusinessAddress(businessAddress);
-    setEditProfileOpen(true);
+  useEffect(() => {
+    try{
+      
+    }
+    catch(err) {
+      console.log("err is as: ", err);
+      
+    }
+  }, [])
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveProfile = () => {
-    setBusinessName(editBusinessName);
-    setContactEmail(editContactEmail);
-    setPhoneNumber(editPhoneNumber);
-    setBusinessAddress(editBusinessAddress);
-    setEditProfileOpen(false);
-    toast.success("Profile updated successfully");
+  const handleFileUpload = (field: string, file: File | null) => {
+    setFormData((prev) => ({ ...prev, [field]: file }));
   };
 
   return (
@@ -48,107 +63,66 @@ export default function SupplierProfilePage() {
 
       <Card className="border border-[#E5E7EB] shadow-sm">
         <CardHeader className="border-b border-[#E5E7EB]">
-          <CardTitle className="font-['Inter'] text-[#0F172A]">Business Information</CardTitle>
-          <CardDescription className="font-['Roboto'] text-[#475569]">Update your supplier profile details</CardDescription>
+          <CardTitle className="font-['Inter'] text-[#0F172A]">Contact Information</CardTitle>
+          <CardDescription className="font-['Roboto'] text-[#475569]">Update your supplier contact details</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="font-['Roboto'] text-[#475569]">Business Name</Label>
-                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="font-['Roboto']" />
+                <Label className="font-['Roboto'] text-[#475569]">First Name *</Label>
+                <Input 
+                  value={formData?.firstName}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  } className="font-['Roboto']" />
               </div>
               <div className="space-y-2">
-                <Label className="font-['Roboto'] text-[#475569]">Contact Email</Label>
-                <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="font-['Roboto']" />
+                <Label className="font-['Roboto'] text-[#475569]">Last Name *</Label>
+                <Input 
+                  value={formData?.lastName} 
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  } className="font-['Roboto']" />
               </div>
               <div className="space-y-2">
-                <Label className="font-['Roboto'] text-[#475569]">Phone Number</Label>
-                <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="font-['Roboto']" />
+                <Label className="font-['Roboto'] text-[#475569]">Email *</Label>
+                <Input value={formData?.email} 
+                onChange={(e) =>
+                  handleInputChange("email", e.target.value)
+                } className="font-['Roboto']" />
               </div>
               <div className="space-y-2">
-                <Label className="font-['Roboto'] text-[#475569]">Business Address</Label>
-                <Input value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} className="font-['Roboto']" />
+                <Label className="font-['Roboto'] text-[#475569]">Phone *</Label>
+                <Input value={formData?.phone} 
+                onChange={(e) =>
+                  handleInputChange("phone", e.target.value)
+                } className="font-['Roboto']" />
               </div>
-            </div>
-            <div className="flex justify-end pt-4">
-              <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']" onClick={handleOpenEditProfile}>
-                    Save Changes
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px]">
-                  <DialogHeader>
-                    <DialogTitle className="font-['Inter'] text-[#0F172A]">Edit Business Information</DialogTitle>
-                    <DialogDescription className="font-['Roboto'] text-[#475569]">
-                      Update your supplier profile details. Click save when you're done.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-business-name" className="font-['Roboto'] text-[#475569]">
-                          Business Name
-                        </Label>
-                        <Input
-                          id="edit-business-name"
-                          value={editBusinessName}
-                          onChange={(e) => setEditBusinessName(e.target.value)}
-                          className="font-['Roboto']"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-email" className="font-['Roboto'] text-[#475569]">
-                          Contact Email
-                        </Label>
-                        <Input
-                          id="edit-email"
-                          type="email"
-                          value={editContactEmail}
-                          onChange={(e) => setEditContactEmail(e.target.value)}
-                          className="font-['Roboto']"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-phone" className="font-['Roboto'] text-[#475569]">
-                          Phone Number
-                        </Label>
-                        <Input
-                          id="edit-phone"
-                          type="tel"
-                          value={editPhoneNumber}
-                          onChange={(e) => setEditPhoneNumber(e.target.value)}
-                          className="font-['Roboto']"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-address" className="font-['Roboto'] text-[#475569]">
-                          Business Address
-                        </Label>
-                        <Input
-                          id="edit-address"
-                          value={editBusinessAddress}
-                          onChange={(e) => setEditBusinessAddress(e.target.value)}
-                          className="font-['Roboto']"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setEditProfileOpen(false)}
-                      className="font-['Roboto'] border-[#E5E7EB] hover:bg-[#F1F5F9]"
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSaveProfile} className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']">
-                      Save Changes
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">Address Line 1 *</Label>
+                <Input value={formData?.addressLine1} onChange={(e) =>
+                  handleInputChange("addressLine1", e.target.value)
+                } className="font-['Roboto']" />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">Address Line 2 *</Label>
+                <Input value={formData?.addressLine2} onChange={(e) =>
+                  handleInputChange("addressLine2", e.target.value)
+                } className="font-['Roboto']" />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">Town/City *</Label>
+                <Input value={formData?.addressLine2} onChange={(e) =>
+                  handleInputChange("addressLine2", e.target.value)
+                } className="font-['Roboto']" />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">PostCode *</Label>
+                <Input value={formData?.addressLine2} onChange={(e) =>
+                  handleInputChange("addressLine2", e.target.value)
+                } className="font-['Roboto']" />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -156,32 +130,163 @@ export default function SupplierProfilePage() {
 
       <Card className="border border-[#E5E7EB] shadow-sm">
         <CardHeader className="border-b border-[#E5E7EB]">
-          <CardTitle className="font-['Inter'] text-[#0F172A]">Performance Stats</CardTitle>
-          <CardDescription className="font-['Roboto'] text-[#475569]">Your supplier ratings and metrics</CardDescription>
+          <CardTitle className="font-['Inter'] text-[#0F172A]">Verification Documents</CardTitle>
+          <CardDescription className="font-['Roboto'] text-[#475569]">Update your supplier document details</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-[#1E293B] rounded-xl border border-[#334155]">
-              <div className="h-12 w-12 rounded-full bg-[#92400E] flex items-center justify-center mx-auto mb-3">
-                <Star className="h-6 w-6 text-[#FCD34D]" />
-              </div>
-              <p className="font-['Inter'] text-[#F8FAFC] mb-1">4.8</p>
-              <p className="text-sm text-[#94A3B8] font-['Roboto']">Average Rating</p>
+          <div className="space-y-3">
+            <Label htmlFor="companyReg">
+              Company Registration Document{" "}
+              <span className="text-danger">*</span>
+            </Label>
+            <p className="text-sm text-subtle-ink">
+              Certificate of incorporation or business registration
+            </p>
+            <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer">
+              <input
+                type="file"
+                id="companyReg"
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) =>
+                  handleFileUpload(
+                    "companyRegDoc",
+                    e.target.files?.[0] || null
+                  )
+                }
+              />
+              <label htmlFor="companyReg" className="cursor-pointer">
+                <Upload className="h-10 w-10 text-subtle-ink mx-auto mb-3" />
+                {formData.companyRegDoc ? (
+                  <p className="text-sm font-medium text-success">
+                    {formData.companyRegDoc.name}
+                  </p>
+                ) : (
+                  <>
+                    <p className="font-medium mb-1">
+                      Click to upload document
+                    </p>
+                    <p className="text-sm text-subtle-ink">
+                      PDF, JPG or PNG (max 5MB)
+                    </p>
+                  </>
+                )}
+              </label>
             </div>
-            <div className="text-center p-6 bg-[#1E293B] rounded-xl border border-[#334155]">
-              <div className="h-12 w-12 rounded-full bg-[#065F46] flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="h-6 w-6 text-[#34D399]" />
-              </div>
-              <p className="font-['Inter'] text-[#F8FAFC] mb-1">234</p>
-              <p className="text-sm text-[#94A3B8] font-['Roboto']">Total Quotes</p>
+          </div>
+          <div className="space-y-3 mt-4">
+            <Label htmlFor="insurance">
+              Public Liability Insurance{" "}
+              {/* <span className="text-danger">*</span> */}
+            </Label>
+            <p className="text-sm text-subtle-ink">
+              Proof of current public liability insurance (minimum £1M
+              cover)
+            </p>
+            <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer">
+              <input
+                type="file"
+                id="insurance"
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) =>
+                  handleFileUpload(
+                    "insuranceDoc",
+                    e.target.files?.[0] || null
+                  )
+                }
+              />
+              <label htmlFor="insurance" className="cursor-pointer">
+                <Upload className="h-10 w-10 text-subtle-ink mx-auto mb-3" />
+                {formData.insuranceDoc ? (
+                  <p className="text-sm font-medium text-success">
+                    {formData.insuranceDoc.name}
+                  </p>
+                ) : (
+                  <>
+                    <p className="font-medium mb-1">
+                      Click to upload document
+                    </p>
+                    <p className="text-sm text-subtle-ink">
+                      PDF, JPG or PNG (max 5MB)
+                    </p>
+                  </>
+                )}
+              </label>
             </div>
-            <div className="text-center p-6 bg-[#1E293B] rounded-xl border border-[#334155]">
-              <div className="h-12 w-12 rounded-full bg-[#7F1D1D] flex items-center justify-center mx-auto mb-3">
-                <Award className="h-6 w-6 text-[#FCA5A5]" />
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="border border-[#E5E7EB] shadow-sm">
+        <CardHeader className="border-b border-[#E5E7EB]">
+          <CardTitle className="font-['Inter'] text-[#0F172A]">Business Information</CardTitle>
+          <CardDescription className="font-['Roboto'] text-[#475569]">Update your supplier profile details</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">Trading As (if different) *</Label>
+                <Input 
+                  value={formData?.tradingAs}
+                  onChange={(e) =>
+                    handleInputChange("tradingAs", e.target.value)
+                  } className="font-['Roboto']" />
               </div>
-              <p className="font-['Inter'] text-[#F8FAFC] mb-1">Active</p>
-              <p className="text-sm text-[#94A3B8] font-['Roboto']">Account Status</p>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">Business Name *</Label>
+                <Input 
+                  value={formData?.businessName} 
+                  onChange={(e) =>
+                    handleInputChange("businessName", e.target.value)
+                  } className="font-['Roboto']" />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="businessType">
+                    Business Type <span className="text-danger">*</span>
+                  </Label>
+                  <Select
+                    value={formData.businessType}
+                    onValueChange={(value) =>
+                      handleInputChange("businessType", value)
+                    }
+                  >
+                    <SelectTrigger id="businessType">
+                      <SelectValue placeholder="Select business type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sole-trader">Sole Trader</SelectItem>
+                      <SelectItem value="partnership">Partnership</SelectItem>
+                      <SelectItem value="limited">Limited Company</SelectItem>
+                      <SelectItem value="plc">
+                        Public Limited Company
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              <div className="space-y-2">
+                <Label className="font-['Roboto'] text-[#475569]">VAT Number</Label>
+                <Input value={formData?.vatNumber} 
+                onChange={(e) =>
+                  handleInputChange("vatNumber", e.target.value)
+                } className="font-['Roboto']" />
+              </div>
+              <div>
+                <Label className="font-['Roboto'] text-[#475569]">Business Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Tell customers about your business, experience, and what makes you stand out..."
+                  rows={5}
+                  value={formData.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                />
+              </div>
             </div>
+              <Button className="bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto']">
+                Save Changes
+              </Button>
           </div>
         </CardContent>
       </Card>

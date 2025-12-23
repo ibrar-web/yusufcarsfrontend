@@ -45,6 +45,7 @@ export default function SupplierOnboardingPage() {
   const [formData, setFormData] = useState({
     role: "supplier" as const,
     firstName: "",
+    lastName: "",
     marketingOptIn: false,
     email: "",
     phone: "",
@@ -79,18 +80,18 @@ export default function SupplierOnboardingPage() {
       title: "Business Information",
       description: "Tell us about your business",
     },
+    // {
+    //   id: 2,
+    //   title: "Address & Service Area",
+    //   description: "Where you're based and areas you serve",
+    // },
     {
       id: 2,
-      title: "Address & Service Area",
-      description: "Where you're based and areas you serve",
-    },
-    {
-      id: 3,
       title: "Verification Documents",
       description: "Upload required documentation",
     },
     {
-      id: 4,
+      id: 3,
       title: "Review & Submit",
       description: "Review your information and submit",
     },
@@ -179,9 +180,10 @@ export default function SupplierOnboardingPage() {
       // append all text fields
       appendIfValue("role", formData.role);
       appendIfValue("firstName", formData.firstName);
+      appendIfValue("lastName", formData.lastName);
       appendIfValue("email", formData.email);
       appendIfValue("phone", formData.phone);
-      appendIfValue("fullName", formData.businessName);
+      appendIfValue("fullName", formData.firstName + " " + formData.lastName);
       appendIfValue("businessName", formData.businessName);
       appendIfValue("password", formData.password);
       appendIfValue("tradingAs", formData.tradingAs);
@@ -235,7 +237,7 @@ export default function SupplierOnboardingPage() {
     switch (step) {
       case 0: {
         if (!formData?.firstName?.trim()) return showError("First name is required");
-        if (!formData?.businessName?.trim()) return showError("Business name is required");
+        if (!formData?.lastName?.trim()) return showError("Last name is required");
         if (!formData?.email?.trim()) return showError("Email is required");
         if (showToast && !emailRegex?.test(formData?.email))
           return showError("Please enter a valid email address");
@@ -250,25 +252,30 @@ export default function SupplierOnboardingPage() {
         // if (!formData?.categories?.length) return showError("Please select at least one category");
         if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
         if (!formData?.gdprConsent) return showError("You must give GDPR consent");
+        if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
+        if (!formData?.city?.trim()) return showError("City is required");
+        if (!formData?.postcode?.trim()) return showError("Postcode is required");
+        if (!formData?.serviceRadius) return showError("Service radius is required");
         return true;
       }
 
       case 1: {
         if (!formData?.tradingAs) return showError("Trading As is required");
+        if (!formData?.businessName?.trim()) return showError("Business name is required");
         if (!formData?.businessType) return showError("Business type is required");
         if (!formData?.description?.trim()) return showError("Business description is required");
         if (!formData?.vatNumber) return showError("VAT number is required");
         return true;
       }
 
-      case 2: {
-        if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
-        if (!formData?.city?.trim()) return showError("City is required");
-        if (!formData?.postcode?.trim()) return showError("Postcode is required");
-        if (!formData?.serviceRadius) return showError("Service radius is required");
-        // if (!formData?.categories?.length) return showError("Please select at least one category");
-        return true;
-      }
+      // case 2: {
+      //   if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
+      //   if (!formData?.city?.trim()) return showError("City is required");
+      //   if (!formData?.postcode?.trim()) return showError("Postcode is required");
+      //   if (!formData?.serviceRadius) return showError("Service radius is required");
+      //   // if (!formData?.categories?.length) return showError("Please select at least one category");
+      //   return true;
+      // }
 
       case 3: {
         if (!formData?.companyRegDoc) return showError("Company registration document is required");
@@ -375,6 +382,21 @@ export default function SupplierOnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="lastName">
+                    Last Name <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Your last name"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      handleInputChange("lastName", e.target.value)
+                    }
+                    className="h-12"
+                  />
+                </div>
+
+                {/* <div className="space-y-2">
                   <Label htmlFor="businessName">
                     Business Name <span className="text-danger">*</span>
                   </Label>
@@ -387,7 +409,7 @@ export default function SupplierOnboardingPage() {
                     }
                     className="h-12"
                   />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <Label htmlFor="email">
@@ -464,6 +486,90 @@ export default function SupplierOnboardingPage() {
                   />
                 </div>
 
+                <>
+                <div className="space-y-2">
+                  <Label htmlFor="addressLine1">
+                    Address Line 1 <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="addressLine1"
+                    placeholder="Street address"
+                    value={formData.addressLine1}
+                    onChange={(e) =>
+                      handleInputChange("addressLine1", e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="addressLine2">Address Line 2</Label>
+                  <Input
+                    id="addressLine2"
+                    placeholder="Apartment, suite, etc."
+                    value={formData.addressLine2}
+                    onChange={(e) =>
+                      handleInputChange("addressLine2", e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">
+                      Town/City <span className="text-danger">*</span>
+                    </Label>
+                    <Input
+                      id="city"
+                      placeholder="e.g. Birmingham"
+                      value={formData.city}
+                      onChange={(e) =>
+                        handleInputChange("city", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="postcode">
+                      Postcode <span className="text-danger">*</span>
+                    </Label>
+                    <Input
+                      id="postcode"
+                      placeholder="e.g. B1 1AA"
+                      value={formData.postcode}
+                      onChange={(e) =>
+                        handleInputChange("postcode", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="serviceRadius">
+                    Service Radius <span className="text-danger">*</span>
+                  </Label>
+                  <Select
+                    value={formData.serviceRadius}
+                    onValueChange={(value) =>
+                      handleInputChange("serviceRadius", value)
+                    }
+                  >
+                    <SelectTrigger id="serviceRadius">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">Within 5 miles</SelectItem>
+                      <SelectItem value="10">Within 10 miles</SelectItem>
+                      <SelectItem value="20">Within 20 miles</SelectItem>
+                      <SelectItem value="50">Within 50 miles</SelectItem>
+                      <SelectItem value="nationwide">Nationwide</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-subtle-ink">
+                    Maximum distance you're willing to deliver or serve
+                  </p>
+                </div>
+              </>
+
                 {/* <div className="space-y-2">
                   <Label>
                     Categories you supply <span className="text-danger">*</span>
@@ -500,7 +606,7 @@ export default function SupplierOnboardingPage() {
                   </p>
                 </div> */}
 
-                <div className="flex flex-col gap-3 pt-2">
+                {/* <div className="flex flex-col gap-3 pt-2">
                   <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
                     <Checkbox
                       id="terms"
@@ -558,7 +664,7 @@ export default function SupplierOnboardingPage() {
                       accept the Terms of Service and Privacy Policy.
                     </label>
                   </div>
-                </div>
+                </div> */}
               </>
             )}
 
@@ -574,6 +680,21 @@ export default function SupplierOnboardingPage() {
                     onChange={(e) =>
                       handleInputChange("tradingAs", e.target.value)
                     }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="businessName">
+                    Business Name <span className="text-danger">*</span>
+                  </Label>
+                  <Input
+                    id="businessName"
+                    placeholder="Your business name"
+                    value={formData.businessName}
+                    onChange={(e) =>
+                      handleInputChange("businessName", e.target.value)
+                    }
+                    className="h-12"
                   />
                 </div>
 
@@ -637,7 +758,7 @@ export default function SupplierOnboardingPage() {
             )}
 
             {/* Step 2: Address & Service Area */}
-            {currentStep === 2 && (
+            {/* {currentStep === 2 && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="addressLine1">
@@ -721,7 +842,7 @@ export default function SupplierOnboardingPage() {
                   </p>
                 </div>
 
-                {/* <div className="space-y-3">
+                <div className="space-y-3">
                   <Label>
                     Parts Categories <span className="text-danger">*</span>
                   </Label>
@@ -748,12 +869,12 @@ export default function SupplierOnboardingPage() {
                       </div>
                     ))}
                   </div>
-                </div> */}
+                </div>
               </>
-            )}
+            )} */}
 
             {/* Step 3: Verification Documents */}
-            {currentStep === 3 && (
+            {currentStep === 2 && (
               <>
                 <div className="space-y-3">
                   <Label htmlFor="companyReg">
@@ -849,12 +970,24 @@ export default function SupplierOnboardingPage() {
             )}
 
             {/* Step 4: Review & Submit */}
-            {currentStep === 4 && (
+            {currentStep === 3 && (
               <>
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-semibold mb-3">Contact Information</h3>
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">First Name:</span>
+                        <span className="font-medium">
+                          {formData.firstName || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">Last Name:</span>
+                        <span className="font-medium">
+                          {formData.lastName || "Not provided"}
+                        </span>
+                      </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Business Name:</span>
                         <span className="font-medium">
@@ -874,9 +1007,27 @@ export default function SupplierOnboardingPage() {
                         </span>
                       </div>
                       <div className="flex justify-between">
+                        <span className="text-subtle-ink">Address Line 1:</span>
+                        <span className="font-medium">
+                          {formData.addressLine1 || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">Address Line 2:</span>
+                        <span className="font-medium">
+                          {formData.addressLine2 || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">Town/City:</span>
+                        <span className="font-medium">
+                          {formData.city || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-subtle-ink">Postcode:</span>
                         <span className="font-medium">
-                          {formData.contactPostcode || "Not provided"}
+                          {formData.postcode || "Not provided"}
                         </span>
                       </div>
                     </div>
@@ -885,6 +1036,18 @@ export default function SupplierOnboardingPage() {
                   <div>
                     <h3 className="font-semibold mb-3">Business Details</h3>
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">Trading As:</span>
+                        <span className="font-medium">
+                          {formData.tradingAs || "Not selected"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-subtle-ink">Business Name:</span>
+                        <span className="font-medium">
+                          {formData.businessName || "Not selected"}
+                        </span>
+                      </div>
                       <div className="flex justify-between">
                         <span className="text-subtle-ink">Business Type:</span>
                         <span className="font-medium">
@@ -900,7 +1063,7 @@ export default function SupplierOnboardingPage() {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <h3 className="font-semibold mb-3">Service Area</h3>
                     <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex justify-between">
@@ -930,7 +1093,7 @@ export default function SupplierOnboardingPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div>
                     <h3 className="font-semibold mb-3">Documents</h3>
@@ -991,6 +1154,38 @@ export default function SupplierOnboardingPage() {
                     .
                   </Label>
                 </div>
+                <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                    <Checkbox
+                      id="marketing"
+                      checked={formData.marketingOptIn}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("marketingOptIn", checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="marketing"
+                      className="text-sm font-normal cursor-pointer leading-relaxed"
+                    >
+                      Send me updates about special offers and new suppliers.
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                    <Checkbox
+                      id="gdpr-consent"
+                      checked={formData.gdprConsent}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("gdprConsent", checked === true)
+                      }
+                    />
+                    <label
+                      htmlFor="gdpr-consent"
+                      className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
+                    >
+                      I agree to be contacted about becoming a supplier and
+                      accept the Terms of Service and Privacy Policy.
+                    </label>
+                  </div>
               </>
             )}
           </CardContent>
@@ -1026,7 +1221,7 @@ export default function SupplierOnboardingPage() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!formData.termsAccepted}
+              disabled={!formData.termsAccepted || !formData?.gdprConsent}
               className="gap-2 cursor-pointer"
             >
               Submit Application

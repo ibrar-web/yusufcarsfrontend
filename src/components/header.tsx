@@ -69,7 +69,7 @@ const PATH_TO_PAGE: Array<{
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
   {
     match: (path) =>
-      path.startsWith("/suppliers") && !path.startsWith("/supplier"),
+      path.includes("supplier") && !path.startsWith("/supplier"),
     page: "suppliers",
   },
   {
@@ -197,7 +197,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
   const handleRoleSelection = (role: "user" | "supplier" | "admin") => {
     try {
-      console.log("role :", role);
+      // console.log("role :", role);
       setSelectedRole(role);
 
       if (role === "user" || role === "supplier") {
@@ -249,7 +249,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           {/* Logo */}
           <button
             onClick={() => navigate("home")}
-            className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group"
+            className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group cursor-pointer"
           >
             <div
               className={cn(
@@ -259,7 +259,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
             >
               <Car
                 className={cn(
-                  "text-white transition-all duration-300",
+                  "text-white transition-all duration-300 cursor-pointer",
                   scrolled ? "h-5 w-5" : "h-6 w-6"
                 )}
               />
@@ -852,6 +852,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           setSignupDialogOpen(false);
           setShowSignIn(true);
         }}
+        setSignupDialogOpen={setSignupDialogOpen}
         onSuccess={handleAuthSuccess}
       />
 

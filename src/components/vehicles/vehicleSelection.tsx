@@ -162,7 +162,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       persistVehicleSelection(payload);
       setFilterDialogOpen(false);
       setPreviewVehicle(null);
-      onNavigate("request-flow", undefined, payload);
+      onNavigate("products", undefined, payload);
       return;
     }
 
@@ -181,7 +181,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     persistVehicleSelection(payload);
     setFilterDialogOpen(false);
     setPreviewVehicle(null);
-    onNavigate("request-flow", undefined, payload);
+    onNavigate("products", undefined, payload);
   };
 
   const handleDialogToggle = (open: boolean) => {
@@ -439,7 +439,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
             </div>
           </div>
           <Dialog open={filterDialogOpen} onOpenChange={handleDialogToggle}>
-            <DialogContent className="sm:max-w-[600px] rounded-[24px] p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-[600px] rounded-[12px] p-0 overflow-hidden">
               {previewVehicle ? (
                 <VehicleSummaryCard
                   vehicle={previewVehicle}

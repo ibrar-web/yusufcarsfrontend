@@ -83,7 +83,7 @@ export function VehicleSummaryCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl shadow-2xl border border-white/10 max-h-[80vh] flex flex-col",
+        "relative overflow-hidden max-h-[80vh] flex flex-col",
         className
       )}
     >
@@ -96,13 +96,20 @@ export function VehicleSummaryCard({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/95 via-[#1E293B]/90 to-[#0F172A]/95" />
       </div>
-      <div className="relative z-10 px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 flex-1 flex flex-col overflow-hidden">
+      <div className="relative z-10 px-4 sm:px-8 lg:px-12 py-4 sm:py-2 lg:py-5 flex-1 flex flex-col overflow-hidden">
         {(title || subtitle) && (
           <div className="text-center mb-6">
             {title && (
               <h1
-                className="font-['Inter'] font-bold text-white/80"
-                style={{ fontSize: "32px", lineHeight: "1.2" }}
+                className="
+        font-['Inter']
+        font-bold
+        text-white/80
+        text-[16px]
+        md:text-[20px]
+        lg:text-[28px]
+        leading-[1.2]
+      "
               >
                 {title}
               </h1>
@@ -112,7 +119,15 @@ export function VehicleSummaryCard({
 
         <div className="relative overflow-hidden bg-gradient-to-br from-[#1E293B]/60 to-[#0F172A]/70 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/5 flex-1 flex flex-col">
           <div className="relative z-10 text-center mb-6">
-            <h2 className="font-['Inter'] font-bold text-white/80 text-[22px] sm:text-[28px] leading-tight px-4">
+            <h2
+              className="font-['Inter'] font-bold text-white/80 
+        font-bold
+        text-white/80
+        text-[16px]
+        md:text-[20px]
+        lg:text-[28px]
+        leading-[1.2] leading-tight px-4"
+            >
               {vehicleTitle}
             </h2>
           </div>
@@ -122,10 +137,10 @@ export function VehicleSummaryCard({
               {baseDetails.map((detail) => (
                 <div key={detail.label} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative p-4 sm:p-5 bg-[#0F172A]/45 backdrop-blur-sm rounded-2xl border border-white/[0.06] hover:border-primary/40 transition-all min-h-[120px] flex flex-col justify-center text-left shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+                  <div className="relative p-4 sm:p-5 bg-[#0F172A]/45 backdrop-blur-sm rounded-md border border-white/[0.06] hover:border-primary/40 transition-all min-h-[120px] flex flex-col justify-center text-left shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 border border-primary/40">
-                        <Car className="h-3.5 w-3.5 text-primary/70" />
+                      <span className="inline-flex min-h-8 min-w-8 h-8 w-8 items-center justify-center rounded-full bg-primary/15 border border-primary/40 shrink-0">
+                        <Car className="h-3.5 w-3.5 text-white" />
                       </span>
                       <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-[0.2em]">
                         {detail.label}
@@ -143,7 +158,7 @@ export function VehicleSummaryCard({
               {extendedDetails.map((detail) => (
                 <div key={detail.label} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                  <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/30 backdrop-blur-sm rounded-2xl border border-white/[0.04] hover:border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.2)]">
+                  <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/30 backdrop-blur-sm rounded-md border border-white/[0.04] hover:border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.2)]">
                     <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-wider mb-1">
                       {detail.label}
                     </p>
@@ -160,7 +175,7 @@ export function VehicleSummaryCard({
                 {vehicleExtras.map((detail) => (
                   <div key={detail.label} className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                    <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-2xl border border-white/[0.04] hover-border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                    <div className="relative py-3 px-4 sm:p-4 bg-[#0F172A]/20 backdrop-blur-sm rounded-md border border-white/[0.04] hover-border-primary/20 transition-all text-left shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                       <p className="font-['Roboto'] text-[11px] sm:text-xs text-white/40 uppercase tracking-wider mb-1">
                         {detail.label}
                       </p>

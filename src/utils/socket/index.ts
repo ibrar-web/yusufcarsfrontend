@@ -1,8 +1,9 @@
 "use client";
 
 import { io, type Socket } from "socket.io-client";
+import { environment } from "@/utils/environment";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+const SOCKET_URL = environment.socketUrl;
 const HEARTBEAT_EVENT = "client:heartbeat";
 const HEARTBEAT_INTERVAL_MS = 30_000;
 

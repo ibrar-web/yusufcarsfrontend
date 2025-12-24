@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/header";
 import { fetchServiceCategories } from "@/actions/categories";
+import { environment } from "@/utils/environment";
 
 export default async function WebsiteLayout({
   children,
@@ -9,7 +10,7 @@ export default async function WebsiteLayout({
 }) {
   // Fetch categories on the server and pass down via props/context as needed.
   const categories = await fetchServiceCategories();
-  if (process.env.NODE_ENV === "development") {
+  if (environment.isDevelopment) {
     console.log("Loaded service categories", {
       count: categories.length,
       categories,

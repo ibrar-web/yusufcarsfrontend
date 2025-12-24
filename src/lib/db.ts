@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { config as loadEnv } from "dotenv";
 import { DataSource } from "typeorm";
+import { environment } from "@/utils/environment";
 import {
   ServiceCategorySchema,
   ServiceItemSchema,
@@ -20,25 +21,23 @@ const entities = [
 
 // Ensure environment variables are loaded when running locally.
 loadEnv({ path: ".env" });
-if (process.env.NODE_ENV === "production") {
-  loadEnv({ path: ".env.production" });
+if (environment.isProduction || environment.isStaging) {
+  const envFile = environment.isProduction ? ".env.production" : ".env.staging";
+  loadEnv({ path: envFile });
 }
 
 function buildDataSource() {
   const {
-    DATABASE_HOST = "localhost",
-    DATABASE_PORT = "5432",
-    DATABASE_URL,
-    DATABASE_USER,
-    DATABASE_PASSWORD,
-    DATABASE_NAME,
-    NODE_ENV,
-  } = process.env;
+    url: DATABASE_URL,
+    host: DATABASE_HOST = "localhost",
+    port: DATABASE_PORT = 5432,
+    user: DATABASE_USER,
+    password: DATABASE_PASSWORD,
+    name: DATABASE_NAME,
+    ssl,
+  } = environment.database;
 
-  if (
-    !DATABASE_URL &&
-    (!DATABASE_USER || !DATABASE_PASSWORD || !DATABASE_NAME)
-  ) {
+  if (!DATABASE_URL && (!DATABASE_USER || !DATABASE_PASSWORD || !DATABASE_NAME)) {
     throw new Error(
       "Database credentials are missing. Provide DATABASE_URL or DATABASE_USER, DATABASE_PASSWORD and DATABASE_NAME."
     );
@@ -58,13 +57,18 @@ function buildDataSource() {
         database: DATABASE_NAME,
       };
 
+  const sslConfig = ssl.enabled
+    ? { rejectUnauthorized: ssl.rejectUnauthorized }
+    : undefined;
+
   const dataSource = new DataSource({
     ...connectionOptions,
+    ...(sslConfig ? { ssl: sslConfig } : {}),
     entities,
     synchronize: false,
-    logging: NODE_ENV === "development",
+    logging: environment.isDevelopment,
   });
-  if (NODE_ENV === "development") {
+  if (environment.isDevelopment) {
     console.log("[db] Initializing datasource with entities:", entities);
   }
   return dataSource;
@@ -72,7 +76,7 @@ function buildDataSource() {
 
 const globalDataSource = globalThis.__serviceDataSource ?? buildDataSource();
 
-if (process.env.NODE_ENV !== "production") {
+if (!environment.isProduction && !environment.isStaging) {
   globalThis.__serviceDataSource = globalDataSource;
 }
 

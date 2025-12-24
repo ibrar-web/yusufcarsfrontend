@@ -1,5 +1,6 @@
 "use server";
 import { VehicleEnquiryResponse } from "@/types/dvla";
+import { environment } from "@/utils/environment";
 
 export async function enquiryVehicle(
   registrationNumber: string, vehicleModel: string
@@ -8,8 +9,7 @@ export async function enquiryVehicle(
     throw new Error("Registration number is required.");
   }
 
-  const apiKey = process.env.DVLA_API_KEY;
-  const apiUrl = process.env.DVLA_API;
+  const { apiKey, apiUrl } = environment.integrations.dvla;
 
   if (!apiKey || !apiUrl) {
     throw new Error("System configuration error. Please try again later.");

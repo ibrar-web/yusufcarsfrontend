@@ -42,6 +42,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { environment } from "@/utils/environment";
 
 type InquiryStatus =
   | "pending"
@@ -115,7 +116,7 @@ const ADMIN_INQUIRIES_BASE = apiRoutes.admin.inquiries.list;
 const buildFileUrl = (key?: string | null) => {
   if (!key) return null;
   if (/^https?:\/\//i.test(key)) return key;
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+  const base = environment.apiBaseUrl ?? "";
   const origin = base.replace(/\/api\/.*$/i, "");
   return `${origin}/${key}`;
 };

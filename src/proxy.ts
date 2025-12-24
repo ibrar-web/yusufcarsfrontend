@@ -3,8 +3,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { environment } from "@/utils/environment";
 
-const JOSE_SECRET = process.env.JOSE_SECRET!;
+const JOSE_SECRET = environment.security.joseSecret;
 const secret = new TextEncoder().encode(JOSE_SECRET);
 
 async function getRoleFromToken(token?: string) {
@@ -47,7 +48,7 @@ export default async function middleware(req: NextRequest) {
   );
 
   // Get role
-  const token = req.cookies.get("access_token")?.value;
+  const token = req.cookies.get(environment.cookies.name)?.value;
   const role = await getRoleFromToken(token);
 
   console.log("ROLE:", role, "PATH:", pathname);

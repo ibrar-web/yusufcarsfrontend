@@ -3,10 +3,10 @@
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import type { UserRole } from "@/utils/api";
+import { environment } from "@/utils/environment";
 
-const COOKIE_NAME = process.env.COOKIE_NAME ?? "access_token";
-const JOSE_SECRET =
-  process.env.JOSE_SECRET ?? "super_secret_key_here_change_me";
+const COOKIE_NAME = environment.cookies.name;
+const JOSE_SECRET = environment.security.joseSecret;
 const secretKey = new TextEncoder().encode(JOSE_SECRET);
 
 type ValidRole = Extract<UserRole, "user" | "supplier" | "admin">;

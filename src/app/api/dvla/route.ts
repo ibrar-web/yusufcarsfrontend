@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
+import { environment } from "@/utils/environment";
 
-const DVLA_API_URL =
-  process.env.DVLA_API ??
-  "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles";
-const DVLA_API_KEY = process.env.DVLA_API_KEY;
+const DVLA_API_URL = environment.integrations.dvla.apiUrl;
+const DVLA_API_KEY = environment.integrations.dvla.apiKey;
 
 export async function POST(request: Request) {
   if (!DVLA_API_KEY) {

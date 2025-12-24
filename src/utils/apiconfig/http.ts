@@ -1,11 +1,12 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig, Method } from "axios";
+import { environment } from "@/utils/environment";
 
 type ErrorPayload = { message?: string; error?: string };
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BASE_URL = environment.apiBaseUrl;
 
-if (!BASE_URL && process.env.NODE_ENV !== "production") {
+if (!BASE_URL && environment.isDevelopment) {
   // Surface an early warning in development when the API URL is misconfigured.
   // eslint-disable-next-line no-console
   console.warn("Missing NEXT_PUBLIC_API_BASE_URL; requests may fail with a Network Error.");

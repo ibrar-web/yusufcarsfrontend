@@ -47,6 +47,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
+import { QUOTE_REQUEST_EVENT } from "@/utils/socket/quoteRequestSocket";
 
 type QuoteRequestUser = {
   id: string;
@@ -66,6 +67,10 @@ type QuoteRequestDetails = {
   services?: string[] | null;
 };
 
+type ServiceItem = {
+  name: string;
+};
+
 type SupplierQuoteRequestApi = {
   id: string;
   supplierId?: string | null;
@@ -77,6 +82,8 @@ type SupplierQuoteRequestApi = {
   rejectionReason?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  postcode?:string | null;
+  serviceItems: any;
 };
 
 type SupplierQuoteRequest = {
@@ -88,6 +95,7 @@ type SupplierQuoteRequest = {
   vehicleDisplay?: string;
   registrationNumber?: string;
   partDescription: string;
+  partName: string;
   detailSummary: string;
   engineSize?: string;
   services?: string[];
@@ -197,12 +205,14 @@ const normalizeQuoteRequest = (
     vehicleDisplay: vehicleDisplay || undefined,
     registrationNumber: requestData.registrationNumber || undefined,
     partDescription,
+    // partName: payload?.serviceItems[0]?.name || payload?.serviceItems?.name ,
+    partName: payload?.serviceItems?.name,
     detailSummary:
       detailSummaryParts.join(" • ") || "No additional details provided",
     engineSize: requestData.engineSize || undefined,
     services: serviceNames,
     status: (payload.status || "pending").toLowerCase(),
-    postcode: requestData.postcode || requestData.user?.postCode || undefined,
+    postcode: requestData.postcode || requestData.user?.postCode || payload.postcode ||  undefined,
     createdAt: payload.createdAt || undefined,
     createdRelative: formatRelativeTime(payload.createdAt),
     expiresAt: payload.expiresAt || undefined,
@@ -252,6 +262,36 @@ export default function SupplierRequestsPage() {
   useEffect(() => {
     loadRequests();
   }, [loadRequests]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const handleIncomingRequest = (event: Event) => {
+      if (!(event instanceof CustomEvent)) return;
+      const payload = event.detail as SupplierQuoteRequestApi | null;
+      console.log({payload});
+      
+      if (!payload) return;
+      const normalizedRequest = normalizeQuoteRequest(payload);
+
+      setRequests((prev) => {
+        const existingIndex = prev.findIndex(
+          (request) => request.id === normalizedRequest.id
+        );
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = normalizedRequest;
+          return updated;
+        }
+        return [normalizedRequest, ...prev];
+      });
+    };
+
+    window.addEventListener(QUOTE_REQUEST_EVENT, handleIncomingRequest as EventListener);
+    return () => {
+      window.removeEventListener(QUOTE_REQUEST_EVENT, handleIncomingRequest as EventListener);
+    };
+  }, []);
 
   const newRequests = requests.filter(
     (request) => request.status === "pending" || request.status === "new"

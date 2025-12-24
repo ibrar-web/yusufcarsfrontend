@@ -19,11 +19,15 @@ import {
   type CartSummary,
   removeVehicleFromCart,
   removeServiceByIndex,
+  persistServicesSelection,
+  serviceObj,
 } from "@/utils/cart-storage";
 import { useAppState } from "@/hooks/use-app-state";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { VehicleSummaryCard } from "@/components/vehicles/vehicle-summary-card";
 import { toast } from "sonner";
+import { apiPost } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
 
 export default function CartPage() {
   const { handleNavigate } = useAppState();
@@ -32,6 +36,10 @@ export default function CartPage() {
     services: [],
   });
   const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
+  const [requestingQuote, setRequestingQuote] = useState(false);
+  const [requestingServiceId, setRequestingServiceId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const updateSummary = () => setCartSummary(loadCartSummary());
@@ -75,6 +83,87 @@ export default function CartPage() {
     }
     setVehicleDialogOpen(false);
     handleNavigate("products", undefined, vehicle);
+  };
+
+  // const slugifyServiceName = (value: string) =>
+  //   value
+  //     .trim()
+  //     .toLowerCase()
+  //     .replace(/[^a-z0-9]+/g, "-")
+  //     .replace(/(^-|-$)+/g, "");
+
+  const buildQuoteRequestPayload = (
+    vehicleData: NonNullable<CartSummary["vehicle"]>,
+    serviceList: CartSummary["services"],
+    service: serviceObj,
+  ) => {
+    if (!serviceList || !serviceList.length) {
+      throw new Error("Add at least one service to proceed.");
+    }
+
+    console.log({serviceList});
+    
+    // const services = serviceList.map((service) =>
+    //   slugifyServiceName(service.id),
+    // );
+
+    const services = serviceList.find((ser) =>
+      ser?.id ===service?.id
+    )?.id;
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7);
+
+    return {
+      make: vehicleData.make,
+      model: vehicleData.model,
+      registrationNumber: vehicleData.registrationNumber,
+      taxStatus: vehicleData.taxStatus,
+      taxDueDate: vehicleData.taxDueDate,
+      motStatus: vehicleData.motStatus,
+      yearOfManufacture: vehicleData.yearOfManufacture,
+      fuelType: vehicleData.fuelType,
+      engineSize: vehicleData.engineSize,
+      engineCapacity: vehicleData.engineCapacity,
+      co2Emissions: vehicleData.co2Emissions,
+      services,
+      postcode: vehicleData.postcode,
+      requestType:
+        vehicleData.requestType ??
+        (vehicleData.localRequest ? "local" : "national"),
+      expiresAt: expiryDate.toISOString(),
+    };
+  };
+
+  const handleQuoteRequest = async (service: serviceObj) => {
+    if (!vehicle) {
+      toast.error("Add your vehicle before requesting a quote.");
+      return;
+    }
+    if (!services.length) {
+      toast.error("Add at least one service.");
+      return;
+    }
+
+    setRequestingQuote(true);
+    setRequestingServiceId(service.id);
+    try {
+      const payload = buildQuoteRequestPayload(vehicle, services, service);
+      await apiPost(apiRoutes.user.quote.requestQuote, payload);
+      toast.success("Quote request submitted.");
+      const remainingServices = services.filter(
+        (entry) => entry.id !== service.id,
+      );
+      persistServicesSelection(remainingServices);
+      refreshSummary();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to send quote request.",
+      );
+    } finally {
+      setRequestingQuote(false);
+      setRequestingServiceId(null);
+    }
   };
 
   return (
@@ -197,13 +286,29 @@ export default function CartPage() {
                             </p>
                           )}
                         </div>
-                        <button
-                          className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1"
-                          onClick={() => handleServiceRemove(index)}
-                        >
-                          <X className="h-4 w-4" />
-                          Remove
-                        </button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="lg"
+                            onClick={() => handleQuoteRequest(service)}
+                            disabled={
+                              requestingQuote &&
+                              requestingServiceId === service.id
+                            }
+                            className="cursor-pointer"
+                          >
+                            {requestingQuote &&
+                            requestingServiceId === service.id
+                              ? "Requesting…"
+                              : "Request a Quote"}
+                          </Button>
+                          <button
+                            className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 cursor-pointer"
+                            onClick={() => handleServiceRemove(index)}
+                            >
+                            <X className="h-4 w-4" />
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -67,9 +67,6 @@ type QuoteRequestDetails = {
   services?: string[] | null;
 };
 
-type ServiceItem = {
-  name: string;
-};
 
 type SupplierQuoteRequestApi = {
   id: string;

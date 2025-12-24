@@ -48,22 +48,33 @@ export const environment = {
         "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
     },
   },
-  database: {
-    url: process.env.DATABASE_URL,
-    host: process.env.DATABASE_HOST,
-    port: Number(process.env.DATABASE_PORT || "5432"),
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    name: process.env.DATABASE_NAME,
-    ssl:
-      process.env.DATABASE_SSL === "true"
+  database: (() => {
+    const rawDatabaseUrl = process.env.DATABASE_URL;
+    const hasProtocol = Boolean(rawDatabaseUrl?.includes("://"));
+    const useConnectionUrl = hasProtocol && rawDatabaseUrl;
+    const hostFallback = rawDatabaseUrl && !hasProtocol ? rawDatabaseUrl : undefined;
+    const resolvedHost = hostFallback ?? process.env.DATABASE_HOST;
+    const useDiscreteSettings = !useConnectionUrl;
+    const sslEnabled = process.env.DATABASE_SSL === "true";
+
+    return {
+      url: useConnectionUrl ?? undefined,
+      host: useDiscreteSettings ? resolvedHost : undefined,
+      port: useDiscreteSettings
+        ? Number(process.env.DATABASE_PORT || "5432")
+        : undefined,
+      user: useDiscreteSettings ? process.env.DATABASE_USER : undefined,
+      password: useDiscreteSettings ? process.env.DATABASE_PASSWORD : undefined,
+      name: useDiscreteSettings ? process.env.DATABASE_NAME : undefined,
+      ssl: sslEnabled
         ? {
             enabled: true,
             rejectUnauthorized:
               process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== "false",
           }
         : { enabled: false },
-  },
+    };
+  })(),
 } as const;
 console.log("environment", environment);
 if (typeof window === "undefined") {

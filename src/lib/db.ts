@@ -29,13 +29,19 @@ if (environment.isProduction || environment.isStaging) {
 function buildDataSource() {
   const {
     url: DATABASE_URL,
-    host: DATABASE_HOST = "localhost",
-    port: DATABASE_PORT = 5432,
-    user: DATABASE_USER,
-    password: DATABASE_PASSWORD,
-    name: DATABASE_NAME,
+    host,
+    port,
+    user,
+    password,
+    name,
     ssl,
   } = environment.database;
+
+  const DATABASE_HOST = DATABASE_URL ? undefined : host ?? "localhost";
+  const DATABASE_PORT = DATABASE_URL ? undefined : port ?? 5432;
+  const DATABASE_USER = DATABASE_URL ? undefined : user;
+  const DATABASE_PASSWORD = DATABASE_URL ? undefined : password;
+  const DATABASE_NAME = DATABASE_URL ? undefined : name;
 
   if (!DATABASE_URL && (!DATABASE_USER || !DATABASE_PASSWORD || !DATABASE_NAME)) {
     throw new Error(

@@ -97,6 +97,10 @@ export const apiRoutes = {
         return `user/orders/${orderId}/complete`;
       },
     },
+    profile: {
+      get: "user/profile",
+      update: "user/profile",
+    }
   },
   supplier: {
     quote: {
@@ -111,6 +115,10 @@ export const apiRoutes = {
     orders: {
       listorders: "supplier/orders",
     },
+    profile: {
+      get: "/supplier/profile",
+      update: "/supplier/profile",
+    }
   },
   admin: {
     users: {

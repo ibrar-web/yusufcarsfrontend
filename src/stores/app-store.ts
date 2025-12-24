@@ -76,7 +76,8 @@ export type Page =
   | "contact"
   | "products"
   | "notifications"
-  | "history";
+  | "history"
+  | "services";
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: "/",
@@ -96,6 +97,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   about: "/about",
   contact: "/contact",
   products: "/products",
+  services: "/services",
   notifications: "/notifications",
   history: "/history",
 };

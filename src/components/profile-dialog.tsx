@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,48 +9,104 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { User, Mail, Phone, Camera, Save } from "lucide-react";
+import { User, Mail, Phone, Save } from "lucide-react";
 import { toast } from "sonner";
+import { apiGet, apiPut } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
 
 interface ProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+type UserProfileApiResponse = {
+  data?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    postCode?: string;
+  };
+};
+
 export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const [formData, setFormData] = useState({
-    name: "John Smith",
+    firstName: "John",
+    lastName: "Smith",
     email: "john@example.com",
-    phone: "07123 456789",
+    postCode: "B1 1BD",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  
+  useEffect(() => {
+    let ignore = false;
+    const fetchProfile = async () => {
+      try {
+        if (!open) {
+          return;
+        }
+        const response = await apiGet<UserProfileApiResponse>(
+          apiRoutes.user.profile.get
+        );
+        
+        const payload = response?.data;
+        if (!payload || ignore) return;
+      
+        setFormData((prev) => ({
+          ...prev,
+          firstName: payload.firstName ?? "",
+          lastName: payload.lastName ?? "",
+          email: payload.email ?? "",
+          postCode: payload.postCode ?? "",
+        }));
+      } catch (err) {
+        if (ignore) return;
+        console.error("Failed to load user profile", err);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to load profile data"
+        );
+      }
+    };
+      
+    fetchProfile();
+    return () => {
+      ignore = true;
+    };
+  }, [open])
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    try {
+      const response = await apiPut<any>(apiRoutes?.user?.profile?.update, formData);
+      if (response?.statusCode === 200) {
+        setIsSubmitting(false);
+        toast.success("Profile updated successfully!");
+        onOpenChange(false);
+      }
+    }
+    catch(err) {
+      console.log("err is as:  ", err);
+    }
     // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Profile updated successfully!");
-      onOpenChange(false);
-    }, 1500);
+    // setTimeout(() => {
+    //   setIsSubmitting(false);
+    //   toast.success("Profile updated successfully!");
+    //   onOpenChange(false);
+    // }, 1500);
   };
 
-  const handleAvatarChange = () => {
-    toast.info("Avatar upload coming soon!");
-  };
+  // const handleAvatarChange = () => {
+  //   toast.info("Avatar upload coming soon!");
+  // };
 
-  // Get initials for avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  // // Get initials for avatar fallback
+  // const getInitials = (name: string) => {
+  //   return name
+  //     .split(" ")
+  //     .map((n) => n[0])
+  //     .join("")
+  //     .toUpperCase()
+  //     .slice(0, 2);
+  // };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,7 +122,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
         <div className="mt-6">
           {/* Avatar Section */}
-          <div className="flex flex-col items-center mb-8">
+          {/* <div className="flex flex-col items-center mb-8">
             <div className="relative">
               <Avatar className="h-24 w-24">
                 <AvatarImage src="" alt={formData.name} />
@@ -85,23 +141,42 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             <p className="mt-3 font-['Roboto'] text-[#64748B]" style={{ fontSize: "13px" }}>
               Click the camera icon to change your photo
             </p>
-          </div>
+          </div> */}
 
           {/* Profile Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Full Name */}
+            {/* First Name */}
             <div className="space-y-2">
-              <Label htmlFor="profile-name" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
-                Full Name
+              <Label htmlFor="firstName" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+                First Name
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
                 <Input
-                  id="profile-name"
+                  id="firstName"
                   type="text"
-                  placeholder="John Smith"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="John"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label htmlFor="lastName" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+                Last Name
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Smith"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                   required
                 />
@@ -120,6 +195,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   type="email"
                   placeholder="john@example.com"
                   value={formData.email}
+                  disabled={true}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                   required
@@ -127,19 +203,19 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               </div>
             </div>
 
-            {/* Phone */}
+            {/* Post Code */}
             <div className="space-y-2">
-              <Label htmlFor="profile-phone" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
-                Phone Number
+              <Label htmlFor="postCode" className="font-['Roboto'] text-[#0F172A]" style={{ fontSize: "14px" }}>
+                Post Code
               </Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
                 <Input
-                  id="profile-phone"
+                  id="postCode"
                   type="tel"
                   placeholder="07123 456789"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  value={formData.postCode}
+                  onChange={(e) => setFormData({ ...formData, postCode: e.target.value })}
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                   required
                 />

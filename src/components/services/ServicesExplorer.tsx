@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { ServiceCategoryDTO } from "@/actions/categories";
+import { toast } from "sonner";
+// import { useRouter } from "next/navigation";
+import {
+  CartServiceItem,
+  loadCartSummary,
+  persistServicesSelection,
+  subscribeToCartUpdates,
+} from "@/utils/cart-storage";
+import type { ServiceCategoryDTO, ServiceItemDTO } from "@/actions/categories";
 
 type ServicesExplorerProps = {
   categories: ServiceCategoryDTO[];
@@ -26,6 +34,8 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
   const [dialogCategory, setDialogCategory] =
     useState<ServiceCategoryDTO | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cartServices, setCartServices] = useState<CartServiceItem[]>([]);
+  // const router = useRouter();
 
   const filteredCategories = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -58,6 +68,57 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
     setDialogCategory(null);
     setActiveCategory(null);
     setActiveSubcategory(null);
+  };
+
+  useEffect(() => {
+    const updateCartServices = () => {
+      const summary = loadCartSummary();
+      setCartServices(Array.isArray(summary.services) ? summary.services : []);
+    };
+    updateCartServices();
+    const unsubscribe = subscribeToCartUpdates(updateCartServices);
+    return unsubscribe;
+  }, []);
+
+  const handleAddService = (item: ServiceItemDTO, subcategoryName?: string) => {
+    const summary = loadCartSummary();
+    if (!summary.vehicle) {
+      toast.error("Add your vehicle before selecting services.");
+      // router.push("/");
+      return;
+    }
+    const existingServices = Array.isArray(summary.services)
+      ? [...summary.services]
+      : [];
+    const serviceEntry: CartServiceItem = {
+      id: item.id,
+      label: item.name,
+      category: [dialogCategory?.name, subcategoryName]
+        .filter(Boolean)
+        .join(" / "),
+    };
+
+    const alreadyInCart = existingServices.some(
+      (service) => service.id === serviceEntry.id,
+    );
+    if (!alreadyInCart) {
+      existingServices.push(serviceEntry);
+      persistServicesSelection(existingServices);
+      toast.success("Service added to cart.");
+    } else {
+      toast.error("Service already in cart.");
+    }
+
+    // router.push("/cart");
+  };
+
+  const handleRemoveService = (id: string) => {
+    const summary = loadCartSummary();
+    const remaining = Array.isArray(summary.services)
+      ? summary.services.filter((service) => service.id !== id)
+      : [];
+    persistServicesSelection(remaining);
+    toast.success("Service removed from cart.");
   };
 
   return (
@@ -103,7 +164,7 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-[#F02801]"
+                      className="text-[#F02801] cursor-pointer"
                       onClick={() => openCategoryDialog(category)}
                     >
                       View
@@ -189,11 +250,15 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                     {subOpen ? (
                       <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#CBD5E1]">
                         {subcategory.items?.length ? (
-                          subcategory.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center justify-between gap-6 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_12px_rgba(15,23,42,0.08)]"
-                            >
+                          subcategory.items.map((item) => {
+                            const inCart = cartServices.some(
+                              (service) => service.id === item.id,
+                            );
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between gap-6 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_12px_rgba(15,23,42,0.08)]"
+                              >
                               <div>
                                 <p className="font-medium text-[#0F172A]">
                                   {item.name}
@@ -206,13 +271,22 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                               </div>
                               <Button
                                 className="h-10 w-10 rounded-full border border-[#E5E7EB] text-[#F02801] bg-white hover:bg-[#FEE2E2] text-lg p-0 cursor-pointer"
-                                aria-label={`Add ${item.name}`}
+                                aria-label={
+                                  inCart
+                                    ? `Remove ${item.name}`
+                                    : `Add ${item.name}`
+                                }
+                                onClick={() =>
+                                  inCart
+                                    ? handleRemoveService(item.id)
+                                    : handleAddService(item, subcategory.name)
+                                }
                               >
-                                +
+                                {inCart ? "−" : "+"}
                               </Button>
                             </div>
-                          ))
-                        ) : (
+                          )}
+                        )) : (
                           <p className="text-sm text-[#64748B]">
                             No items currently listed for this subcategory.
                           </p>

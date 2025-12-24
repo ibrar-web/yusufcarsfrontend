@@ -109,7 +109,7 @@ export default function CartPage() {
 
     const services = serviceList.find((ser) =>
       ser?.id ===service?.id
-    );
+    )?.id;
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);

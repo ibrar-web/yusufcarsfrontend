@@ -13,6 +13,9 @@ export type CartSummary = {
   vehicle: VehicleData;
   services: CartServiceItem[];
 };
+export type serviceObj = {
+  id: string,
+}
 
 const VEHICLE_COOKIE_KEY = "pq_vehicle_request";
 const SERVICES_COOKIE_KEY = "pq_service_selection";

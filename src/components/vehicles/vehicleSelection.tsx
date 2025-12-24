@@ -179,7 +179,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     persistVehicleSelection(payload);
     setFilterDialogOpen(false);
     setPreviewVehicle(null);
-    onNavigate("products", undefined, payload);
+    // onNavigate("products", undefined, payload);
+    onNavigate("services", undefined, payload);
   };
 
   const handleDialogToggle = (open: boolean) => {

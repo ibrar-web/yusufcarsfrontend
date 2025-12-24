@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -76,7 +76,6 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-
   // Product detail dialog state
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
@@ -198,7 +197,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     if (selectedProduct) {
       toast.success(`Added ${selectedProduct.name} to your basket`);
       setProductDetailOpen(false);
-    onNavigate("cart");
+      onNavigate("cart");
     }
   };
 

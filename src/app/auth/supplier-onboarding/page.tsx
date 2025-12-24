@@ -97,42 +97,13 @@ export default function SupplierOnboardingPage() {
     },
   ];
 
-  const categories = [
-    "Engine Parts",
-    "Brakes",
-    "Suspension",
-    "Electrical",
-    "Bodywork",
-    "Interior",
-    "Exhaust",
-    "Cooling System",
-    "Transmission",
-    "Steering",
-  ];
-
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCategoryToggle = (category: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category],
-    }));
   };
 
   const handleFileUpload = (field: string, file: File | null) => {
     setFormData((prev) => ({ ...prev, [field]: file }));
   };
-
-  // const handleNext = () => {
-  //   if (currentStep < steps.length - 1) {
-  //     setCurrentStep(currentStep + 1);
-  //     window.scrollTo({ top: 0, behavior: "smooth" });
-  //   }
-  // };
 
   const handleNext = () => {
     const isValid = validateStep(currentStep);
@@ -236,8 +207,10 @@ export default function SupplierOnboardingPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     switch (step) {
       case 0: {
-        if (!formData?.firstName?.trim()) return showError("First name is required");
-        if (!formData?.lastName?.trim()) return showError("Last name is required");
+        if (!formData?.firstName?.trim())
+          return showError("First name is required");
+        if (!formData?.lastName?.trim())
+          return showError("Last name is required");
         if (!formData?.email?.trim()) return showError("Email is required");
         if (showToast && !emailRegex?.test(formData?.email))
           return showError("Please enter a valid email address");
@@ -246,24 +219,31 @@ export default function SupplierOnboardingPage() {
         if (!formData?.password) return showError("Password is required");
         if (showToast && formData?.password?.length < 6)
           return showError("Password must be at least 6 characters");
-        if (!formData?.confirmPassword) return showError("Confirm password is required");
+        if (!formData?.confirmPassword)
+          return showError("Confirm password is required");
         if (showToast && formData?.password !== formData?.confirmPassword)
           return showError("Passwords do not match");
         // if (!formData?.categories?.length) return showError("Please select at least one category");
         // if (!formData?.termsAccepted) return showError("You must accept the Terms & Conditions");
         // if (!formData?.gdprConsent) return showError("You must give GDPR consent");
-        if (!formData?.addressLine1?.trim()) return showError("Address line 1 is required");
+        if (!formData?.addressLine1?.trim())
+          return showError("Address line 1 is required");
         if (!formData?.city?.trim()) return showError("City is required");
-        if (!formData?.postcode?.trim()) return showError("Postcode is required");
-        if (!formData?.serviceRadius) return showError("Service radius is required");
+        if (!formData?.postcode?.trim())
+          return showError("Postcode is required");
+        if (!formData?.serviceRadius)
+          return showError("Service radius is required");
         return true;
       }
 
       case 1: {
         if (!formData?.tradingAs) return showError("Trading As is required");
-        if (!formData?.businessName?.trim()) return showError("Business name is required");
-        if (!formData?.businessType) return showError("Business type is required");
-        if (!formData?.description?.trim()) return showError("Business description is required");
+        if (!formData?.businessName?.trim())
+          return showError("Business name is required");
+        if (!formData?.businessType)
+          return showError("Business type is required");
+        if (!formData?.description?.trim())
+          return showError("Business description is required");
         if (!formData?.vatNumber) return showError("VAT number is required");
         return true;
       }
@@ -278,7 +258,8 @@ export default function SupplierOnboardingPage() {
       // }
 
       case 3: {
-        if (!formData?.companyRegDoc) return showError("Company registration document is required");
+        if (!formData?.companyRegDoc)
+          return showError("Company registration document is required");
         // if (!formData?.insuranceDoc) return showError("Insurance document is required");
         return true;
       }
@@ -487,88 +468,88 @@ export default function SupplierOnboardingPage() {
                 </div>
 
                 <>
-                <div className="space-y-2">
-                  <Label htmlFor="addressLine1">
-                    Address Line 1 <span className="text-danger">*</span>
-                  </Label>
-                  <Input
-                    id="addressLine1"
-                    placeholder="Street address"
-                    value={formData.addressLine1}
-                    onChange={(e) =>
-                      handleInputChange("addressLine1", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="addressLine2">Address Line 2</Label>
-                  <Input
-                    id="addressLine2"
-                    placeholder="Apartment, suite, etc."
-                    value={formData.addressLine2}
-                    onChange={(e) =>
-                      handleInputChange("addressLine2", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city">
-                      Town/City <span className="text-danger">*</span>
+                    <Label htmlFor="addressLine1">
+                      Address Line 1 <span className="text-danger">*</span>
                     </Label>
                     <Input
-                      id="city"
-                      placeholder="e.g. Birmingham"
-                      value={formData.city}
+                      id="addressLine1"
+                      placeholder="Street address"
+                      value={formData.addressLine1}
                       onChange={(e) =>
-                        handleInputChange("city", e.target.value)
+                        handleInputChange("addressLine1", e.target.value)
                       }
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="postcode">
-                      Postcode <span className="text-danger">*</span>
-                    </Label>
+                    <Label htmlFor="addressLine2">Address Line 2</Label>
                     <Input
-                      id="postcode"
-                      placeholder="e.g. B1 1AA"
-                      value={formData.postcode}
+                      id="addressLine2"
+                      placeholder="Apartment, suite, etc."
+                      value={formData.addressLine2}
                       onChange={(e) =>
-                        handleInputChange("postcode", e.target.value)
+                        handleInputChange("addressLine2", e.target.value)
                       }
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="serviceRadius">
-                    Service Radius <span className="text-danger">*</span>
-                  </Label>
-                  <Select
-                    value={formData.serviceRadius}
-                    onValueChange={(value) =>
-                      handleInputChange("serviceRadius", value)
-                    }
-                  >
-                    <SelectTrigger id="serviceRadius">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">Within 5 miles</SelectItem>
-                      <SelectItem value="10">Within 10 miles</SelectItem>
-                      <SelectItem value="20">Within 20 miles</SelectItem>
-                      <SelectItem value="50">Within 50 miles</SelectItem>
-                      <SelectItem value="nationwide">Nationwide</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-subtle-ink">
-                    Maximum distance you're willing to deliver or serve
-                  </p>
-                </div>
-              </>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">
+                        Town/City <span className="text-danger">*</span>
+                      </Label>
+                      <Input
+                        id="city"
+                        placeholder="e.g. Birmingham"
+                        value={formData.city}
+                        onChange={(e) =>
+                          handleInputChange("city", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="postcode">
+                        Postcode <span className="text-danger">*</span>
+                      </Label>
+                      <Input
+                        id="postcode"
+                        placeholder="e.g. B1 1AA"
+                        value={formData.postcode}
+                        onChange={(e) =>
+                          handleInputChange("postcode", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="serviceRadius">
+                      Service Radius <span className="text-danger">*</span>
+                    </Label>
+                    <Select
+                      value={formData.serviceRadius}
+                      onValueChange={(value) =>
+                        handleInputChange("serviceRadius", value)
+                      }
+                    >
+                      <SelectTrigger id="serviceRadius">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">Within 5 miles</SelectItem>
+                        <SelectItem value="10">Within 10 miles</SelectItem>
+                        <SelectItem value="20">Within 20 miles</SelectItem>
+                        <SelectItem value="50">Within 50 miles</SelectItem>
+                        <SelectItem value="nationwide">Nationwide</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-subtle-ink">
+                      Maximum distance you're willing to deliver or serve
+                    </p>
+                  </div>
+                </>
 
                 {/* <div className="space-y-2">
                   <Label>
@@ -672,7 +653,10 @@ export default function SupplierOnboardingPage() {
             {currentStep === 1 && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="tradingAs">Trading As (if different) <span className="text-danger">*</span></Label>
+                  <Label htmlFor="tradingAs">
+                    Trading As (if different){" "}
+                    <span className="text-danger">*</span>
+                  </Label>
                   <Input
                     id="tradingAs"
                     placeholder="e.g. AutoParts Direct"
@@ -723,7 +707,9 @@ export default function SupplierOnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="vatNumber">VAT Number <span className="text-danger">*</span></Label>
+                  <Label htmlFor="vatNumber">
+                    VAT Number <span className="text-danger">*</span>
+                  </Label>
                   <Input
                     id="vatNumber"
                     placeholder="GB123456789"
@@ -1155,37 +1141,37 @@ export default function SupplierOnboardingPage() {
                   </Label>
                 </div>
                 <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
-                    <Checkbox
-                      id="marketing"
-                      checked={formData.marketingOptIn}
-                      onCheckedChange={(checked) =>
-                        handleInputChange("marketingOptIn", checked === true)
-                      }
-                    />
-                    <Label
-                      htmlFor="marketing"
-                      className="text-sm font-normal cursor-pointer leading-relaxed"
-                    >
-                      Send me updates about special offers and new suppliers.
-                    </Label>
-                  </div>
+                  <Checkbox
+                    id="marketing"
+                    checked={formData.marketingOptIn}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("marketingOptIn", checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="marketing"
+                    className="text-sm font-normal cursor-pointer leading-relaxed"
+                  >
+                    Send me updates about special offers and new suppliers.
+                  </Label>
+                </div>
 
-                  <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
-                    <Checkbox
-                      id="gdpr-consent"
-                      checked={formData.gdprConsent}
-                      onCheckedChange={(checked) =>
-                        handleInputChange("gdprConsent", checked === true)
-                      }
-                    />
-                    <label
-                      htmlFor="gdpr-consent"
-                      className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
-                    >
-                      I agree to be contacted about becoming a supplier and
-                      accept the Terms of Service and Privacy Policy.
-                    </label>
-                  </div>
+                <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-xl">
+                  <Checkbox
+                    id="gdpr-consent"
+                    checked={formData.gdprConsent}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("gdprConsent", checked === true)
+                    }
+                  />
+                  <label
+                    htmlFor="gdpr-consent"
+                    className="text-sm text-subtle-ink leading-relaxed cursor-pointer"
+                  >
+                    I agree to be contacted about becoming a supplier and accept
+                    the Terms of Service and Privacy Policy.
+                  </label>
+                </div>
               </>
             )}
           </CardContent>

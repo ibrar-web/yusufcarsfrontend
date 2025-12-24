@@ -86,9 +86,8 @@ const normalizeCategories = (payload: unknown): AdminCategory[] => {
       typeof record.data === "object" &&
       Array.isArray((record.data as { data?: AdminCategory[] }).data)
     ) {
-      return (
-        ((record.data as { data?: AdminCategory[] }).data ?? []) as AdminCategory[]
-      );
+      return ((record.data as { data?: AdminCategory[] }).data ??
+        []) as AdminCategory[];
     }
     if (Array.isArray(record.items)) {
       return record.items as AdminCategory[];
@@ -116,7 +115,6 @@ export default function AdminCategoryItemsPage() {
   const subCategoryId = searchParams.get("parentId");
   const subCategoryName = searchParams.get("name") ?? "Selected Category";
 
-
   const fethCategoryItems = useCallback(async (categoryId: string) => {
     setIsCategoryItemsLoading(true);
     try {
@@ -127,9 +125,7 @@ export default function AdminCategoryItemsPage() {
       setCategoryItems(normalizeCategories(payload ?? []));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to load subcategories"
+        error instanceof Error ? error.message : "Failed to load subcategories"
       );
     } finally {
       setIsCategoryItemsLoading(false);
@@ -184,8 +180,9 @@ export default function AdminCategoryItemsPage() {
   };
 
   const handleViewItems = (subcategory: AdminCategory) => {
+    console.log(subcategory);
     // router.push(`/admin/category-items?parentId=${subcategory.id}&name=${encodeURIComponent(subcategory.name)}`)
-  }
+  };
 
   const handleCreateCategoryItem = async () => {
     if (!subCategoryId || !formName.trim()) {
@@ -244,13 +241,11 @@ export default function AdminCategoryItemsPage() {
     try {
       const payload = {
         name: formName.trim(),
-        slug:formSlug?.trim(),
+        slug: formSlug?.trim(),
         description: formDescription.trim() || undefined,
       };
       await apiPatch(
-        apiRoutes.admin.categoryItems.update(
-          selectedSubcategory.id
-        ),
+        apiRoutes.admin.categoryItems.update(selectedSubcategory.id),
         payload
       );
       setCategoryItems((prev) =>
@@ -274,9 +269,7 @@ export default function AdminCategoryItemsPage() {
     setIsDeleting(true);
     try {
       await apiDelete(
-        apiRoutes.admin.categoryItems.delete(
-          selectedSubcategory.id
-        )
+        apiRoutes.admin.categoryItems.delete(selectedSubcategory.id)
       );
       setCategoryItems((prev) =>
         prev.filter((sub) => sub.id !== selectedSubcategory.id)
@@ -292,292 +285,313 @@ export default function AdminCategoryItemsPage() {
     }
   };
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            className="rounded-full border border-[#E2E8F0] text-[#0F172A] cursor-pointer"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to SubCategories
-          </Button>
-          <div className="flex items-center gap-2 text-[#475569] font-['Roboto']">
-            <FolderTree className="h-5 w-5 text-[#F97316]" />
-            <span>Category Items for</span>
-            <span className="font-semibold text-[#0F172A]">{subCategoryName}</span>
-          </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          className="rounded-full border border-[#E2E8F0] text-[#0F172A] cursor-pointer"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to SubCategories
+        </Button>
+        <div className="flex items-center gap-2 text-[#475569] font-['Roboto']">
+          <FolderTree className="h-5 w-5 text-[#F97316]" />
+          <span>Category Items for</span>
+          <span className="font-semibold text-[#0F172A]">
+            {subCategoryName}
+          </span>
         </div>
+      </div>
 
-        <Card className="border-2 border-[#E2E8F0] shadow-lg">
-          <CardHeader className="border-b border-[#E5E7EB] bg-[#F8FAFC] rounded-t-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="font-['Inter'] text-xl text-[#0F172A]">
-                  Category Items
-                </CardTitle>
-                <CardDescription className="font-['Roboto'] text-[#475569] mt-1">
-                  Manage Category Items for {subCategoryName}
-                </CardDescription>
-              </div>
-              <Badge className="rounded-full bg-[#E0E7FF] text-[#4338CA] font-['Roboto']">
-                {filteredSubcategories.length} results
-              </Badge>
+      <Card className="border-2 border-[#E2E8F0] shadow-lg">
+        <CardHeader className="border-b border-[#E5E7EB] bg-[#F8FAFC] rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-['Inter'] text-xl text-[#0F172A]">
+                Category Items
+              </CardTitle>
+              <CardDescription className="font-['Roboto'] text-[#475569] mt-1">
+                Manage Category Items for {subCategoryName}
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="p-4 border-b border-[#E5E7EB]">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative max-w-md w-full">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-                  <Input
-                    value={subcategorySearch}
-                    onChange={(event) => setSubcategorySearch(event.target.value)}
-                    placeholder="Search Category Item"
-                    className="pl-12 h-12 border-[#E5E7EB] rounded-full focus:border-[#F02801] focus:ring-[#F02801]"
-                  />
-                </div>
-                <Button
-                  className="rounded-full bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
-                  onClick={() => handleOpenCreate()}
-                >
-                  Add Category Items
-                </Button>
+            <Badge className="rounded-full bg-[#E0E7FF] text-[#4338CA] font-['Roboto']">
+              {filteredSubcategories.length} results
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="p-4 border-b border-[#E5E7EB]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                <Input
+                  value={subcategorySearch}
+                  onChange={(event) => setSubcategorySearch(event.target.value)}
+                  placeholder="Search Category Item"
+                  className="pl-12 h-12 border-[#E5E7EB] rounded-full focus:border-[#F02801] focus:ring-[#F02801]"
+                />
               </div>
+              <Button
+                className="rounded-full bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
+                onClick={() => handleOpenCreate()}
+              >
+                Add Category Items
+              </Button>
             </div>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-[#F8FAFC]">
-                  <TableRow className="border-[#E5E7EB]">
-                    <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
-                      ID
-                    </TableHead>
-                    <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
-                      Name
-                    </TableHead>
-                    <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
-                      slug
-                    </TableHead>
-                    <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
-                      Description
-                    </TableHead>
-                    <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
-                      Actions
-                    </TableHead>
-                    <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isCategoryItemsLoading ? (
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={`subcategory-skeleton-${index}`}>
-                        <TableCell colSpan={3}>
-                          <div className="h-5 w-full rounded bg-[#F1F5F9] animate-pulse" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : filteredSubcategories.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-3">
-                          <Search className="h-10 w-10 text-[#CBD5E1]" />
-                          <p className="text-[#475569] font-['Roboto']">
-                            No Category Items found.
-                          </p>
-                        </div>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-[#F8FAFC]">
+                <TableRow className="border-[#E5E7EB]">
+                  <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
+                    ID
+                  </TableHead>
+                  <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
+                    Name
+                  </TableHead>
+                  <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
+                    slug
+                  </TableHead>
+                  <TableHead className="text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs">
+                    Description
+                  </TableHead>
+                  <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6">
+                    Actions
+                  </TableHead>
+                  <TableHead className="text-right text-[#475569] font-['Roboto'] uppercase tracking-wide text-xs pr-6"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isCategoryItemsLoading ? (
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={`subcategory-skeleton-${index}`}>
+                      <TableCell colSpan={3}>
+                        <div className="h-5 w-full rounded bg-[#F1F5F9] animate-pulse" />
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filteredSubcategories.map((subcategory) => (
-                      <TableRow key={subcategory.id} className="border-[#F1F5F9]">
-                        <TableCell className="font-['Inter'] text-[#0F172A]">
-                          {subcategory.id}
-                        </TableCell>
-                        <TableCell className="font-['Roboto'] text-[#0F172A]">
-                          {subcategory.name}
-                        </TableCell>
-                        <TableCell className="font-['Roboto'] text-[#0F172A]">
-                          {subcategory.slug}
-                        </TableCell>
-                        <TableCell className="font-['Roboto'] text-[#475569]">
-                          {subcategory.description || "—"}
-                        </TableCell>
-                        <TableCell className="text-right pr-6">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-[#0F172A] hover:bg-[#FEF3F2] cursor-pointer"
-                              onClick={() => handleOpenEdit(subcategory)}
-                              aria-label={`Edit ${subcategory.name}`}
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-[#B91C1C] hover:bg-[#FEF2F2] cursor-pointer"
-                              onClick={() => handleOpenDelete(subcategory)}
-                              aria-label={`Delete ${subcategory.name}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right pr-6">
+                  ))
+                ) : filteredSubcategories.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3">
+                        <Search className="h-10 w-10 text-[#CBD5E1]" />
+                        <p className="text-[#475569] font-['Roboto']">
+                          No Category Items found.
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSubcategories.map((subcategory) => (
+                    <TableRow key={subcategory.id} className="border-[#F1F5F9]">
+                      <TableCell className="font-['Inter'] text-[#0F172A]">
+                        {subcategory.id}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#0F172A]">
+                        {subcategory.name}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#0F172A]">
+                        {subcategory.slug}
+                      </TableCell>
+                      <TableCell className="font-['Roboto'] text-[#475569]">
+                        {subcategory.description || "—"}
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="border-[#E2E8F0] text-[#0F172A] cursor-pointer"
-                            onClick={() => handleViewItems(subcategory)}
+                            className="text-[#0F172A] hover:bg-[#FEF3F2] cursor-pointer"
+                            onClick={() => handleOpenEdit(subcategory)}
+                            aria-label={`Edit ${subcategory.name}`}
                           >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[#B91C1C] hover:bg-[#FEF2F2] cursor-pointer"
+                            onClick={() => handleOpenDelete(subcategory)}
+                            aria-label={`Delete ${subcategory.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-[#E2E8F0] text-[#0F172A] cursor-pointer"
+                          onClick={() => handleViewItems(subcategory)}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           View
                         </Button>
                       </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
-                Add Category Item
-              </DialogTitle>
-              <DialogDescription className="font-['Roboto'] text-[#475569]">
-                Create a new category item under {subCategoryName}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Name</p>
-                <Input
-                  value={formName}
-                  onChange={(event) => setFormName(event.target.value)}
-                  placeholder="Brake Discs"
-                />
-              </div>
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">slug</p>
-                <Input
-                  value={formSlug}
-                  onChange={(event) => setFormSlug(event.target.value)}
-                  placeholder="Brake Discs"
-                />
-              </div>
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
-                  Description
-                </p>
-                <Textarea
-                  value={formDescription}
-                  onChange={(event) => setFormDescription(event.target.value)}
-                  placeholder="Short description (optional)"
-                  className="min-h-[120px]"
-                />
-              </div>
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
+              Add Category Item
+            </DialogTitle>
+            <DialogDescription className="font-['Roboto'] text-[#475569]">
+              Create a new category item under {subCategoryName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Name
+              </p>
+              <Input
+                value={formName}
+                onChange={(event) => setFormName(event.target.value)}
+                placeholder="Brake Discs"
+              />
             </div>
-            <DialogFooter className="mt-4">
-              <Button variant="ghost" className="cursor-pointer" onClick={() => setCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="text-white cursor-pointer"
-                onClick={() => handleCreateCategoryItem()}
-                disabled={isSaving}
-              >
-                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Create
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
-                Edit Subcategory
-              </DialogTitle>
-              <DialogDescription className="font-['Roboto'] text-[#475569]">
-                Update the selected subcategory details
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Name</p>
-                <Input
-                  value={formName}
-                  onChange={(event) => setFormName(event.target.value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">Slug</p>
-                <Input
-                  value={formSlug}
-                  onChange={(event) => setFormSlug(event.target.value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
-                  Description
-                </p>
-                <Textarea
-                  value={formDescription}
-                  onChange={(event) => setFormDescription(event.target.value)}
-                  className="min-h-[120px]"
-                />
-              </div>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                slug
+              </p>
+              <Input
+                value={formSlug}
+                onChange={(event) => setFormSlug(event.target.value)}
+                placeholder="Brake Discs"
+              />
             </div>
-            <DialogFooter className="mt-4">
-              <Button variant="ghost" className="cursor-pointer" onClick={() => setEditDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="cursor-pointer text-white"
-                onClick={() => handleUpdateCategoryItems()}
-                disabled={isSaving}
-              >
-                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Save Changes
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Description
+              </p>
+              <Textarea
+                value={formDescription}
+                onChange={(event) => setFormDescription(event.target.value)}
+                placeholder="Short description (optional)"
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="ghost"
+              className="cursor-pointer"
+              onClick={() => setCreateDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="text-white cursor-pointer"
+              onClick={() => handleCreateCategoryItem()}
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
-                Delete Subcategory
-              </DialogTitle>
-              <DialogDescription className="font-['Roboto'] text-[#475569]">
-                This action cannot be undone. Are you sure you want to continue?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="ghost" className="cursor-pointer" onClick={() => setDeleteDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="text-white cursor-pointer"
-                onClick={() => handleDeleteSubcategory()}
-                disabled={isDeleting}
-              >
-                {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    );
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
+              Edit Subcategory
+            </DialogTitle>
+            <DialogDescription className="font-['Roboto'] text-[#475569]">
+              Update the selected subcategory details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Name
+              </p>
+              <Input
+                value={formName}
+                onChange={(event) => setFormName(event.target.value)}
+              />
+            </div>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Slug
+              </p>
+              <Input
+                value={formSlug}
+                onChange={(event) => setFormSlug(event.target.value)}
+              />
+            </div>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Description
+              </p>
+              <Textarea
+                value={formDescription}
+                onChange={(event) => setFormDescription(event.target.value)}
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="ghost"
+              className="cursor-pointer"
+              onClick={() => setEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="cursor-pointer text-white"
+              onClick={() => handleUpdateCategoryItems()}
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
+              Delete Subcategory
+            </DialogTitle>
+            <DialogDescription className="font-['Roboto'] text-[#475569]">
+              This action cannot be undone. Are you sure you want to continue?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              className="cursor-pointer"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="text-white cursor-pointer"
+              onClick={() => handleDeleteSubcategory()}
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }

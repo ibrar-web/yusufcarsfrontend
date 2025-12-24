@@ -45,10 +45,7 @@ function buildDataSource() {
     logging: NODE_ENV === "development",
   });
   if (NODE_ENV === "development") {
-    console.log(
-      "[db] Initializing datasource with entities:",
-      entities.map((entity) => entity.name),
-    );
+    console.log("[db] Initializing datasource with entities:", entities);
   }
   return dataSource;
 }

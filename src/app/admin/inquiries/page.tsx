@@ -1,13 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useCallback, useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,12 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TablePagination } from "@/components/table-pagination";
-import { apiGet, apiPost } from "@/utils/apiconfig/http";
+import { apiGet } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
 import { cn } from "@/components/ui/utils";
 import { toast } from "sonner";
 import {
-  CheckCircle,
   FileText,
   Link as LinkIcon,
   Loader2,
@@ -146,7 +139,6 @@ export default function AdminInquiriesPage() {
     null
   );
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchInquiries = useCallback(async () => {
@@ -190,42 +182,10 @@ export default function AdminInquiriesPage() {
     fetchInquiries();
   }, [fetchInquiries]);
 
-  const counts = useMemo(() => {
-    const newCount = records.filter(
-      (item) => item.status === "pending" || item.status === "in_progress"
-    ).length;
-    return {
-      new: newCount,
-    };
-  }, [records]);
-
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setPage(1);
     setSearchTerm(searchInput);
-  };
-
-  const handleStatusUpdate = async (
-    inquiry: InquiryRecord,
-    nextStatus: InquiryStatus
-  ) => {
-    try {
-      setUpdatingStatus(true);
-      await apiPost(`${apiRoutes.admin.inquiries.detail(inquiry.id)}/status`, {
-        status: nextStatus,
-      });
-      toast.success("Inquiry status updated");
-      setSelectedInquiry({ ...inquiry, status: nextStatus });
-      fetchInquiries();
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Unable to update status. Please try again.";
-      toast.error(message);
-    } finally {
-      setUpdatingStatus(false);
-    }
   };
 
   const openDetails = async (record: InquiryRecord) => {

@@ -4,6 +4,10 @@
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
+    "[project]/src/app/(website)/cart/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
     "[project]/src/app/(website)/contact/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
@@ -32,15 +36,23 @@
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
+    "[project]/src/app/(website)/services/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
     "[project]/src/app/(website)/supplier-profile/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
-    "[project]/src/app/(website)/vehicle-confirmation/page": [
+    "[project]/src/app/_not-found/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
-    "[project]/src/app/_not-found/page": [
+    "[project]/src/app/admin/categories/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
+    "[project]/src/app/admin/category-items/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
@@ -57,6 +69,10 @@
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
     "[project]/src/app/admin/reports/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
+    "[project]/src/app/admin/subcategories/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
@@ -88,6 +104,10 @@
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
+    "[project]/src/app/supplier/orders/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
     "[project]/src/app/supplier/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
@@ -109,6 +129,10 @@
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],
     "[project]/src/app/user/history/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
+    ],
+    "[project]/src/app/user/orders/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/ce62453a442c7f35-s.p.a9507876.woff2"
     ],

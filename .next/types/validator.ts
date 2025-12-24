@@ -56,6 +56,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/(website)/cart/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/cart">> = Specific
+  const handler = {} as typeof import("../../src/app/(website)/cart/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/(website)/contact/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/contact">> = Specific
@@ -119,6 +128,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/(website)/services/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/services">> = Specific
+  const handler = {} as typeof import("../../src/app/(website)/services/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/(website)/supplier-profile/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/supplier-profile">> = Specific
@@ -128,10 +146,19 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
-// Validate ../../src/app/(website)/vehicle-confirmation/page.tsx
+// Validate ../../src/app/admin/categories/page.tsx
 {
-  type __IsExpected<Specific extends AppPageConfig<"/vehicle-confirmation">> = Specific
-  const handler = {} as typeof import("../../src/app/(website)/vehicle-confirmation/page.js")
+  type __IsExpected<Specific extends AppPageConfig<"/admin/categories">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/categories/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/category-items/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/category-items">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/category-items/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -168,6 +195,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/reports">> = Specific
   const handler = {} as typeof import("../../src/app/admin/reports/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/subcategories/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/subcategories">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/subcategories/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -236,6 +272,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/supplier/orders/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/supplier/orders">> = Specific
+  const handler = {} as typeof import("../../src/app/supplier/orders/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/supplier/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/supplier">> = Specific
@@ -285,6 +330,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends AppPageConfig<"/user/history">> = Specific
   const handler = {} as typeof import("../../src/app/user/history/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/user/orders/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/user/orders">> = Specific
+  const handler = {} as typeof import("../../src/app/user/orders/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

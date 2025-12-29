@@ -320,7 +320,7 @@ export default function CartPage() {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-3 pt-4">
+              {/* <div className="flex flex-wrap gap-3 pt-4">
                 <Button
                   className="flex-1 min-w-[180px]"
                   onClick={openVehicleDialog}
@@ -346,9 +346,9 @@ export default function CartPage() {
                 >
                   Clear Cart
                 </Button>
-              </div>
+              </div> */}
 
-              <div className="rounded-2xl border border-[#E2E8F0] bg-[#0F172A] text-white px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* <div className="rounded-2xl border border-[#E2E8F0] bg-[#0F172A] text-white px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="font-['Inter'] text-lg font-semibold">
                     Ready to request quotes?
@@ -364,7 +364,7 @@ export default function CartPage() {
                   Continue to Quotes
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </div>
+              </div> */}
             </div>
           )}
         </section>

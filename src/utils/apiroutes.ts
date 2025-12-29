@@ -115,6 +115,9 @@ export const apiRoutes = {
     orders: {
       listorders: "supplier/orders",
     },
+    stats: {
+      summary: "supplier/stats",
+    },
     profile: {
       get: "/supplier/profile",
       update: "/supplier/profile",

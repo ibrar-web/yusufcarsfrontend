@@ -1,11 +1,88 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { categoryBreakdownData, quotePerformanceData } from "@/page-components/supplier-dashboard/data";
+import { apiGet } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+type SupplierStats = {
+  totalOrders: number;
+  activeOrders: number;
+  completedOrders: number;
+  totalReviews: number;
+  averageRating: number;
+};
+
+type SupplierStatsResponse = {
+  statusCode: number;
+  message: string;
+  data: SupplierStats;
+};
+
 export default function SupplierAnalyticsPage() {
+  const [stats, setStats] = useState<SupplierStats | null>(null);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const maxQuotes = Math.max(...categoryBreakdownData.map((item) => item.quotes));
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchStats = async () => {
+      setIsStatsLoading(true);
+      setStatsError(null);
+
+      try {
+        const response = await apiGet<SupplierStatsResponse>(apiRoutes.supplier.stats.summary);
+        if (!isMounted) return;
+        if (response?.data) {
+          setStats(response.data);
+          return;
+        }
+        setStatsError("The stats response was empty.");
+      } catch (error) {
+        if (!isMounted) return;
+        setStatsError(error instanceof Error ? error.message : "Failed to load stats.");
+      } finally {
+        if (isMounted) {
+          setIsStatsLoading(false);
+        }
+      }
+    };
+
+    fetchStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const statsMetrics = stats
+    ? [
+        {
+          label: "Total orders",
+          value: stats.totalOrders.toLocaleString("en-GB"),
+        },
+        {
+          label: "Active orders",
+          value: stats.activeOrders.toLocaleString("en-GB"),
+        },
+        {
+          label: "Completed orders",
+          value: stats.completedOrders.toLocaleString("en-GB"),
+        },
+        {
+          label: "Total reviews",
+          value: stats.totalReviews.toLocaleString("en-GB"),
+        },
+        {
+          label: "Average rating",
+          value: stats.averageRating.toFixed(1),
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6">
@@ -13,6 +90,35 @@ export default function SupplierAnalyticsPage() {
         <CardContent className="p-6">
           <h1 className="font-['Inter'] text-[#0F172A] mb-1 text-3xl">Analytics</h1>
           <p className="text-[#475569] font-['Roboto']">Track your performance and business metrics</p>
+        </CardContent>
+      </Card>
+
+      <Card className="border border-[#E5E7EB] shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="font-['Inter'] text-[#0F172A]">Stats overview</CardTitle>
+          <CardDescription className="font-['Roboto'] text-[#475569]">Live counts pulled from supplier/stats</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isStatsLoading ? (
+            <p className="text-sm font-['Roboto'] text-[#475569]">Loading stats…</p>
+          ) : stats ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {statsMetrics.map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-2xl border border-[#F1F5F9] bg-white px-4 py-3 shadow-sm"
+                >
+                  <p className="text-xs font-['Roboto'] uppercase tracking-wide text-[#94A3B8]">{metric.label}</p>
+                  <p className="text-2xl font-['Inter'] text-[#0F172A]">{metric.value}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm font-['Roboto'] text-[#F02801]">
+              Unable to load stats.
+              {statsError ? ` ${statsError}` : ""}
+            </p>
+          )}
         </CardContent>
       </Card>
 

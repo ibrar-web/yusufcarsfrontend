@@ -14,6 +14,7 @@ import {
   Bell,
   Package,
   History,
+  Aperture,
   Blocks,
   ShoppingCart,
 } from "lucide-react";
@@ -372,8 +373,8 @@ export function Header({ sticky = true }: HeaderProps = {}) {
 
                     <DropdownMenuSeparator />
 
-                    <Link href="/user/orders">
-                      <DropdownMenuItem>
+                    <Link href="/user/orders" className="cursor-pointer">
+                      <DropdownMenuItem className="cursor-pointer">
                         <Blocks className="mr-2 h-4 w-4" />
                         My Orders
                       </DropdownMenuItem>
@@ -389,20 +390,26 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                         )}
                       </DropdownMenuItem>
                     </Link>
+                    <Link href="/services">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Aperture className="mr-2 h-4 w-4" />
+                        Services
+                      </DropdownMenuItem>
+                    </Link>
                     <Link href="/user/history">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
                         <History className="mr-2 h-4 w-4" />
                         History
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem onClick={openProfileDialog}>
+                    <DropdownMenuItem onClick={openProfileDialog} className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setShowSignOutDialog(true)}
-                      className="text-[#F02801]"
+                      className="text-[#F02801] cursor-pointer"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out

@@ -46,7 +46,26 @@ import {
   engineSizes,
   fuelTypes,
 } from "@/data/vehicle-options";
+import { fetchServiceCategories } from "@/actions/categories";
+import type { ServiceItemDTO } from "@/actions/categories";
 
+// type TopServiceCategory = {
+//   id: string;
+//   name: string;
+//   slug: string;
+//   description: string | null;
+//   subcategoryCount: number;
+// };
+
+type TopServiceItem = ServiceItemDTO & {
+  categoryName: string;
+  subcategoryName: string;
+};
+
+// type TopServicesResponse = {
+//   categories: TopServiceCategory[];
+//   items: TopServiceItem[];
+// };
 interface HomePageProps {
   onNavigate: (
     page: string,
@@ -92,6 +111,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const [lookupYear, setLookupYear] = useState("");
   const [lookupFuelType, setLookupFuelType] = useState("");
   const [lookupEngineSize, setLookupEngineSize] = useState("");
+  // const [topServiceCategories, setTopServiceCategories] = useState<TopServiceCategory[]>([]);
+  const [topServiceItems, setTopServiceItems] = useState<TopServiceItem[]>([]);
+  const [isTopServicesLoading, setIsTopServicesLoading] = useState(false);
+  const [topServicesError, setTopServicesError] = useState<string | null>(null);
 
   const featuredParts = useMemo(
     () => [
@@ -153,6 +176,51 @@ export function HomePage({ onNavigate }: HomePageProps) {
     }
   }, [featuredParts, selectedProduct]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const loadTopServices = async () => {
+      setIsTopServicesLoading(true);
+      setTopServicesError(null);
+      try {
+        const categories = await fetchServiceCategories({
+          includeSubcategories: true,
+          includeItems: true,
+        });
+        const items: TopServiceItem[] = categories.flatMap((category) =>
+          (category.subcategories ?? []).flatMap((subcategory) =>
+            (subcategory.items ?? []).map((item) => ({
+              ...item,
+              categoryName: category.name,
+              subcategoryName: subcategory.name,
+            })),
+          ),
+        );
+        if (!isMounted) return;
+        // setTopServiceCategories(data.categories ?? []);
+        setTopServiceItems(items);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error(error);
+        setTopServicesError(
+          error instanceof Error ? error.message : "Failed to load top services."
+        );
+      } finally {
+        if (isMounted) {
+          setIsTopServicesLoading(false);
+        }
+      }
+    };
+
+    loadTopServices();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+
   const isLookupDisabled =
     lookupMode === "registration"
       ? lookupRegistration.length < 6
@@ -204,6 +272,64 @@ export function HomePage({ onNavigate }: HomePageProps) {
   return (
     <div className="min-h-screen">
       <VehicleSelection onNavigate={onNavigate} />
+
+      {/* Top services */}
+      <section className="py-16 bg-white">
+        <div className="max-w-[1320px] mx-auto px-6">
+
+            <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex-1">
+                <h3 className="font-['Inter'] text-2xl font-semibold text-[#0F172A]">
+                  Top Search
+                </h3>
+                <p className="text-sm text-[#64748B]">
+                  One tap to shortlist the most popular service requests.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-[#F02801] text-[#F02801] hover:bg-[#FFF1ED] rounded-full h-12 px-6 font-['Roboto'] font-semibold md:ml-auto cursor-pointer"
+                onClick={() => onNavigate("services")}
+              >
+                View all services
+              </Button>
+            </div>
+
+            {topServicesError && (
+              <p className="mt-3 text-sm text-[#F02801]">
+                {topServicesError}
+              </p>
+            )}
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              {isTopServicesLoading
+                ? Array.from({ length: 6 }).map((_, index) => (
+                    <span
+                      key={`top-search-placeholder-${index}`}
+                      className="h-10 w-[180px] rounded-full bg-[#F1F5F9] animate-pulse"
+                    />
+                  ))
+                : topServiceItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => onNavigate("services")}
+                      className="flex flex-col gap-0.5 rounded-full border border-[#E5E7EB] px-4 py-2 text-left text-sm text-[#0F172A] hover:border-[#F02801] focus-visible:ring-2 focus-visible:ring-[#F02801]/60 transition cursor-pointer"
+                    >
+                      <span className="font-semibold">{item.name}</span>
+                      <span className="text-[11px] text-[#64748B]">
+                        {item.categoryName}
+                        {item.subcategoryName ? ` · ${item.subcategoryName}` : ""}
+                      </span>
+                    </button>
+                  ))}
+              {!isTopServicesLoading && topServiceItems.length === 0 && (
+                <p className="text-sm text-[#64748B]">
+                  No services available right now.
+                </p>
+              )}
+            </div>
+        </div>
+      </section>
 
       {/* Lowest Prices Of The Season */}
       <section className="py-24 bg-white relative">

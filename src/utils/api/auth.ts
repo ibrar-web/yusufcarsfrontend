@@ -1,7 +1,7 @@
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiPost } from "../apiconfig/http";
-
-export type UserRole = "user" | "supplier" | "admin" | "";
+import { persistAuthSession } from "@/utils/auth-storage";
+import type { LoginUser, UserRole } from "./types";
 
 export interface CustomerSignupPayload {
   // fullName: string;
@@ -58,13 +58,22 @@ export interface LoginPayload {
   role?: UserRole;
 }
 
-export interface LoginResponse {
-  id: string;
-  email: string;
-  fullName: string;
-  role: UserRole;
-  isActive: boolean;
-  createdAt: string;
+// export interface LoginResponse {
+//   id: string;
+//   email: string;
+//   fullName: string;
+//   role: UserRole;
+//   isActive: boolean;
+//   createdAt: string;
+// }
+
+export interface LoginApiResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    token: string;
+    user: LoginUser;
+  };
 }
 
 function buildSupplierFormData(payload: SupplierSignupPayload) {
@@ -127,9 +136,19 @@ export const authApi = {
     return apiPost<SignupResponse>(apiRoutes.auth.signup, normalizedBody, config);
   },
   async login(payload: LoginPayload) {
-    return apiPost<LoginResponse>(
+    const response = await apiPost<LoginApiResponse>(
       apiRoutes.auth.login,
       payload as unknown as Record<string, unknown>
     );
+    const payloadData = response?.data;
+
+    if (!payloadData) {
+      throw new Error("Missing login data from the API.");
+    }
+
+    persistAuthSession(payloadData.token, payloadData.user);
+    return payloadData.user;
   },
 };
+
+export type { LoginUser, UserRole };

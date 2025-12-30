@@ -21,11 +21,11 @@ export type ServiceItemDTO = {
     id: string;
     name: string;
     slug: string;
-    category?: {
-      id: string;
-      name: string;
-      slug: string;
-    };
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
   };
 };
 
@@ -79,14 +79,14 @@ function mapItem(
             id: item.subcategory.id,
             name: item.subcategory.name,
             slug: item.subcategory.slug,
-            category:
-              includeCategory && item.subcategory.category
-                ? {
-                    id: item.subcategory.category.id,
-                    name: item.subcategory.category.name,
-                    slug: item.subcategory.category.slug,
-                  }
-                : undefined,
+          }
+        : undefined,
+    category:
+      includeCategory && item.subcategory?.category
+        ? {
+            id: item.subcategory.category.id,
+            name: item.subcategory.category.name,
+            slug: item.subcategory.category.slug,
           }
         : undefined,
   };

@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { getSessionFromCookie } from "@/actions/session";
 import { SessionHydrator } from "@/components/session-hydrator";
+import { LocalSessionHydrator } from "@/components/local-session-hydrator";
 import { SocketManager } from "@/components/socket-manager";
 
 const inter = Inter({
@@ -40,6 +41,7 @@ export default async function RootLayout({
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
         <SessionHydrator session={session} />
+        <LocalSessionHydrator />
         <SocketManager />
         {children}
         <Toaster />

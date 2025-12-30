@@ -11,13 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
-import { authApi, type UserRole } from "@/utils/api";
+import { authApi, type LoginUser, type UserRole } from "@/utils/api";
 
 interface SignInDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignUpClick?: () => void;
-  onSuccess?: (role?: UserRole) => void;
+  onSuccess?: (payload?: LoginUser | UserRole) => void;
   selectedRole: UserRole;
   setSelectedRole: Dispatch<SetStateAction<UserRole>>;
 }
@@ -41,12 +41,12 @@ export function SignInDialog({
     try {
       setIsSubmitting(true);
       // console.log("user Clicked", formData);
-      const response = await authApi.login({ ...formData });
+      const user = await authApi.login({ ...formData });
       // console.log("response :", response);
       toast.success("Signed in successfully!");
       setFormData({ email: "", password: "" });
       onOpenChange(false);
-      onSuccess?.(response.role ?? selectedRole);
+      onSuccess?.(user);
     } catch (error) {
       console.error(error);
       const message =

@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig, Method } from "axios";
 import { environment } from "@/utils/environment";
+import { getStoredAuthToken } from "@/utils/auth-storage";
 
 type ErrorPayload = { message?: string; error?: string };
 
@@ -18,6 +19,20 @@ export const http = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
+});
+
+http.interceptors.request.use((config) => {
+  const token = getStoredAuthToken();
+  if (!token) {
+    return config;
+  }
+
+  config.headers = {
+    ...(config.headers ?? {}),
+    Authorization: `Bearer ${token}`,
+  };
+
+  return config;
 });
 
 http.interceptors.response.use(

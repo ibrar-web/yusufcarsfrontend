@@ -1,5 +1,7 @@
 "use server";
 
+"use server";
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
@@ -7,6 +9,15 @@ import { environment } from "@/utils/environment";
 
 const JOSE_SECRET = environment.security.joseSecret;
 const secret = new TextEncoder().encode(JOSE_SECRET);
+
+const getBearerToken = (value?: string | null) => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (trimmed.toLowerCase().startsWith("bearer ")) {
+    return trimmed.slice(7).trim();
+  }
+  return trimmed;
+};
 
 async function getRoleFromToken(token?: string) {
   if (!token) return null;
@@ -48,8 +59,9 @@ export default async function middleware(req: NextRequest) {
     (p) => pathname === p || pathname.startsWith(p + "/")
   );
 
-  // Get role
-  const token = req.cookies.get(environment.cookies.name)?.value;
+  const authHeader = req.headers.get("authorization");
+  const cookieToken = req.cookies.get(environment.cookies.name)?.value;
+  const token = getBearerToken(authHeader) ?? cookieToken;
   const role = await getRoleFromToken(token);
 
   console.log("ROLE:", role, "PATH:", pathname);

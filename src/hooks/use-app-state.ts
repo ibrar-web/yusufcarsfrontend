@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import type { UserRole } from "@/utils/api";
+import type { LoginUser, UserRole } from "@/utils/api";
 import {
   useAppStore,
   resolvePage,
@@ -14,6 +14,7 @@ import {
 } from "@/stores/app-store";
 import { apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
+import { clearAuthSession } from "@/utils/auth-storage";
 
 export function useAppState() {
   const router = useRouter();
@@ -116,6 +117,7 @@ export function useAppState() {
     } catch (error) {
       console.error("Failed to call logout endpoint", error);
     } finally {
+      clearAuthSession();
       setIsAuthenticated(false);
       setUserRole(null);
       setConfirmedOrderDetails(null);
@@ -132,8 +134,8 @@ export function useAppState() {
   ]);
 
   const authSuccess = useCallback(
-    (role?: UserRole) => {
-      handleAuthSuccess(role);
+    (payload?: LoginUser | UserRole) => {
+      handleAuthSuccess(payload);
     },
     [handleAuthSuccess],
   );

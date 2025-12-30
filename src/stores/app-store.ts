@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { UserRole } from "@/utils/api";
+import type { LoginUser, UserRole } from "@/utils/api";
 
 export type OrderDetails = {
   orderNumber: string;
@@ -139,7 +139,7 @@ interface AppStore {
   setQuoteNotifications: (data: QuoteNotificationsState) => void;
   confirmedOrderDetails: OrderDetails | null;
   setConfirmedOrderDetails: (details: OrderDetails | null) => void;
-  handleAuthSuccess: (role?: UserRole) => void;
+  handleAuthSuccess: (payload?: LoginUser | UserRole) => void;
 }
 
 export const useAppStore = create<AppStore>()((set) => ({
@@ -173,9 +173,13 @@ export const useAppStore = create<AppStore>()((set) => ({
   confirmedOrderDetails: null,
   setConfirmedOrderDetails: (confirmedOrderDetails) =>
     set({ confirmedOrderDetails }),
-  handleAuthSuccess: (role?: UserRole) =>
-    set({
+  handleAuthSuccess: (payload?: LoginUser | UserRole) => {
+    const isUserPayload =
+      typeof payload === "object" && payload !== null;
+    return set({
       isAuthenticated: true,
-      userRole: role ?? null,
-    }),
+      userRole: isUserPayload ? payload.role : (payload ?? null),
+      userId: isUserPayload ? payload.id : null,
+    });
+  },
 }));

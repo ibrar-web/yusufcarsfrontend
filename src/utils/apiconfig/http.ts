@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import type { AxiosRequestConfig, Method } from "axios";
 import { environment } from "@/utils/environment";
 import { getStoredAuthToken } from "@/utils/auth-storage";
@@ -23,14 +23,11 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const token = getStoredAuthToken();
-  if (!token) {
-    return config;
+  const headers = new AxiosHeaders(config.headers ?? {});
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
-
-  config.headers = {
-    ...(config.headers ?? {}),
-    Authorization: `Bearer ${token}`,
-  };
+  config.headers = headers;
 
   return config;
 });

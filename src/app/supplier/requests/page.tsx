@@ -266,7 +266,7 @@ export default function SupplierRequestsPage() {
     const handleIncomingRequest = (event: Event) => {
       if (!(event instanceof CustomEvent)) return;
       const payload = event.detail as SupplierQuoteRequestApi | null;
-      console.log({payload});
+      // console.log({payload});
       
       if (!payload) return;
       const normalizedRequest = normalizeQuoteRequest(payload);
@@ -478,7 +478,7 @@ export default function SupplierRequestsPage() {
                         </p>
                       </div>
                       <p className="text-sm font-['Roboto'] text-[#0F172A] pl-9">
-                        {request.partDescription}
+                        {request?.partName ? request?.partName : request.partDescription}
                       </p>
                     </div>
 

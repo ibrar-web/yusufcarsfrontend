@@ -23,6 +23,7 @@
   "/admin/suppliers/profile/page": "app/admin/suppliers/profile/page.js",
   "/admin/users/page": "app/admin/users/page.js",
   "/api/dvla/route": "app/api/dvla/route.js",
+  "/api/service-categories/route": "app/api/service-categories/route.js",
   "/auth/supplier-onboarding/page": "app/auth/supplier-onboarding/page.js",
   "/supplier/analytics/page": "app/supplier/analytics/page.js",
   "/supplier/messages/chat/page": "app/supplier/messages/chat/page.js",

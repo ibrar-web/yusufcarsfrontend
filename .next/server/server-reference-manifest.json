@@ -335,7 +335,7 @@
         "app/(website)/contact/page": "rsc",
         "app/(website)/how-it-works/page": "rsc",
         "app/(website)/new-supplier/page": "rsc",
-        "app/(website)/page": "rsc",
+        "app/(website)/page": "action-browser",
         "app/(website)/parts-selection/page": "rsc",
         "app/(website)/products/page": "rsc",
         "app/(website)/request-flow/page": "rsc",

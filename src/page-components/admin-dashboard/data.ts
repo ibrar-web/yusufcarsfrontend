@@ -11,7 +11,9 @@ export const adminStats = {
 
 export interface adminUsersInterface {
   id: string;
-  fullName: string;
+  // fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   postCode: string;
   createdAt: string;

@@ -15,7 +15,7 @@ const resolveEnvironment = (value?: string | null): AppEnvironment => {
 };
 
 const nodeEnv = resolveEnvironment(process.env.APP_ENV ?? process.env.NODE_ENV);
-console.log("nodeEnv", nodeEnv);
+// console.log("nodeEnv", nodeEnv);
 const buildFlags = {
   nodeEnv,
   isDevelopment: nodeEnv === "development",
@@ -76,7 +76,7 @@ export const environment = {
     };
   })(),
 } as const;
-console.log("environment", environment);
+// console.log("environment", environment);
 if (typeof window === "undefined") {
   console.info(
     `[env] Active environment: ${nodeEnv}. API base: ${

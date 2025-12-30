@@ -273,14 +273,14 @@ export default function AdminUsersPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center text-white font-['Inter']">
-                            {user.fullName
+                            {user.firstName
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </div>
                           <div>
                             <p className="font-['Inter'] text-[#0F172A]">
-                              {user.fullName}
+                              {user.firstName}
                             </p>
                             <p className="text-sm text-[#475569] font-['Roboto']">
                               {user.id}
@@ -375,7 +375,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-start gap-4">
                   <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span className="text-white font-['Inter'] text-xl">
-                      {selectedUser.fullName
+                      {selectedUser.firstName
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
@@ -384,7 +384,7 @@ export default function AdminUsersPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-['Inter'] text-white">
-                        {selectedUser.fullName}
+                        {selectedUser.firstName}
                       </h3>
                       <Badge
                         className={`font-['Roboto'] ${
@@ -522,14 +522,14 @@ export default function AdminUsersPage() {
               <div className="bg-[#F1F5F9] p-4 rounded-xl border border-[#E5E7EB]">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center text-white font-['Inter']">
-                    {selectedUser.fullName
+                    {selectedUser.firstName
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </div>
                   <div>
                     <p className="font-['Inter'] text-[#0F172A]">
-                      {selectedUser.fullName}
+                      {selectedUser.firstName}
                     </p>
                     <p className="text-sm text-[#475569] font-['Roboto']">
                       {selectedUser.email}

@@ -3,17 +3,8 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
+import { ShoppingCart, X, CheckCircle, XCircle } from "lucide-react";
 import {
-  ShoppingCart,
-  FileText,
-  ArrowRight,
-  RefreshCcw,
-  X,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
-import {
-  clearCartCookies,
   loadCartSummary,
   subscribeToCartUpdates,
   type CartSummary,
@@ -38,7 +29,7 @@ export default function CartPage() {
   const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
   const [requestingQuote, setRequestingQuote] = useState(false);
   const [requestingServiceId, setRequestingServiceId] = useState<string | null>(
-    null,
+    null
   );
 
   useEffect(() => {
@@ -68,14 +59,6 @@ export default function CartPage() {
     : [];
   const isEmpty = !vehicle && services.length === 0;
 
-  const openVehicleDialog = () => {
-    if (!vehicle) {
-      toast.error("Add your vehicle details before reviewing the request.");
-      return;
-    }
-    setVehicleDialogOpen(true);
-  };
-
   const handleVehicleConfirm = () => {
     if (!vehicle) {
       toast.error("Add your vehicle before continuing.");
@@ -95,21 +78,19 @@ export default function CartPage() {
   const buildQuoteRequestPayload = (
     vehicleData: NonNullable<CartSummary["vehicle"]>,
     serviceList: CartSummary["services"],
-    service: serviceObj,
+    service: serviceObj
   ) => {
     if (!serviceList || !serviceList.length) {
       throw new Error("Add at least one service to proceed.");
     }
 
-    console.log({serviceList});
-    
+    console.log({ serviceList });
+
     // const services = serviceList.map((service) =>
     //   slugifyServiceName(service.id),
     // );
 
-    const services = serviceList.find((ser) =>
-      ser?.id ===service?.id
-    )?.id;
+    const services = serviceList.find((ser) => ser?.id === service?.id)?.id;
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
@@ -152,13 +133,13 @@ export default function CartPage() {
       await apiPost(apiRoutes.user.quote.requestQuote, payload);
       toast.success("Quote request submitted.");
       const remainingServices = services.filter(
-        (entry) => entry.id !== service.id,
+        (entry) => entry.id !== service.id
       );
       persistServicesSelection(remainingServices);
       refreshSummary();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to send quote request.",
+        error instanceof Error ? error.message : "Failed to send quote request."
       );
     } finally {
       setRequestingQuote(false);
@@ -193,8 +174,8 @@ export default function CartPage() {
                 Your cart is empty
               </h2>
               <p className="font-['Roboto'] text-[#64748B] max-w-md mb-6">
-                Start by entering your vehicle details and selecting at least one
-                service so suppliers know what to quote for.
+                Start by entering your vehicle details and selecting at least
+                one service so suppliers know what to quote for.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button onClick={() => handleNavigate("home")}>
@@ -225,11 +206,7 @@ export default function CartPage() {
                     </button>
                   </div>
                   <p className="font-['Inter'] text-2xl font-semibold text-[#0F172A] mt-2">
-                    {[
-                      vehicle?.yearOfManufacture,
-                      vehicle?.make,
-                      vehicle?.model,
-                    ]
+                    {[vehicle?.yearOfManufacture, vehicle?.make, vehicle?.model]
                       .filter(Boolean)
                       .join(" ")}
                   </p>
@@ -304,7 +281,7 @@ export default function CartPage() {
                           <button
                             className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 cursor-pointer"
                             onClick={() => handleServiceRemove(index)}
-                            >
+                          >
                             <X className="h-4 w-4" />
                             Remove
                           </button>
@@ -402,7 +379,8 @@ export default function CartPage() {
                   No vehicle selected
                 </h3>
                 <p className="font-['Roboto'] text-[#475569]">
-                  Add your vehicle details first so we can confirm everything looks right.
+                  Add your vehicle details first so we can confirm everything
+                  looks right.
                 </p>
               </div>
             )}

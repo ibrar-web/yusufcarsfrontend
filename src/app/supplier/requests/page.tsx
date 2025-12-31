@@ -52,7 +52,7 @@ import { QUOTE_REQUEST_EVENT } from "@/utils/socket/quoteRequestSocket";
 type QuoteRequestUser = {
   id: string;
   email?: string | null;
-  fullName?: string | null;
+  firstName?: string | null;
   postCode?: string | null;
 };
 
@@ -65,6 +65,12 @@ type QuoteRequestDetails = {
   model?: string | null;
   engineSize?: string | null;
   services?: string[] | null;
+  serviceItems?: Array<{
+    id: string;
+    name?: string | null;
+    slug?: string | null;
+  }>;
+  serviceCategories?: string[] | null;
 };
 
 
@@ -79,8 +85,13 @@ type SupplierQuoteRequestApi = {
   rejectionReason?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
-  postcode?:string | null;
-  serviceItems: any;
+  postcode?: string | null;
+  services?: string[] | null;
+  serviceItems?: Array<{
+    id: string;
+    name?: string | null;
+    slug?: string | null;
+  }>;
 };
 
 type SupplierQuoteRequest = {
@@ -160,20 +171,37 @@ const toDisplayLabel = (value?: string | null) => {
 const normalizeQuoteRequest = (
   payload: SupplierQuoteRequestApi
 ): SupplierQuoteRequest => {
-  const requestData: QuoteRequestDetails = payload.request ?? {
-    id: payload.requestId ?? payload.id,
-    user: null,
-    registrationNumber: null,
-    postcode: null,
-    make: null,
-    model: null,
-    engineSize: null,
-    services: null,
+  const requestPayload: QuoteRequestDetails =
+    payload.request ?? ({} as QuoteRequestDetails);
+  const requestData: QuoteRequestDetails = {
+    id: requestPayload.id ?? payload.requestId ?? payload.id,
+    user: requestPayload.user ?? null,
+    registrationNumber: requestPayload.registrationNumber ?? null,
+    postcode:
+      requestPayload.postcode ??
+      payload.postcode ??
+      requestPayload.user?.postCode ??
+      null,
+    make: requestPayload.make ?? null,
+    model: requestPayload.model ?? null,
+    engineSize: requestPayload.engineSize ?? null,
+    services: requestPayload.services ?? payload.services ?? null,
+    serviceItems:
+      requestPayload.serviceItems ?? payload.serviceItems ?? undefined,
+    serviceCategories: requestPayload.serviceCategories ?? null,
   };
-  const serviceNames =
-    requestData.services?.map(toDisplayLabel).filter(Boolean) ?? [];
-  const partDescription = serviceNames.length
-    ? serviceNames.join(", ")
+  const combinedServiceItems = requestData.serviceItems ?? [];
+  const serviceNames = combinedServiceItems
+    .map((item) => item.name ?? item.slug)
+    .filter(Boolean)
+    .map(toDisplayLabel);
+  const fallbackServiceNames =
+    (requestData.services ?? []).map(toDisplayLabel).filter(Boolean);
+  const normalizedServiceNames = serviceNames.length
+    ? serviceNames
+    : fallbackServiceNames;
+  const partDescription = normalizedServiceNames.length
+    ? normalizedServiceNames.join(", ")
     : "General service request";
   const vehicleDisplay = [requestData.make, requestData.model]
     .filter(Boolean)
@@ -191,23 +219,22 @@ const normalizeQuoteRequest = (
   ].filter(Boolean);
 
   return {
-    id: payload.id,
+    id: payload.id ?? requestData.id,
     requestId: payload.requestId ?? requestData.id ?? payload.id,
     supplierId: payload.supplierId ?? undefined,
     customerName:
-      requestData.user?.fullName ||
-      requestData.user?.email ||
+      requestData.user?.firstName ||
       "Unknown customer",
     customerEmail: requestData.user?.email || undefined,
     vehicleDisplay: vehicleDisplay || undefined,
     registrationNumber: requestData.registrationNumber || undefined,
     partDescription,
     // partName: payload?.serviceItems[0]?.name || payload?.serviceItems?.name ,
-    partName: payload?.serviceItems?.name,
+    partName: normalizedServiceNames[0] || partDescription,
     detailSummary:
       detailSummaryParts.join(" • ") || "No additional details provided",
     engineSize: requestData.engineSize || undefined,
-    services: serviceNames,
+    services: normalizedServiceNames,
     status: (payload.status || "pending").toLowerCase(),
     postcode: requestData.postcode || requestData.user?.postCode || payload.postcode ||  undefined,
     createdAt: payload.createdAt || undefined,
@@ -557,7 +584,7 @@ export default function SupplierRequestsPage() {
                   >
                     <DialogTrigger asChild>
                       <Button
-                        className="w-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full py-5"
+                        className="w-full bg-[#F02801] hover:bg-[#D22301] text-white font-['Roboto'] rounded-full py-5 cursor-pointer"
                         onClick={() => setOpenRequestId(request.id)}
                       >
                         <Send className="h-4 w-4 mr-2" />
@@ -772,7 +799,7 @@ export default function SupplierRequestsPage() {
             <div className="flex justify-center mt-8">
               <Button
                 onClick={() => setRequestsToShow((prev) => prev + 2)}
-                className="bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#475569] font-['Roboto']"
+                className="bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#475569] font-['Roboto'] cursor-pointer"
               >
                 <Package className="h-5 w-5 mr-2" />
                 Show More

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertCircle, BarChart3, Menu, MessageSquare, Send, Settings, Blocks, LogOut } from "lucide-react";
+import { AlertCircle, BarChart3, FileText, Menu, MessageSquare, Send, Settings, Blocks, LogOut } from "lucide-react";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,12 @@ export default function SupplierLayout({ children }: SupplierLayoutProps) {
         label: "Analytics",
         href: "/supplier/analytics",
         icon: BarChart3,
+      },
+      {
+        id: "blogs",
+        label: "Blog Posts",
+        href: "/supplier/blogs",
+        icon: FileText,
       },
       {
         id: "messages",

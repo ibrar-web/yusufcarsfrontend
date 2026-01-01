@@ -12,6 +12,7 @@ import {
 } from "@/page-components/admin-dashboard/data";
 import {
   Building2,
+  FileText,
   FileWarning,
   LayoutDashboard,
   MessageSquare,
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { id: "inquiries", label: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
   { id: "reports", label: "Reports", href: "/admin/reports", icon: FileWarning },
   { id: "categories", label: "Categories", href: "/admin/categories", icon: Grid3x3 },
+  { id: "blogs", label: "Blogs", href: "/admin/blogs", icon: FileText },
 ] as const;
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

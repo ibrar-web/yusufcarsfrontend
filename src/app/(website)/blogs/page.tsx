@@ -12,10 +12,18 @@ import type { BlogRecord } from "@/types/blog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, Newspaper, Search, Sparkles } from "lucide-react";
+import {
+  Facebook,
+  Flame,
+  Instagram,
+  Newspaper,
+  Search,
+  Sparkles,
+  Youtube,
+} from "lucide-react";
 import useDebounce from "@/components/debouncedSearch/debouncedSearch";
 import { cn } from "@/components/ui/utils";
-import { resolveBlogImage } from "@/components/blogs/utils";
+import { formatBlogDate, resolveBlogImage } from "@/components/blogs/utils";
 
 const sampleStories: BlogRecord[] = [
   {
@@ -231,6 +239,14 @@ const discoveryTopics = [
     setSearchFilter(term);
     setPage(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const focusSearchField = () => {
+    if (searchFieldRef.current) {
+      searchFieldRef.current.focus();
+      searchFieldRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const highlightStory = featured ?? trending[0] ?? sampleStories[0];

@@ -819,39 +819,42 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                         My Account
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        navigate("cart");
-                        setMobileMenuOpen(false);
-                      }}
+                    <Link
+                      href={"/user/quotes"}
+                      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-subtle-ink hover:bg-[#F1F5F9] transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <FileText className="mr-2 h-4 w-4" />
-                      My Requests
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        openTrackOrderDialog();
-                        setMobileMenuOpen(false);
-                      }}
+                      <div className="flex items-center gap-2">
+                        <Bell className="h-4 w-4 text-[#F02801]" />
+                        <span
+                          className="font-['Inter'] font-semibold text-[#0F172A]"
+                          style={{ fontSize: "13px" }}
+                        >
+                          Notifications
+                        </span>
+                      </div>
+                      {notificationCount > 0 && (
+                        <span className="bg-[#F02801] text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                          {notificationCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
+                      href={"/user/orders"}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-subtle-ink hover:bg-[#F1F5F9] transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Package className="mr-2 h-4 w-4" />
-                      Track Order
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        navigate("chat");
-                        setMobileMenuOpen(false);
-                      }}
+                      <Blocks className="h-4 w-4" />
+                      My Orders
+                    </Link>
+                    <Link
+                      href={"/user/chat"}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-subtle-ink hover:bg-[#F1F5F9] transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <MessageSquare className="mr-2 h-4 w-4" />
+                      <MessageSquare className="h-4 w-4" />
                       Messages
-                    </Button>
+                    </Link>
                     <Button
                       variant="ghost"
                       className="w-full justify-start"
@@ -863,6 +866,22 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </Button>
+                    <Link
+                      href={"/services"}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-subtle-ink hover:bg-[#F1F5F9] transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Aperture className="h-4 w-4" />
+                      Services
+                    </Link>
+                    <Link
+                      href={"/user/history"}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-subtle-ink hover:bg-[#F1F5F9] transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <History className="h-4 w-4" />
+                      History
+                    </Link>
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-[#F02801] hover:text-[#D22301] hover:bg-[#FEF2F2]"

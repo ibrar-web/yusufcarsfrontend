@@ -171,7 +171,7 @@ export default function Chat() {
     <div className="h-screen flex flex-col bg-background">
       <Header />
 
-      <div className="bg-white border-b border-[#E5E7EB] py-3 px-6">
+      {/* <div className="mt-[1000px] bg-white border-b border-[#E5E7EB] mx-auto px-6 py-20">
         <div className="max-w-[1400px] mx-auto flex items-center gap-2">
           <BackButton
             onBack={handleBack || (() => handleNavigate("quotes"))}
@@ -185,9 +185,9 @@ export default function Chat() {
             Messages
           </span>
         </div>
-      </div>
+      </div> */}
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden py-20">
         <div className="hidden lg:block w-80 border-r border-border bg-muted/20">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-lg">Messages</h2>

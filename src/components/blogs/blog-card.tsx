@@ -29,37 +29,47 @@ export function BlogCard({
   const imageUrl = resolveBlogImage(blog);
   const authorName = formatBlogAuthor(blog.author);
   const href = `/blogs/${encodeURIComponent(blog.slug ?? blog.id)}`;
-  const excerpt = buildBlogExcerpt(blog, variant === "featured" ? 240 : 160);
-  const layoutClasses =
-    orientation === "horizontal"
-      ? "flex gap-4 sm:gap-6 items-start"
-      : "flex flex-col";
+  const isFeatured = variant === "featured";
+  const isHorizontal = orientation === "horizontal";
+  const excerpt = buildBlogExcerpt(
+    blog,
+    isFeatured ? 260 : isHorizontal ? 140 : 180
+  );
+  const layoutClasses = cn(
+    "flex gap-4 transition sm:gap-5",
+    isHorizontal ? "flex-row items-start" : "flex-col"
+  );
 
   return (
     <Link
       href={href}
       className={cn(
-        "group rounded-3xl border border-border/60 bg-card/80 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl",
+        "group rounded-3xl border border-border/60 bg-card/80 p-5 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-2xl",
         className
       )}
     >
       <div className={layoutClasses}>
         <div
           className={cn(
-            "relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-700 to-slate-800",
-            orientation === "horizontal" ? "h-40 w-40 min-w-[10rem]" : "h-48 w-full"
+            "relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#080d1e] via-[#0f1a35] to-[#1b2750] ring-1 ring-white/5",
+            isHorizontal
+              ? "h-28 w-40 min-w-[10rem] flex-shrink-0 sm:h-32 sm:w-48"
+              : isFeatured
+              ? "w-full aspect-[18/9] md:aspect-[21/9] lg:max-h-[340px]"
+              : "w-full aspect-[16/9] lg:max-h-[240px]"
           )}
         >
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={blog.title}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-800/80 to-slate-700/70" />
           )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent opacity-70 transition group-hover:opacity-40" />
           {blog.categories?.length ? (
             <div className="absolute left-3 top-3 flex flex-wrap gap-2">
               {blog.categories.slice(0, 2).map((category) => (
@@ -76,6 +86,14 @@ export function BlogCard({
         </div>
 
         <div className="flex-1 space-y-3">
+          <h3
+            className={cn(
+              "text-2xl font-semibold leading-tight tracking-tight text-foreground transition group-hover:text-primary",
+              isFeatured ? "text-3xl" : ""
+            )}
+          >
+            {blog.title}
+          </h3>
           <div className="text-sm text-muted-foreground">
             {formatBlogDate(blog.publishedAt ?? blog.createdAt)}
             {authorName ? ` · ${authorName}` : ""}
@@ -83,21 +101,12 @@ export function BlogCard({
               ? ` · ${blog.views.toLocaleString()} views`
               : ""}
           </div>
-          <h3
-            className={cn(
-              "text-2xl font-semibold leading-tight tracking-tight text-foreground transition group-hover:text-primary",
-              variant === "featured" ? "text-3xl" : ""
-            )}
-          >
-            {blog.title}
-          </h3>
           {showExcerpt && excerpt ? (
-            <p className="text-base text-muted-foreground">
-              {excerpt}
-            </p>
+            <p className="text-base text-muted-foreground">{excerpt}</p>
           ) : null}
-          <div className="text-sm font-semibold text-primary">
-            Read more →
+          <div className="inline-flex items-center text-sm font-semibold text-primary">
+            Read more
+            <span className="ml-1 transition group-hover:translate-x-1">→</span>
           </div>
         </div>
       </div>

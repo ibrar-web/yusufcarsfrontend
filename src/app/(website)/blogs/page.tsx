@@ -72,15 +72,23 @@ export default function BlogsPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const searchFieldRef = useRef<HTMLInputElement | null>(null);
 
-  const searchQuery = useDebounce(searchFilter, 400);
-  const discoveryTopics = [
-    "EV Ownership",
-    "Motorsport",
+const searchQuery = useDebounce(searchFilter, 400);
+const discoveryTopics = [
+  "EV Ownership",
+  "Motorsport",
     "Detailing",
     "Supplier Diaries",
     "Buying Guides",
     "Maintenance",
+];
+  const navLinks = [
+    { label: "News", href: "#news" },
+    { label: "Reviews", href: "#reviews" },
+    { label: "Guides", href: "#guides" },
+    { label: "Videos", href: "#videos" },
+    { label: "Opinion", href: "#opinion" },
   ];
 
   const loadHeroContent = useCallback(async () => {
@@ -243,10 +251,14 @@ export default function BlogsPage() {
   const heroHref = `/blogs/${encodeURIComponent(
     highlightStory.slug ?? highlightStory.id
   )}`;
+  const shotStories = (heroLoading ? sampleStories : displayStories).slice(
+    0,
+    6
+  );
 
   return (
-    <div className="bg-[#030712] text-white">
-      <section className="relative isolate mx-auto w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 px-6 py-12 shadow-[0_20px_120px_rgba(0,0,0,0.45)] sm:px-10 lg:py-16">
+    <div className="bg-[#030712] pb-16 pt-24 text-white lg:pt-28">
+      <section className="relative isolate mx-auto w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 px-5 py-12 shadow-[0_20px_120px_rgba(0,0,0,0.45)] sm:px-8 lg:py-16">
         {heroImage ? (
           <img
             src={heroImage}
@@ -256,8 +268,8 @@ export default function BlogsPage() {
           />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-r from-black via-[#050c1f]/95 to-transparent" />
-        <div className="relative z-10 grid gap-10 lg:grid-cols-[1.2fr,0.8fr]">
-          <div className="space-y-6">
+        <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
+          <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200">
               <Sparkles className="h-4 w-4" />
               PartsQuote Journal
@@ -385,7 +397,60 @@ export default function BlogsPage() {
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-16 pt-12 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-12 pt-10 sm:px-6 lg:gap-10 lg:px-8">
+        <section className="rounded-3xl border border-slate-100 bg-white p-6 text-slate-900 shadow-2xl">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">
+                Daily shots
+              </p>
+              <h2 className="text-2xl font-semibold text-slate-900">
+                Quick reads from the garage
+              </h2>
+            </div>
+            <p className="text-sm text-slate-500">
+              Micro updates from suppliers, tuners, and detailing crews.
+            </p>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {shotStories.map((shot) => {
+              const imageUrl = resolveBlogImage(shot);
+              return (
+                <Link
+                  key={`shot-${shot.id}`}
+                  href={`/blogs/${encodeURIComponent(shot.slug ?? shot.id)}`}
+                  className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 shadow-sm transition hover:-translate-y-1 hover:border-primary/40"
+                >
+                  <div className="h-20 w-28 flex-shrink-0 overflow-hidden rounded-xl bg-slate-200">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={shot.title}
+                        className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-slate-200 via-slate-100 to-white" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      {shot.categories?.[0] ?? "Community"}
+                    </p>
+                    <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
+                      {shot.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 line-clamp-2">
+                      {shot.excerpt ??
+                        shot.seoDescription ??
+                        "Supplier notes from the workshop floor."}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
         <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
           <div className="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-rose-200">
             <Flame className="h-4 w-4" />
@@ -413,7 +478,7 @@ export default function BlogsPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.25fr,0.75fr]">
+        <section className="grid gap-5 lg:grid-cols-[1.25fr,0.75fr]">
           <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white">
             <div className="mb-4 flex items-center gap-3 text-xs uppercase tracking-[0.4em] text-amber-200">
               <Sparkles className="h-4 w-4" />
@@ -463,7 +528,7 @@ export default function BlogsPage() {
           </div>
         </section>
 
-        <section className="space-y-6 rounded-3xl bg-white p-6 text-slate-900 shadow-2xl">
+        <section className="space-y-5 rounded-3xl bg-white p-6 text-slate-900 shadow-2xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-rose-500">
@@ -493,7 +558,7 @@ export default function BlogsPage() {
             )}
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {initialLoading
               ? Array.from({ length: pageSize }).map((_, index) => (
                   <Skeleton

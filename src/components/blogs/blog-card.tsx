@@ -36,7 +36,7 @@ export function BlogCard({
     isFeatured ? 260 : isHorizontal ? 140 : 180
   );
   const layoutClasses = cn(
-    "flex gap-5 transition",
+    "flex gap-4 transition sm:gap-5",
     isHorizontal ? "flex-row items-start" : "flex-col"
   );
 
@@ -52,12 +52,11 @@ export function BlogCard({
         <div
           className={cn(
             "relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#080d1e] via-[#0f1a35] to-[#1b2750] ring-1 ring-white/5",
-            isHorizontal ? "w-36 sm:w-44 lg:w-48 flex-shrink-0" : "w-full",
-            isFeatured
-              ? "aspect-[20/9] md:aspect-[21/9]"
-              : isHorizontal
-              ? "aspect-[4/3]"
-              : "aspect-[4/3] md:aspect-[16/9]"
+            isHorizontal
+              ? "h-28 w-40 min-w-[10rem] flex-shrink-0 sm:h-32 sm:w-48"
+              : isFeatured
+              ? "w-full aspect-[18/9] md:aspect-[21/9] lg:max-h-[340px]"
+              : "w-full aspect-[16/9] lg:max-h-[240px]"
           )}
         >
           {imageUrl ? (

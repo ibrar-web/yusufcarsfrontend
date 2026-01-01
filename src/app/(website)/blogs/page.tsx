@@ -1,5 +1,9 @@
 'use client';
 
+import Link from 'next/link';
+
+const detailPath = '/blogs/inside-the-twin-turbo-v6-that-powers-the-gtr-nismo';
+
 const featuredMain = {
   title: 'Inside the Next-Gen EV Platforms Powering Luxury SUVs',
   excerpt:
@@ -275,26 +279,31 @@ export default function BlogsPage() {
     <div className="blog-page">
       {/* Featured slider / top stories */}
       <section className="featured">
-        <article className="featured-main">
-          <div className="image-wrapper">
-            <img src={featuredMain.image} alt={featuredMain.title} />
-          </div>
-          <div className="featured-content">
-            <h1>{featuredMain.title}</h1>
-            <p>{featuredMain.excerpt}</p>
-            <span className="meta">
-              {featuredMain.author} • {featuredMain.date}
-            </span>
-          </div>
-        </article>
+        <Link href={detailPath} className="card-link">
+          <article className="featured-main">
+            <div className="image-wrapper">
+              <img src={featuredMain.image} alt={featuredMain.title} />
+            </div>
+            <div className="featured-content">
+              <h1>{featuredMain.title}</h1>
+              <p>{featuredMain.excerpt}</p>
+              <span className="meta">
+                {featuredMain.author} • {featuredMain.date}
+              </span>
+              <span className="view-details">View Details</span>
+            </div>
+          </article>
+        </Link>
         <div className="featured-secondary">
-          {featuredSecondary.map((story, index) => (
-            <article key={story.title} className="secondary-card">
-              <div className="image-wrapper">
-                <img src={story.image} alt={story.title} />
-              </div>
-              <h2>{story.title}</h2>
-            </article>
+          {featuredSecondary.map((story) => (
+            <Link key={story.title} href={detailPath} className="card-link">
+              <article className="secondary-card">
+                <div className="image-wrapper">
+                  <img src={story.image} alt={story.title} />
+                </div>
+                <h2>{story.title}</h2>
+              </article>
+            </Link>
           ))}
         </div>
       </section>
@@ -304,17 +313,19 @@ export default function BlogsPage() {
         <h3>Trending News</h3>
         <div className="trending-list">
           {trendingNews.map((news) => (
-            <article key={news.title} className="trending-row">
-              <div className="thumbnail">
-                <img src={news.image} alt={news.title} />
-              </div>
-              <div className="trending-body">
-                <h4>{news.title}</h4>
-                <p>
-                  {news.author} • {news.date}
-                </p>
-              </div>
-            </article>
+            <Link key={news.title} href={detailPath} className="card-link">
+              <article className="trending-row">
+                <div className="thumbnail">
+                  <img src={news.image} alt={news.title} />
+                </div>
+                <div className="trending-body">
+                  <h4>{news.title}</h4>
+                  <p>
+                    {news.author} • {news.date}
+                  </p>
+                </div>
+              </article>
+            </Link>
           ))}
         </div>
       </section>
@@ -330,18 +341,20 @@ export default function BlogsPage() {
               <div className="section-list">
                 {section.posts.map((post, index) => (
                   <div key={post.title}>
-                    <article className="post-row">
-                      <div className="thumbnail">
-                        <img src={post.image} alt={post.title} />
-                      </div>
-                      <div className="post-content">
-                        <h6>{post.title}</h6>
-                        <p>{post.excerpt}</p>
-                        <span className="meta">
-                          {post.date} • {post.category}
-                        </span>
-                      </div>
-                    </article>
+                    <Link href={detailPath} className="card-link">
+                      <article className="post-row">
+                        <div className="thumbnail">
+                          <img src={post.image} alt={post.title} />
+                        </div>
+                        <div className="post-content">
+                          <h6>{post.title}</h6>
+                          <p>{post.excerpt}</p>
+                          <span className="meta">
+                            {post.date} • {post.category}
+                          </span>
+                        </div>
+                      </article>
+                    </Link>
                     <div className="divider" />
                     {(index + 1) % 4 === 0 && (
                       <div className="ad-slot">Advertisement</div>
@@ -369,7 +382,9 @@ export default function BlogsPage() {
             <ol>
               {sidebarTrending.map((item, index) => (
                 <li key={item}>
-                  <span>{index + 1}.</span> {item}
+                  <Link href={detailPath} className="inline-link">
+                    <span>{index + 1}.</span> {item}
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -391,12 +406,16 @@ export default function BlogsPage() {
             <h4>Video Highlights</h4>
             <div className="video-list">
               {videoHighlights.map((video) => (
-                <div key={video.title} className="video-card">
+                <Link
+                  key={video.title}
+                  href={detailPath}
+                  className="card-link video-card"
+                >
                   <div className="video-thumb">
                     <img src={video.image} alt={video.title} />
                   </div>
                   <p>{video.title}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -414,7 +433,9 @@ export default function BlogsPage() {
             <h4>Popular Tags</h4>
             <div className="tag-list">
               {tags.map((tag) => (
-                <span key={tag}>{tag}</span>
+                <Link key={tag} href={detailPath} className="tag-link">
+                  {tag}
+                </Link>
               ))}
             </div>
           </div>
@@ -486,6 +507,33 @@ export default function BlogsPage() {
           gap: 16px;
           width: 100%;
           margin-bottom: 24px;
+        }
+
+        .card-link {
+          text-decoration: none;
+          color: inherit;
+          display: block;
+          cursor: pointer;
+        }
+
+        .inline-link {
+          text-decoration: none;
+          color: #111827;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .view-details {
+          margin-top: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #dc2626;
         }
 
         .featured-main,
@@ -783,11 +831,15 @@ export default function BlogsPage() {
           gap: 8px;
         }
 
-        .tag-list span {
+        .tag-link {
           padding: 6px 10px;
           border-radius: 999px;
           background: #f1f5f9;
           font-size: 12px;
+          text-decoration: none;
+          color: #111827;
+          display: inline-flex;
+          cursor: pointer;
         }
 
         .site-footer {

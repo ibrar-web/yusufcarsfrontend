@@ -42,6 +42,7 @@ import {
   MapPin,
   Clock,
   Shield,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/hooks/use-app-state";
@@ -764,18 +765,23 @@ export default function QuotesPage() {
               No quotes found.
             </div>
           )}
-          {filteredQuotes.map((quote) => (
-            <QuoteCard
-              key={quote.id}
-              quote={quote}
-              onAccept={() => handleAcceptQuote(quote)}
-              selected={selectedQuotes.includes(quote.id)}
-              onSelect={handleSelectQuote}
-              showCompare
-              onSupplierClick={handleSupplierClick}
-              accepting={acceptingQuoteId === quote.id}
-            />
-          ))}
+          {loadingQuotes ? 
+            <div className="flex flex-1 items-center justify-center">
+              <Loader2 className="h-12 w-12 animate-spin text-[#F02801]" />
+            </div> : 
+            filteredQuotes.map((quote) => (
+              <QuoteCard
+                key={quote.id}
+                quote={quote}
+                onAccept={() => handleAcceptQuote(quote)}
+                selected={selectedQuotes.includes(quote.id)}
+                onSelect={handleSelectQuote}
+                showCompare
+                onSupplierClick={handleSupplierClick}
+                accepting={acceptingQuoteId === quote.id}
+              />
+            ))
+          }
         </div>
       </div>
 

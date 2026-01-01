@@ -122,15 +122,21 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
   };
 
   return (
-    <div className="space-y-6 mt-8" style={{margin: "0 200px"}}>
+    <div className="space-y-6 mt-8 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_1fr]">
         <div className="space-y-4">
           <Input
             placeholder="Search services"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            className="rounded-2xl border border-[#CBD5E1] mt-8"
+            className="w-full rounded-2xl border border-[#CBD5E1]"
           />
+          <p className="text-sm text-[#475569]">
+            Browse curated service categories that match your vehicle needs.
+            Filters collapse naturally on narrow screens.
+          </p>
+        </div>
+        <div className="space-y-4">
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {!hasCategories && (
               <div className="col-span-full">
@@ -150,13 +156,19 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                       : "border-[#E2E8F0] bg-white/80 hover:border-[#CBD5E1]"
                   }`}
                 >
-                  <header className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-lg font-semibold text-[#0F172A]">
+                  <header className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-base md:text-lg font-semibold text-[#0F172A] truncate"
+                        title={category.name}
+                      >
                         {category.name}
                       </p>
                       {category.description && (
-                        <p className="text-sm text-[#64748B]">
+                        <p
+                          className="text-xs sm:text-sm text-[#64748B] truncate"
+                          title={category.description}
+                        >
                           {category.description}
                         </p>
                       )}
@@ -201,8 +213,6 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
         {dialogCategory && (
           <DialogContent
             className="
-              w-[95vw]
-              max-w-5xl
               max-h-[90vh]
               flex
               flex-col
@@ -257,36 +267,43 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                             return (
                               <div
                                 key={item.id}
-                                className="flex items-center justify-between gap-6 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_12px_rgba(15,23,42,0.08)]"
+                                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white bg-white px-4 py-3 shadow-[0_4px_12px_rgba(15,23,42,0.08)]"
                               >
-                              <div>
-                                <p className="font-medium text-[#0F172A]">
-                                  {item.name}
-                                </p>
-                                {item.description && (
-                                  <p className="text-sm text-[#64748B]">
-                                    {item.description}
+                                <div className="min-w-0">
+                                  <p
+                                    className="font-medium text-[#0F172A] truncate"
+                                    title={item.name}
+                                  >
+                                    {item.name}
                                   </p>
-                                )}
+                                  {item.description && (
+                                    <p
+                                      className="text-sm text-[#64748B] truncate"
+                                      title={item.description}
+                                    >
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <Button
+                                  className="h-10 w-10 rounded-full border border-[#E5E7EB] text-[#F02801] bg-white hover:bg-[#FEE2E2] text-lg p-0"
+                                  aria-label={
+                                    inCart
+                                      ? `Remove ${item.name}`
+                                      : `Add ${item.name}`
+                                  }
+                                  onClick={() =>
+                                    inCart
+                                      ? handleRemoveService(item.id)
+                                      : handleAddService(item, subcategory.name)
+                                  }
+                                >
+                                  {inCart ? "−" : "+"}
+                                </Button>
                               </div>
-                              <Button
-                                className="h-10 w-10 rounded-full border border-[#E5E7EB] text-[#F02801] bg-white hover:bg-[#FEE2E2] text-lg p-0 cursor-pointer"
-                                aria-label={
-                                  inCart
-                                    ? `Remove ${item.name}`
-                                    : `Add ${item.name}`
-                                }
-                                onClick={() =>
-                                  inCart
-                                    ? handleRemoveService(item.id)
-                                    : handleAddService(item, subcategory.name)
-                                }
-                              >
-                                {inCart ? "−" : "+"}
-                              </Button>
-                            </div>
-                          )}
-                        )) : (
+                            );
+                          })
+                        ) : (
                           <p className="text-sm text-[#64748B]">
                             No items currently listed for this subcategory.
                           </p>

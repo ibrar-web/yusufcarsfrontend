@@ -240,6 +240,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     { id: "nav-home", label: "Home", page: "home" },
     { id: "nav-how-it-works", label: "How It Works", page: "how-it-works" },
     { id: "nav-suppliers", label: "Suppliers", page: "suppliers" },
+    { id: "nav-blog", label: "Blog", page: "blogs" },
     { id: "nav-about", label: "About", page: "about" },
     { id: "nav-contact", label: "Contact", page: "contact" },
   ];

@@ -62,6 +62,7 @@ export type Page =
   | "request-flow"
   | "parts-selection"
   | "cart"
+  | "blogs"
   | "quotes"
   | "chat"
   | "supplier-profile"
@@ -85,6 +86,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   "parts-selection": "/parts-selection",
   cart: "/cart",
   quotes: "/quotes",
+  blogs: "/blogs",
   chat: "/user/chat",
   "supplier-profile": "/supplier-profile",
   "supplier-onboarding": "/auth/supplier-onboarding",

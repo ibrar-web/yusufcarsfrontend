@@ -11,6 +11,7 @@ export const websiteRoutes = [
   "/about",
   "/contact",
   "/auth",
+  "/blogs",
 ] as const;
 
 export const userRoutes = [
@@ -30,9 +31,10 @@ export const supplierRoutes = [
   "/supplier/analytics",
   "/supplier/messages",
   "/supplier/profile",
+  "/supplier/blogs",
 ] as const;
 
-export const adminRoutes = ["/admin-dashboard"] as const;
+export const adminRoutes = ["/admin-dashboard", "/admin/blogs"] as const;
 
 export const publicRoutes = [...websiteRoutes] as const;
 
@@ -75,6 +77,18 @@ export const apiRoutes = {
     signup: "/auth/register",
     logout: "/auth/logout",
     profile: "/auth/profile",
+  },
+  common: {
+    blogs: {
+      list: "/blogs",
+      featured: "/blogs/featured",
+      trending: "/blogs/trending",
+      mine: "/blogs/mine",
+      detail: (id: string) => `/blogs/${id}`,
+      create: "/blogs",
+      update: (id: string) => `/blogs/${id}`,
+      delete: (id: string) => `/blogs/${id}`,
+    },
   },
   user: {
     quote: {

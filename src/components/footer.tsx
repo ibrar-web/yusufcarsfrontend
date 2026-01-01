@@ -56,7 +56,10 @@ export function Footer({ onNavigate }: FooterProps) {
                 </button>
               </li>
               <li>
-                <button className="font-['Roboto'] text-sm text-gray-400 hover:text-primary transition-colors">
+                <button
+                  onClick={() => onNavigate("blogs")}
+                  className="font-['Roboto'] text-sm text-gray-400 hover:text-primary transition-colors"
+                >
                   Blog
                 </button>
               </li>

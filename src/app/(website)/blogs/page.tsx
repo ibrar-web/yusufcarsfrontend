@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 
 const detailPath = '/blogs/inside-the-twin-turbo-v6-that-powers-the-gtr-nismo';
 
@@ -275,8 +276,52 @@ const tags = [
 ];
 
 export default function BlogsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const normalizedQuery = searchTerm.trim().toLowerCase();
+
+  const trendingToRender = useMemo(() => {
+    if (!normalizedQuery) return trendingNews;
+    return trendingNews.filter((news) =>
+      news.title.toLowerCase().includes(normalizedQuery)
+    );
+  }, [normalizedQuery]);
+
+  const sectionsToRender = useMemo(() => {
+    if (!normalizedQuery) return articleSections;
+    return articleSections
+      .map((section) => ({
+        ...section,
+        posts: section.posts.filter((post) =>
+          post.title.toLowerCase().includes(normalizedQuery)
+        ),
+      }))
+      .filter((section) => section.posts.length > 0);
+  }, [normalizedQuery]);
+
+  const hasResults =
+    !!sectionsToRender.length || (!!normalizedQuery && trendingToRender.length);
+
   return (
     <div className="blog-page">
+      <section className="tools" aria-label="Blog search">
+        <div className="search-field">
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search blogs"
+          />
+          <button type="button" aria-label="Search">
+            <span>⌕</span>
+          </button>
+        </div>
+        {normalizedQuery && !hasResults ? (
+          <p className="search-empty">
+            No posts match “{searchTerm}”. Clear search to see all stories.
+          </p>
+        ) : null}
+      </section>
+
       {/* Featured slider / top stories */}
       <section className="featured">
         <Link href={detailPath} className="card-link">
@@ -312,28 +357,34 @@ export default function BlogsPage() {
       <section className="trending">
         <h3>Trending News</h3>
         <div className="trending-list">
-          {trendingNews.map((news) => (
-            <Link key={news.title} href={detailPath} className="card-link">
-              <article className="trending-row">
-                <div className="thumbnail">
-                  <img src={news.image} alt={news.title} />
-                </div>
-                <div className="trending-body">
-                  <h4>{news.title}</h4>
-                  <p>
-                    {news.author} • {news.date}
-                  </p>
-                </div>
-              </article>
-            </Link>
-          ))}
+          {trendingToRender.length ? (
+            trendingToRender.map((news) => (
+              <Link key={news.title} href={detailPath} className="card-link">
+                <article className="trending-row">
+                  <div className="thumbnail">
+                    <img src={news.image} alt={news.title} />
+                  </div>
+                  <div className="trending-body">
+                    <h4>{news.title}</h4>
+                    <p>
+                      {news.author} • {news.date}
+                    </p>
+                  </div>
+                </article>
+              </Link>
+            ))
+          ) : (
+            <p className="search-empty">
+              No trending headlines match your search.
+            </p>
+          )}
         </div>
       </section>
 
       <div className="layout">
         <main>
           {/* Recent posts sections */}
-          {articleSections.map((section) => (
+          {sectionsToRender.map((section) => (
             <section key={section.name} className="article-section">
               <header>
                 <h5>{section.name}</h5>
@@ -499,6 +550,47 @@ export default function BlogsPage() {
           padding: 80px 16px 48px;
           font-size: 14px;
           line-height: 1.5;
+        }
+
+        .tools {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 16px;
+        }
+
+        .search-field {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          max-width: 420px;
+          border: 1px solid #d1d5db;
+          border-radius: 12px;
+          overflow: hidden;
+          background: #fff;
+        }
+
+        .search-field input {
+          flex: 1;
+          border: none;
+          padding: 12px;
+          font-size: 14px;
+          outline: none;
+        }
+
+        .search-field button {
+          width: 48px;
+          height: 48px;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 18px;
+          color: #6b7280;
+        }
+
+        .search-empty {
+          font-size: 13px;
+          color: #dc2626;
         }
 
         .featured {

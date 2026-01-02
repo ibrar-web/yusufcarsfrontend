@@ -118,6 +118,13 @@ const statusDisplayConfig: Record<string, OrderStatusConfig> = {
     stepLabel: "Cancelled",
     barClass: "bg-[#94A3B8]",
   },
+  reported: {
+    label: "Reported",
+    pillClass: "border border-[#BBF7D0]",
+    progress: 100,
+    stepLabel: "Reported",
+    barClass: "bg-[#22C55E]",
+  }
 };
 
 const getStatusConfig = (status?: string) => {
@@ -187,6 +194,8 @@ export default function Orders(props?: OrderPageProps) {
   const [reviewText, setReviewText] = useState("");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelText, setCancelText] = useState("");
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
 
 
   const fetchOrders = useCallback(
@@ -290,6 +299,20 @@ export default function Orders(props?: OrderPageProps) {
     setCancelText("");
     fetchOrders();
   }
+
+  const closeReportDialog = () => {
+    setReportProblemOpen(false);
+    setReportReason("");
+  };
+
+  const handleSubmitReportProblem = () => {
+    if (!reportReason.trim()) {
+      toast.error("Please share the issue you encountered.");
+      return;
+    }
+    toast.success("Report submitted. We'll get back to you shortly.");
+    closeReportDialog();
+  };
 
   const handleSubmitReview = async(orderId: string) => {
     try {
@@ -621,8 +644,18 @@ export default function Orders(props?: OrderPageProps) {
                           <p className="text-md font-['Inter'] text-[#0F172A]">{expectedDelivery}</p>
                         </div>
                       </div>
-                      {selectedOrderToView?.status === "in_transit" && 
-                        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                      {selectedOrderToView?.status === "in_transit" && (
+                        <>
+                        <div className="pt-2 flex justify-end">
+                          <Button
+                            variant="link"
+                            className="text-sm font-['Roboto'] text-[#F02801] hover:text-[#D22301] underline-offset-4 cursor-pointer"
+                            onClick={() => setReportProblemOpen(true)}
+                          >
+                            Report a problem
+                          </Button>
+                        </div>
+                        <div className="flex flex-col sm:flex-row">
                           <Button
                             variant="outline"
                             className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
@@ -639,7 +672,8 @@ export default function Orders(props?: OrderPageProps) {
                             Finish Order
                           </Button>
                         </div>
-                      }
+                        </>
+                      )}
                     </div>
                   );
                 })()}
@@ -759,6 +793,63 @@ export default function Orders(props?: OrderPageProps) {
                       disabled={cancelText === ""}
                     >
                       Submit
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Dialog
+              open={reportProblemOpen}
+              onOpenChange={(open) =>
+                open ? setReportProblemOpen(true) : closeReportDialog()
+              }
+            >
+              <DialogContent className="max-w-xl rounded-3xl border border-[#E5E7EB] shadow-2xl p-0">
+                <div className="space-y-8 p-8">
+                  <DialogHeader className="p-0 text-left">
+                    <div className="flex items-start gap-3">
+                      <div>
+                        <DialogTitle className="font-['Inter'] text-2xl text-[#0F172A]">
+                          Report a Problem
+                        </DialogTitle>
+                        <DialogDescription className="font-['Roboto'] text-sm text-[#475569]">
+                          Share what went wrong with{" "}
+                          {selectedOrderToView?.part ?? "your order"}.
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+
+                  <div className="space-y-3 w-full max-w-xl mx-auto">
+                    <p className="text-sm font-['Roboto'] font-medium text-[#0F172A]">
+                      What happened?
+                    </p>
+                    <Textarea
+                      placeholder="Describe the issue you encountered..."
+                      className="w-full rounded-3xl border border-[#E2E8F0] bg-[#FDFEFE] placeholder:text-[#94A3B8] text-left leading-relaxed break-words overflow-auto min-h-[140px] max-h-[50vh] p-3 md:text-sm"
+                      maxLength={750}
+                      value={reportReason}
+                      onChange={(event) => setReportReason(event.target.value)}
+                    />
+                    <div className="text-right text-xs font-['Roboto'] text-[#94A3B8]">
+                      {reportReason.length}/750 characters
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-2xl border border-[#E2E8F0] bg-white text-[#0F172A] font-['Roboto'] hover:bg-[#F8FAFC] cursor-pointer"
+                      onClick={() => closeReportDialog()}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1 rounded-2xl bg-[#F02801] text-white font-['Roboto'] hover:bg-[#D22301] cursor-pointer"
+                      onClick={handleSubmitReportProblem}
+                      disabled={!reportReason.trim()}
+                    >
+                      Submit report
                     </Button>
                   </div>
                 </div>

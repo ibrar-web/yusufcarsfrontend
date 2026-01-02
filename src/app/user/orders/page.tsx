@@ -29,6 +29,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+const ensureEndpoint = (path: string) =>
+  path.startsWith("/") ? path : `/${path}`;
+
 interface OrderPageProps {
   onNavigate: (page: string) => void;
 }
@@ -305,13 +308,29 @@ export default function Orders(props?: OrderPageProps) {
     setReportReason("");
   };
 
-  const handleSubmitReportProblem = () => {
+  const handleSubmitReportProblem = async () => {
     if (!reportReason.trim()) {
       toast.error("Please share the issue you encountered.");
       return;
     }
-    toast.success("Report submitted. We'll get back to you shortly.");
-    closeReportDialog();
+    if (!selectedOrderToView) {
+      toast.error("Select an order before reporting a problem.");
+      return;
+    }
+    try {
+      const endpoint = ensureEndpoint(
+        apiRoutes.user.orders.report(selectedOrderToView?.id)
+      );
+      await apiPost(endpoint, { cancellationReason: reportReason.trim() });
+      toast.success("Report submitted. We'll get back to you shortly.");
+      closeReportDialog();
+      setSelectedOrderToView(null);
+      fetchOrders();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report"
+      );
+    }
   };
 
   const handleSubmitReview = async(orderId: string) => {

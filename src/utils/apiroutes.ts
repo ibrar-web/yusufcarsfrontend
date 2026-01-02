@@ -110,6 +110,7 @@ export const apiRoutes = {
       completeorder: (orderId: string) => {
         return `user/orders/${orderId}/complete`;
       },
+      report: (orderId: string) => `user/orders/${orderId}/report`,
     },
     profile: {
       get: "user/profile",

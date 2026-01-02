@@ -286,7 +286,7 @@ export function ServicesExplorer({ categories }: ServicesExplorerProps) {
                                   )}
                                 </div>
                                 <Button
-                                  className="h-10 w-10 rounded-full border border-[#E5E7EB] text-[#F02801] bg-white hover:bg-[#FEE2E2] text-lg p-0"
+                                  className="h-10 w-10 rounded-full border border-[#E5E7EB] text-[#F02801] bg-white hover:bg-[#FEE2E2] text-lg p-0 cursor-pointer"
                                   aria-label={
                                     inCart
                                       ? `Remove ${item.name}`

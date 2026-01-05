@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const fallbackSiteUrl = "https://www.partsquote.co.uk";
+const fallbackSiteUrl = "https://www.carclinic.com";
 
 const normalizeUrl = (url: string): string =>
   url.endsWith("/") ? url.slice(0, -1) : url;
@@ -19,29 +19,29 @@ const dedupeKeywords = (values: string[] = []): string[] => {
 };
 
 export const siteConfig = {
-  name: "PartsQuote",
-  tagline: "UK car parts marketplace",
+  name: "CarClinic",
+  tagline: "Compare Car Service Quotes & Vehicle Maintenance Prices",
   description:
-    "PartsQuote helps UK drivers match verified suppliers, compare quotes, and order the right car parts in minutes.",
-  shortDescription: "Instant UK car parts quotes from verified suppliers.",
+    "CarClinic helps you compare car service quotes, vehicle maintenance prices, and auto repair services from trusted providers near you.",
+  shortDescription: "Compare car service quotes and maintenance pricing online.",
   url: resolvedSiteUrl,
   locale: "en_GB",
-  company: "PartsQuote Ltd",
-  contactEmail: "hello@partsquote.co.uk",
-  contactPhone: "+44 20 1234 5678",
-  headquarters: "Manchester, United Kingdom",
+  company: "CarClinic Ltd",
+  contactEmail: "support@carclinic.com",
+  contactPhone: "+44 20 3999 1234",
+  headquarters: "London, United Kingdom",
   socials: {
-    x: "@PartsQuote",
-    linkedin: "https://www.linkedin.com/company/partsquote",
-    instagram: "https://www.instagram.com/partsquote",
+    x: "@CarClinicHQ",
+    linkedin: "https://www.linkedin.com/company/carclinic",
+    instagram: "https://www.instagram.com/carclinichq",
   },
   keywords: [
-    "car parts marketplace",
-    "UK car parts",
-    "car part quotes",
-    "PartsQuote",
-    "verified auto suppliers",
-    "vehicle repair marketplace",
+    "car service quote",
+    "vehicle maintenance quote",
+    "auto repair quote",
+    "car maintenance marketplace",
+    "car service pricing",
+    "vehicle service comparison",
   ],
   openGraphImage:
     "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80",
@@ -101,17 +101,9 @@ export const absoluteUrl = (path = "/"): string => {
 
 export const marketingRoutes = [
   "/",
-  "/about",
-  "/services",
-  "/parts-selection",
-  "/products",
-  "/request-flow",
-  "/cart",
-  "/contact",
-  "/blogs",
-  "/how-it-works",
-  "/new-supplier",
-  "/supplier-profile",
+  "/car-quote",
+  "/vehicle-maintenance",
+  "/marketplace",
 ] as const;
 
 export const createMetadata = ({

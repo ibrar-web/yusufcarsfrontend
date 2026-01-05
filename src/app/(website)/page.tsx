@@ -2,14 +2,15 @@ import { HomePageClient } from "./HomePageClient";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "PartsQuote | UK Car Parts Marketplace",
+  title: "Car Service Quotes & Vehicle Maintenance Marketplace | CarClinic",
   description:
-    "Compare quotes from verified UK car parts suppliers, manage orders, and keep your vehicle on the road with PartsQuote.",
+    "Compare car service quotes, vehicle maintenance prices, and auto repair options. Get transparent pricing and choose the best service for your car.",
   path: "/",
   keywords: [
-    "UK car parts marketplace",
-    "instant car part quotes",
-    "verified suppliers",
+    "car service quote",
+    "vehicle maintenance quote",
+    "auto repair quote",
+    "car maintenance marketplace",
   ],
 });
 

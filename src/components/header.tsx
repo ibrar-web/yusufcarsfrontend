@@ -62,6 +62,7 @@ import {
   type CartSummary,
 } from "@/utils/cart-storage";
 import type { Page } from "@/stores/app-store";
+import { siteConfig } from "@/lib/seo";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -72,6 +73,16 @@ const PATH_TO_PAGE: Array<{
   page: string;
 }> = [
   { match: (path) => path === "/", page: "home" },
+  { match: (path) => path.startsWith("/car-quote"), page: "car-quote" },
+  {
+    match: (path) => path.startsWith("/vehicle-maintenance"),
+    page: "vehicle-maintenance",
+  },
+  {
+    match: (path) =>
+      path.startsWith("/marketplace") || path.startsWith("/services"),
+    page: "marketplace",
+  },
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
   {
     match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
@@ -303,7 +314,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
               />
             </div>
             <span className="font-['Inter'] font-bold text-xl text-ink">
-              PartsQuote
+              {siteConfig.name}
             </span>
           </Link>
 

@@ -26,7 +26,7 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | ${siteConfig.tagline}`,
+    default: `${siteConfig.name} – ${siteConfig.tagline}`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     locale: siteConfig.locale,
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
+    title: `${siteConfig.name} – ${siteConfig.tagline}`,
     description: siteConfig.description,
     images: [
       {
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     creator: siteConfig.socials.x,
     site: siteConfig.socials.x,
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
+    title: `${siteConfig.name} – ${siteConfig.tagline}`,
     description: siteConfig.description,
     images: [siteConfig.openGraphImage],
   },
@@ -65,6 +65,11 @@ export const metadata: Metadata = {
     canonical: siteConfig.url,
   },
   category: "Automotive",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default async function RootLayout({

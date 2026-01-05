@@ -1,5 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
+// import Image from "next/image";
+// import Link from "next/link";
 import { fetchServiceCategories } from "@/actions/categories";
 import { ServicesExplorer } from "@/components/services/ServicesExplorer";
 import { createMetadata } from "@/lib/seo";

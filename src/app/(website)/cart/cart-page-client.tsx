@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Header } from "@/components/header";
+// import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, X, CheckCircle, XCircle } from "lucide-react";
 import {
@@ -19,6 +19,7 @@ import { VehicleSummaryCard } from "@/components/vehicles/vehicle-summary-card";
 import { toast } from "sonner";
 import { apiPost } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
+type ExtendedError = Error & { status?: number };
 
 export function CartPageClient() {
   const { handleNavigate } = useAppState();
@@ -138,8 +139,16 @@ export function CartPageClient() {
       persistServicesSelection(remainingServices);
       refreshSummary();
     } catch (error) {
+      const err = error as ExtendedError;
+      if (err.status === 401) {
+        toast.error("Please sign in before requesting a quote.");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("request-sign-in"));
+        }
+        return;
+      }
       toast.error(
-        error instanceof Error ? error.message : "Failed to send quote request."
+        err instanceof Error ? err.message : "Failed to send quote request."
       );
     } finally {
       setRequestingQuote(false);
@@ -149,7 +158,7 @@ export function CartPageClient() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header />
+      {/* <Header /> */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
         <section className="rounded-3xl bg-white shadow-[0_15px_60px_rgba(15,23,42,0.08)] border border-[#E2E8F0] p-6 sm:p-10">
           <header className="mb-8">

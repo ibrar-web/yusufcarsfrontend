@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -172,33 +170,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
     []
   );
 
-  const valueProps = useMemo(
-    () => [
-      {
-        id: "pricing-transparency",
-        title: "Transparent pricing insights",
-        description:
-          "See labour, parts, and diagnostic costs before you approve a quote so you never pay for hidden extras.",
-        icon: Shield,
-      },
-      {
-        id: "verified-network",
-        title: "Verified service network",
-        description:
-          "We vet every provider’s certifications, response times, and customer feedback to keep your car in expert hands.",
-        icon: BadgeCheck,
-      },
-      {
-        id: "faster-bookings",
-        title: "Faster bookings",
-        description:
-          "Automated reminders and digital approvals keep your service timeline moving without back-and-forth phone calls.",
-        icon: Clock,
-      },
-    ],
-    []
-  );
-
   useEffect(() => {
     if (!selectedProduct && featuredParts.length > 0) {
       setSelectedProduct(featuredParts[0]);
@@ -300,132 +271,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-slate-950 text-white">
-        <div className="max-w-[1320px] mx-auto px-6 py-20 grid gap-12 lg:grid-cols-2">
-          <div className="space-y-6">
-            <Badge className="bg-white/10 text-white uppercase tracking-wide">
-              Vehicle care marketplace
-            </Badge>
-            <h1 className="font-['Inter'] text-4xl sm:text-5xl font-bold leading-tight">
-              Compare Car Service Quotes & Vehicle Maintenance Prices
-            </h1>
-            <p className="font-['Roboto'] text-lg text-slate-200">
-              CarClinic connects you with trusted garages and mobile mechanics so you
-              can review car service quotes, vehicle maintenance plans, and auto
-              repair pricing without guesswork.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/car-quote"
-                className="inline-flex items-center justify-center rounded-full bg-[#F02801] px-6 py-3 font-['Inter'] font-semibold text-white hover:bg-[#D22301] transition-colors"
-              >
-                Start a Quote
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                href="/marketplace"
-                className="inline-flex items-center justify-center rounded-full border border-white/40 px-6 py-3 font-['Inter'] font-semibold text-white hover:bg-white/10 transition-colors"
-              >
-                Browse Marketplace
-              </Link>
-            </div>
-            <p className="text-sm text-slate-300">
-              Ready to{" "}
-              <Link
-                href="/car-quote"
-                className="text-white underline decoration-white/50 underline-offset-4 hover:decoration-white"
-              >
-                compare car service quotes
-              </Link>{" "}
-              or review{" "}
-              <Link
-                href="/vehicle-maintenance"
-                className="text-white underline decoration-white/50 underline-offset-4 hover:decoration-white"
-              >
-                vehicle maintenance pricing
-              </Link>
-              ? CarClinic keeps everything transparent from the first estimate to
-              the final invoice.
-            </p>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-[#F02801]/40 to-slate-500/40 blur-2xl opacity-50" />
-            <div className="relative rounded-3xl border border-white/10 bg-slate-900/60 p-4 shadow-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=80"
-                alt="Vehicle repair quote comparison dashboard"
-                width={640}
-                height={480}
-                className="h-full w-full rounded-2xl object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-              />
-              <div className="mt-4 rounded-2xl bg-white/10 p-4">
-                <p className="font-['Roboto'] text-sm text-white/90">
-                  Track labour, diagnostics, and parts in one clean dashboard while
-                  you approve, schedule, and pay online.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-16">
-        <div className="max-w-[1320px] mx-auto px-6">
-          <div className="max-w-3xl space-y-4">
-            <h2 className="font-['Inter'] text-[32px] font-bold text-[#0F172A]">
-              Get Instant Vehicle Maintenance Quotes
-            </h2>
-            <p className="font-['Roboto'] text-lg text-[#475569]">
-              Enter your registration number or build your car profile manually to
-              unlock instant pricing based on mileage, service history, and
-              preferred appointment windows.
-            </p>
-            <ul className="list-disc pl-5 text-[#475569] font-['Roboto'] text-base space-y-2">
-              <li>Cross-compare maintenance plans from mobile and in-garage teams.</li>
-              <li>See travel surcharges, OEM parts availability, and turnaround times.</li>
-              <li>Approve the quote digitally and receive confirmations in your inbox.</li>
-            </ul>
-          </div>
-          <div className="mt-10 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-            <VehicleSelection onNavigate={onNavigate} />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-[#F8FAFC]">
-        <div className="max-w-[1320px] mx-auto px-6">
-          <div className="max-w-3xl mb-10 space-y-4 text-center md:text-left">
-            <h2 className="font-['Inter'] text-[32px] font-bold text-[#0F172A]">
-              Why Choose CarClinic
-            </h2>
-            <p className="font-['Roboto'] text-lg text-[#475569]">
-              Our marketplace blends live pricing data, real customer feedback, and
-              vetted technicians so you always know who is working on your vehicle
-              and why the quote makes sense.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {valueProps.map(({ id, icon: Icon, title, description }) => (
-              <div
-                key={id}
-                className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm"
-              >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF2F2]">
-                  <Icon className="h-6 w-6 text-[#F02801]" />
-                </div>
-                <h3 className="font-['Inter'] text-xl font-semibold text-[#0F172A]">
-                  {title}
-                </h3>
-                <p className="font-['Roboto'] text-sm text-[#475569] leading-relaxed mt-3">
-                  {description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <VehicleSelection onNavigate={onNavigate} />
 
       {/* Top services */}
       <section className="py-16 bg-white">
@@ -489,9 +335,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="py-24 bg-white relative">
         <div className="max-w-[1320px] mx-auto px-6">
           <div className="mb-12">
-            <h3 className="font-['Inter'] text-[32px] lg:text-[42px] font-bold text-[#0F172A] mb-3">
+            <h2 className="font-['Inter'] text-[32px] lg:text-[42px] font-bold text-[#0F172A] mb-3">
               Category
-            </h3>
+            </h2>
             <p
               className="font-['Roboto'] text-[#64748B] max-w-2xl"
               style={{ fontSize: "18px", lineHeight: 1.5 }}
@@ -745,9 +591,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
               >
                 Featured Listings
               </Badge>
-              <h3 className="font-['Inter'] text-4xl lg:text-5xl font-bold mb-3">
+              <h2 className="font-['Inter'] text-4xl lg:text-5xl font-bold mb-3">
                 Popular Car Parts
-              </h3>
+              </h2>
               <p className="font-['Roboto'] text-lg text-gray-300">
                 Top-rated parts from verified suppliers
               </p>
@@ -841,10 +687,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <div className="relative fade-in-up order-2 lg:order-1">
               <div className="mb-8">
                 <h2 className="font-['Inter'] text-4xl lg:text-5xl text-[#0F172A] mb-4">
-                  How the Car Quote Marketplace Works
+                  How It Works
                 </h2>
                 <p className="font-['Roboto'] text-lg text-[#475569]">
-                  Follow these four steps to compare diagnostics, labour, and parts pricing before you confirm a booking.
+                  Get the best deal on car parts in four simple steps
                 </p>
               </div>
               <div className="relative rounded-2xl overflow-hidden">
@@ -962,7 +808,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             {/* Left Side - Trust Indicators */}
             <div className="fade-in-up">
               <h2 className="font-['Inter'] text-5xl lg:text-6xl text-white mb-6">
-                Trusted Auto Repair & Service Providers
+                Featured Suppliers
               </h2>
               <p className="font-['Roboto'] text-xl text-gray-400 mb-12">
                 Connect with verified local suppliers ready to provide
@@ -1128,12 +974,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="py-24 bg-[#F8F9FA]">
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="text-left mb-16">
-            <h3
+            <h2
               className="font-['Inter'] text-[#0F172A] mb-4"
               style={{ fontSize: "40px", fontWeight: "700" }}
             >
               Popular Brands
-            </h3>
+            </h2>
             <p
               className="font-['Roboto'] text-[#64748B] max-w-3xl"
               style={{ fontSize: "16px", lineHeight: 1.6 }}
@@ -1279,7 +1125,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <div className="relative overflow-hidden rounded-2xl">
                 <ImageWithFallback
                   src="https://images.unsplash.com/photo-1675034743126-0f250a5fee51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBtZWNoYW5pY3MlMjB0ZWFtJTIwd29ya3Nob3B8ZW58MXx8fHwxNzU5MjM5NDk3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                  alt="CarClinic team"
+                  alt="PartsQuote Team"
                   className="w-full h-[500px] object-cover"
                 />
                 {/* Play Button Overlay */}
@@ -1307,12 +1153,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 </span>
               </div>
 
-              <h3
+              <h2
                 className="font-['Inter'] text-white mb-12"
                 style={{ fontSize: "40px", fontWeight: "700", lineHeight: 1.2 }}
               >
-                CarClinic service promise
-              </h3>
+                Why Choose PartsQuote?
+              </h2>
 
               {/* Numbered List Items */}
               <div className="space-y-8">
@@ -1444,12 +1290,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Badge className="mb-4 bg-[#64748B]/10 text-[#64748B] border border-[#64748B]/20 rounded-full px-4 py-1.5">
               Customer Reviews
             </Badge>
-            <h3
+            <h2
               className="font-['Inter'] font-semibold text-[#0F172A] mb-3"
               style={{ fontSize: "44px", lineHeight: "1.2" }}
             >
               What Our Customers Say
-            </h3>
+            </h2>
             <p
               className="font-['Inter'] text-[#64748B] max-w-2xl"
               style={{ fontSize: "16px" }}
@@ -1867,12 +1713,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <div className="max-w-[1200px] mx-auto px-6">
           {/* Section Header */}
           <div className="mb-10">
-            <h3
+            <h2
               className="font-['Inter'] font-semibold text-[#0F172A] mb-3"
               style={{ fontSize: "36px", lineHeight: 1.2 }}
             >
               Trusted by Thousands
-            </h3>
+            </h2>
             <p
               className="font-['Roboto'] text-[#64748B]"
               style={{ fontSize: "18px", lineHeight: 1.6 }}
@@ -1989,12 +1835,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
               {/* H2 + Subcopy */}
               <div>
-                <h3
+                <h2
                   className="font-['Inter'] font-semibold text-[#0F172A] mb-4"
                   style={{ fontSize: "52px", lineHeight: 1.1 }}
                 >
                   Are You a Car Parts Supplier?
-                </h3>
+                </h2>
                 <p
                   className="font-['Roboto'] text-[#64748B]"
                   style={{ fontSize: "18px", lineHeight: 1.6 }}
@@ -2208,18 +2054,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 Supplier Reviews
               </span>
             </Badge>
-            <h3
+            <h2
               className="font-['Inter'] font-semibold text-[#0F172A] mb-4"
               style={{ fontSize: "40px", lineHeight: 1.2 }}
             >
               Trusted by UK Suppliers
-            </h3>
+            </h2>
             <p
               className="font-['Roboto'] text-[#64748B]"
               style={{ fontSize: "18px", lineHeight: 1.6 }}
             >
               Hear what our verified suppliers have to say about growing their
-              business with CarClinic.
+              business with PartsQuote
             </p>
           </div>
 
@@ -2262,8 +2108,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     className="font-['Roboto'] text-[#0F172A] mb-3"
                     style={{ fontSize: "14px", lineHeight: 1.6 }}
                   >
-                    "CarClinic brings us 3–5 qualified jobs weekly. Game changer for our
-                    business."
+                    "PartsQuote brings us 3–5 qualified jobs weekly. Game
+                    changer for our business."
                   </p>
                   <div className="text-xs text-[#64748B] font-['Roboto']">
                     AutoParts Direct Ltd
@@ -2444,8 +2290,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     className="font-['Roboto'] text-[#0F172A] mb-3"
                     style={{ fontSize: "14px", lineHeight: 1.6 }}
                   >
-                    "Simple onboarding, fair pricing, and consistent quality leads.
-                    CarClinic has transformed how we find new customers."
+                    "Simple onboarding, fair pricing, and consistent quality
+                    leads. PartsQuote has transformed how we find new
+                    customers."
                   </p>
                   <div className="text-xs text-[#64748B] font-['Roboto']">
                     Bristol Auto Supplies

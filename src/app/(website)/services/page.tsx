@@ -1,5 +1,14 @@
 import { fetchServiceCategories } from "@/actions/categories";
 import { ServicesExplorer } from "@/components/services/ServicesExplorer";
+import { createMetadata } from "@/lib/seo";
+
+export const metadata = createMetadata({
+  title: "Vehicle Services Directory | PartsQuote",
+  description:
+    "Browse MOT, repair, and maintenance categories to tell PartsQuote exactly which parts or services you need from verified suppliers.",
+  path: "/services",
+  keywords: ["vehicle services directory", "service categories", "PartsQuote services"],
+});
 
 export default async function ServicesPage() {
   const categories = await fetchServiceCategories({

@@ -1,10 +1,14 @@
-"use client";
+import { createMetadata } from "@/lib/seo";
+import { AboutPageClient } from "./about-page-client";
 
-import { AboutPage } from "@/page-components/about";
-import { useAppState } from "@/hooks/use-app-state";
+export const metadata = createMetadata({
+  title: "About PartsQuote | Mission & Leadership",
+  description:
+    "Meet the PartsQuote team that is modernising how UK drivers and local suppliers collaborate on vehicle repairs and parts sourcing.",
+  path: "/about",
+  keywords: ["about PartsQuote", "auto marketplace mission", "PartsQuote team"],
+});
 
-export default function About() {
-  const { handleNavigate } = useAppState();
-
-  return <AboutPage onNavigate={handleNavigate} />;
+export default function AboutPage() {
+  return <AboutPageClient />;
 }

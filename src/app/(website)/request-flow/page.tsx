@@ -1,14 +1,14 @@
-"use client";
+import { createMetadata } from "@/lib/seo";
+import { RequestFlowPageClient } from "./request-flow-page-client";
 
-import { RequestFlowPage } from "@/page-components/request-flow";
-import { useAppState } from "@/hooks/use-app-state";
+export const metadata = createMetadata({
+  title: "Request Flow | Manage Supplier Quotes",
+  description:
+    "Understand every stage of the PartsQuote workflow—from sharing your vehicle profile to approving supplier offers and checkout.",
+  path: "/request-flow",
+  keywords: ["quote workflow", "supplier quote process", "PartsQuote request flow"],
+});
 
-export default function RequestFlow() {
-  const { handleNavigate } = useAppState();
-
-  return (
-    <RequestFlowPage
-      onNavigate={handleNavigate}
-    />
-  );
+export default function RequestFlowPage() {
+  return <RequestFlowPageClient />;
 }

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   getBlogPostBySlug,
@@ -6,6 +5,8 @@ import {
   getBlogSummaries,
 } from "@/data/blog-posts";
 import { BlogDetailClient } from "../BlogDetailClient";
+import { createMetadata } from "@/lib/seo";
+import { ArticleStructuredData } from "@/components/seo/article-structured-data";
 
 type BlogDetailPageProps = {
   params: {
@@ -17,35 +18,32 @@ export function generateStaticParams() {
   return getBlogPostMetadata().map((post) => ({ id: post.slug }));
 }
 
-export function generateMetadata({
-  params,
-}: BlogDetailPageProps): Metadata {
+export function generateMetadata({ params }: BlogDetailPageProps) {
   const post = getBlogPostBySlug(params.id);
   if (!post) {
-    return {
+    return createMetadata({
       title: "Blog not found | PartsQuote",
-    };
+      description: "The requested article could not be located.",
+      path: "/blogs",
+    });
   }
-  const url = `https://www.partsquote.co.uk/blogs/${post.slug}`;
-  return {
+  const path = `/blogs/${post.slug}`;
+  return createMetadata({
     title: `${post.title} | PartsQuote Blog`,
     description: post.metaDescription,
-    alternates: {
-      canonical: url,
-    },
+    path,
+    keywords: post.tags,
     openGraph: {
-      title: post.title,
-      description: post.metaDescription,
-      url,
       type: "article",
-      images: [
-        {
-          url: post.heroImage,
-          alt: post.title,
-        },
-      ],
+      images: [{ url: post.heroImage, alt: post.title }],
+      publishedTime: new Date(post.date).toISOString(),
+      authors: [post.author],
+      tags: post.tags,
     },
-  };
+    twitter: {
+      images: [post.heroImage],
+    },
+  });
 }
 
 export default function BlogDetailPage({ params }: BlogDetailPageProps) {
@@ -59,6 +57,9 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
     .slice(0, 6);
 
   return (
-    <BlogDetailClient post={post} trendingArticles={trendingArticles} />
+    <>
+      <ArticleStructuredData post={post} />
+      <BlogDetailClient post={post} trendingArticles={trendingArticles} />
+    </>
   );
 }

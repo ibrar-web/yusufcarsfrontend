@@ -16,7 +16,7 @@ import {
   Blocks,
   ShoppingCart,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent } from "react";
 import { usePathname } from "next/navigation";
 import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
@@ -52,7 +52,7 @@ import { ProfileDialog } from "@/components/profile-dialog";
 import { NotificationDialog } from "@/components/notification-dialog";
 import { OrderConfirmationDialog } from "@/components/order/order-confirmation-dialog";
 import { TrackOrderDialog } from "@/components/order/track-order-dialog";
-import { useAppStore } from "@/stores/app-store";
+import { useAppStore, pageToPath } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
 import { UserRole } from "@/utils/api";
 import Link from "next/link";
@@ -61,6 +61,7 @@ import {
   subscribeToCartUpdates,
   type CartSummary,
 } from "@/utils/cart-storage";
+import type { Page } from "@/stores/app-store";
 
 type HeaderProps = {
   sticky?: boolean;
@@ -233,7 +234,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
       else if (selectedRole == "supplier") navigate("supplier-onboarding");
     } catch (error) {}
   };
-  const navLinks = [
+  const navLinks: Array<{ id: string; label: string; page: Page }> = [
     { id: "nav-home", label: "Home", page: "home" },
     { id: "nav-how-it-works", label: "How It Works", page: "how-it-works" },
     { id: "nav-suppliers", label: "Suppliers", page: "suppliers" },
@@ -245,6 +246,27 @@ export function Header({ sticky = true }: HeaderProps = {}) {
   // Check if we're on a portal page
   const isPortalPage =
     currentPage === "admin-dashboard" || currentPage === "supplier-dashboard";
+
+  const handleNavLink = (
+    event: MouseEvent<HTMLAnchorElement>,
+    page: Page,
+    options: { closeMenu?: boolean } = {}
+  ) => {
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    ) {
+      return;
+    }
+    event.preventDefault();
+    navigate(page);
+    if (options.closeMenu) {
+      setMobileMenuOpen(false);
+    }
+  };
 
   return (
     <header
@@ -262,8 +284,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           )}
         >
           {/* Logo */}
-          <button
-            onClick={() => navigate("home")}
+          <Link
+            href={pageToPath("home")}
+            onClick={(event) => handleNavLink(event, "home")}
             className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group cursor-pointer"
           >
             <div
@@ -282,22 +305,23 @@ export function Header({ sticky = true }: HeaderProps = {}) {
             <span className="font-['Inter'] font-bold text-xl text-ink">
               PartsQuote
             </span>
-          </button>
+          </Link>
 
           {/* Desktop Navigation - Hidden on portal pages */}
           {!isPortalPage && (
             <nav className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
-                <button
+                <Link
                   key={link.id}
-                  onClick={() => navigate(link.page)}
+                  href={pageToPath(link.page)}
+                  onClick={(event) => handleNavLink(event, link.page)}
                   className={cn(
                     "font-['Roboto'] text-primary hover:text-subtle-ink transition-all duration-200 font-medium  cursor-pointer",
                     currentPage === link.page && "text-subtle-ink"
                   )}
                 >
                   {link.label}
-                </button>
+                </Link>
               ))}
             </nav>
           )}
@@ -741,19 +765,19 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           <div className="lg:hidden py-4 border-t border-border slide-down">
             <nav className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <button
+                <Link
                   key={link.id}
-                  onClick={() => {
-                    navigate(link.page);
-                    setMobileMenuOpen(false);
-                  }}
+                  href={pageToPath(link.page)}
+                  onClick={(event) =>
+                    handleNavLink(event, link.page, { closeMenu: true })
+                  }
                   className={cn(
                     "text-left py-2 text-subtle-ink hover:text-ink transition-colors",
                     currentPage === link.page && "text-primary font-medium"
                   )}
                 >
                   {link.label}
-                </button>
+                </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button
@@ -915,13 +939,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         open={showAdminSignup}
         onOpenChange={setShowAdminSignin}
         onSuccess={() => {
-          toast.success(
-            "Admin access request submitted successfully! You'll receive an email once approved."
-          );
-          // Navigate to admin dashboard after successful signup
           setTimeout(() => {
             navigate("admin-dashboard");
-          }, 1500);
+          });
         }}
       />
 

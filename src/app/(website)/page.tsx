@@ -1,30 +1,15 @@
-"use client";
+import type { Metadata } from "next";
+import { HomePageClient } from "./HomePageClient";
 
-import { HomePage } from "./HomePage";
-import { useAppState } from "@/hooks/use-app-state";
+export const metadata: Metadata = {
+  title: "PartsQuote | UK Car Parts Marketplace",
+  description:
+    "Compare quotes from verified UK car parts suppliers, manage orders, and keep your vehicle on the road with PartsQuote.",
+  alternates: {
+    canonical: "https://www.partsquote.co.uk/",
+  },
+};
 
 export default function Home() {
-  const {
-    handleNavigate,
-    isAuthenticated,
-    handleSignOut,
-    openProfileDialog,
-    openNotificationDialog,
-    openTrackOrderDialog,
-    quoteNotifications,
-    clearQuoteNotifications,
-  } = useAppState();
-
-  return (
-    <HomePage
-      onNavigate={handleNavigate}
-      isAuthenticated={isAuthenticated}
-      onSignOut={handleSignOut}
-      onProfileClick={openProfileDialog}
-      onNotificationClick={openNotificationDialog}
-      onTrackOrderClick={openTrackOrderDialog}
-      quoteNotifications={quoteNotifications ?? undefined}
-      onDismissNotifications={clearQuoteNotifications}
-    />
-  );
+  return <HomePageClient />;
 }

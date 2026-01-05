@@ -132,7 +132,7 @@ export function SignInDialog({
           </div>
 
           {/* Account Type */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label
               className="font-['Roboto'] text-[#0F172A]"
               style={{ fontSize: "14px" }}
@@ -155,7 +155,7 @@ export function SignInDialog({
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Sign In Form */}
           <form onSubmit={loginUser} className="space-y-5">

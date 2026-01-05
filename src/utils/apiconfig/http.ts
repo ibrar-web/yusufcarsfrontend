@@ -4,6 +4,7 @@ import { environment } from "@/utils/environment";
 import { getStoredAuthToken } from "@/utils/auth-storage";
 
 type ErrorPayload = { message?: string; error?: string };
+type ExtendedError = Error & { status?: number };
 
 const BASE_URL = environment.apiBaseUrl;
 
@@ -38,10 +39,12 @@ http.interceptors.response.use(
     if (error.code === "ERR_NETWORK") {
       const url = [error.config?.baseURL, error.config?.url].filter(Boolean).join("");
       const target = url || "the API";
-      return Promise.reject(
-        new Error(`Network request to ${target} failed. Check your connection or that the API is reachable.`)
-      );
-    }
+    const err: ExtendedError = new Error(
+      `Network request to ${target} failed. Check your connection or that the API is reachable.`
+    );
+    err.status = undefined;
+    return Promise.reject(err);
+  }
 
     const fallbackMessage =
       "Something went wrong while communicating with the server.";
@@ -51,7 +54,9 @@ http.interceptors.response.use(
       (typeof responseData === "string" ? undefined : responseData?.error) ||
       error.message ||
       fallbackMessage;
-    return Promise.reject(new Error(message));
+    const err: ExtendedError = new Error(message);
+    err.status = error.response?.status;
+    return Promise.reject(err);
   }
 );
 

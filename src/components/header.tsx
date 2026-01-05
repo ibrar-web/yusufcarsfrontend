@@ -171,6 +171,13 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const openSignIn = () => setShowSignIn(true);
+    window.addEventListener("request-sign-in", openSignIn);
+    return () => window.removeEventListener("request-sign-in", openSignIn);
+  }, []);
+
   const handleRegistrationSubmit = () => {
     if (entryMethod === "plate") {
       if (!registrationNumber || registrationNumber.length < 6) {

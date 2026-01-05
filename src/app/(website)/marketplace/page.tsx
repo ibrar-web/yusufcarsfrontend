@@ -24,7 +24,7 @@ export default async function MarketplacePage() {
 
   return (
     <div className="min-h-[90vh] bg-[#F8FAFC]">
-      <section className="bg-white border-b border-[#E2E8F0]">
+      {/* <section className="bg-white border-b border-[#E2E8F0]">
         <div className="max-w-[1200px] mx-auto px-6 py-20 grid gap-12 lg:grid-cols-[3fr,2fr] items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#F02801] mb-4">
@@ -75,10 +75,10 @@ export default async function MarketplacePage() {
             />
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="py-12">
-        <div className="max-w-[1200px] mx-auto px-6 space-y-8">
+        {/* <div className="max-w-[1200px] mx-auto px-6 space-y-8">
           <div className="grid gap-6 md:grid-cols-3">
             {[
               { label: "Average response", value: "12 minutes" },
@@ -97,12 +97,12 @@ export default async function MarketplacePage() {
                 </p>
               </div>
             ))}
-          </div>
+          </div> */}
 
-          <div className="rounded-3xl border border-[#E2E8F0] bg-white">
+          <div className="rounded-3xl border border-[#E2E8F0] bg-white p-8">
             <ServicesExplorer categories={categories} />
           </div>
-        </div>
+        {/* </div> */}
       </section>
     </div>
   );

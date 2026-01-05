@@ -1,11 +1,8 @@
-import { notFound } from "next/navigation";
-import {
-  getBlogPostBySlug,
-  getBlogSummaries,
-} from "@/data/blog-posts";
+import { getBlogSummaries } from "@/data/blog-posts";
 import { BlogDetailClient } from "../BlogDetailClient";
 import { createMetadata } from "@/lib/seo";
 import { ArticleStructuredData } from "@/components/seo/article-structured-data";
+import { loadBlogPost } from "@/lib/blogs-service";
 
 type BlogDetailPageProps = {
   params: {
@@ -13,15 +10,10 @@ type BlogDetailPageProps = {
   };
 };
 
-export function generateMetadata({ params }: BlogDetailPageProps) {
-  const post = getBlogPostBySlug(params.id);
-  if (!post) {
-    return createMetadata({
-      title: "Blog not found | PartsQuote",
-      description: "The requested article could not be located.",
-      path: "/blogs",
-    });
-  }
+export async function generateMetadata({
+  params,
+}: BlogDetailPageProps) {
+  const { post } = await loadBlogPost(params.id);
   const path = `/blogs/${post.slug}`;
   return createMetadata({
     title: `${post.title} | PartsQuote Blog`,
@@ -41,12 +33,10 @@ export function generateMetadata({ params }: BlogDetailPageProps) {
   });
 }
 
-export default function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const post = getBlogPostBySlug(params.id);
-  if (!post) {
-    notFound();
-  }
-
+export default async function BlogDetailPage({
+  params,
+}: BlogDetailPageProps) {
+  const { post } = await loadBlogPost(params.id);
   const trendingArticles = getBlogSummaries()
     .filter((article) => article.slug !== post.slug)
     .slice(0, 6);

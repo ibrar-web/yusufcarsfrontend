@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   applicationName: siteConfig.name,
   referrer: "origin-when-cross-origin",
-  keywords: siteConfig.keywords,
+  keywords: [...siteConfig.keywords],
   authors: [{ name: siteConfig.company, url: siteConfig.url }],
   creator: siteConfig.company,
   publisher: siteConfig.company,

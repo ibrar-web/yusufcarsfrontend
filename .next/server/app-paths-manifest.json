@@ -28,6 +28,8 @@
   "/api/dvla/route": "app/api/dvla/route.js",
   "/api/service-categories/route": "app/api/service-categories/route.js",
   "/auth/supplier-onboarding/page": "app/auth/supplier-onboarding/page.js",
+  "/robots.txt/route": "app/robots.txt/route.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js",
   "/supplier/analytics/page": "app/supplier/analytics/page.js",
   "/supplier/blogs/page": "app/supplier/blogs/page.js",
   "/supplier/messages/chat/page": "app/supplier/messages/chat/page.js",

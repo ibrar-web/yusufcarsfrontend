@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import {
   getBlogPostBySlug,
-  getBlogPostMetadata,
   getBlogSummaries,
 } from "@/data/blog-posts";
 import { BlogDetailClient } from "../BlogDetailClient";
@@ -13,10 +12,6 @@ type BlogDetailPageProps = {
     id: string;
   };
 };
-
-export function generateStaticParams() {
-  return getBlogPostMetadata().map((post) => ({ id: post.slug }));
-}
 
 export function generateMetadata({ params }: BlogDetailPageProps) {
   const post = getBlogPostBySlug(params.id);

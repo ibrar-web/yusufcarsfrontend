@@ -8,6 +8,18 @@
           "exportedName": "getSessionFromCookie",
           "filename": "src/actions/session.ts"
         },
+        "app/(website)/blogs/[id]/page": {
+          "moduleId": 66671,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/(website)/blogs/page": {
+          "moduleId": 43344,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
         "app/(website)/cart/page": {
           "moduleId": 62056,
           "async": false,
@@ -70,6 +82,12 @@
         },
         "app/_not-found/page": {
           "moduleId": 75604,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/admin/blogs/page": {
+          "moduleId": 5056,
           "async": false,
           "exportedName": "getSessionFromCookie",
           "filename": "src/actions/session.ts"
@@ -142,6 +160,12 @@
         },
         "app/supplier/analytics/page": {
           "moduleId": 61572,
+          "async": false,
+          "exportedName": "getSessionFromCookie",
+          "filename": "src/actions/session.ts"
+        },
+        "app/supplier/blogs/page": {
+          "moduleId": 8006,
           "async": false,
           "exportedName": "getSessionFromCookie",
           "filename": "src/actions/session.ts"
@@ -221,6 +245,8 @@
       },
       "layer": {
         "app/(website)/about/page": "rsc",
+        "app/(website)/blogs/[id]/page": "rsc",
+        "app/(website)/blogs/page": "rsc",
         "app/(website)/cart/page": "rsc",
         "app/(website)/contact/page": "rsc",
         "app/(website)/how-it-works/page": "rsc",
@@ -232,6 +258,7 @@
         "app/(website)/services/page": "rsc",
         "app/(website)/supplier-profile/page": "rsc",
         "app/_not-found/page": "rsc",
+        "app/admin/blogs/page": "rsc",
         "app/admin/categories/page": "rsc",
         "app/admin/category-items/page": "rsc",
         "app/admin/inquiries/page": "rsc",
@@ -244,6 +271,7 @@
         "app/admin/users/page": "rsc",
         "app/auth/supplier-onboarding/page": "rsc",
         "app/supplier/analytics/page": "rsc",
+        "app/supplier/blogs/page": "rsc",
         "app/supplier/messages/chat/page": "rsc",
         "app/supplier/messages/page": "rsc",
         "app/supplier/orders/page": "rsc",
@@ -268,6 +296,18 @@
           "exportedName": "fetchServiceCategories",
           "filename": "src/actions/categories.ts"
         },
+        "app/(website)/blogs/[id]/page": {
+          "moduleId": 66671,
+          "async": false,
+          "exportedName": "fetchServiceCategories",
+          "filename": "src/actions/categories.ts"
+        },
+        "app/(website)/blogs/page": {
+          "moduleId": 43344,
+          "async": false,
+          "exportedName": "fetchServiceCategories",
+          "filename": "src/actions/categories.ts"
+        },
         "app/(website)/cart/page": {
           "moduleId": 62056,
           "async": false,
@@ -331,6 +371,8 @@
       },
       "layer": {
         "app/(website)/about/page": "rsc",
+        "app/(website)/blogs/[id]/page": "rsc",
+        "app/(website)/blogs/page": "rsc",
         "app/(website)/cart/page": "rsc",
         "app/(website)/contact/page": "rsc",
         "app/(website)/how-it-works/page": "rsc",
@@ -353,6 +395,18 @@
           "exportedName": "fetchServiceSubcategoriesByCategory",
           "filename": "src/actions/categories.ts"
         },
+        "app/(website)/blogs/[id]/page": {
+          "moduleId": 66671,
+          "async": false,
+          "exportedName": "fetchServiceSubcategoriesByCategory",
+          "filename": "src/actions/categories.ts"
+        },
+        "app/(website)/blogs/page": {
+          "moduleId": 43344,
+          "async": false,
+          "exportedName": "fetchServiceSubcategoriesByCategory",
+          "filename": "src/actions/categories.ts"
+        },
         "app/(website)/cart/page": {
           "moduleId": 62056,
           "async": false,
@@ -416,6 +470,8 @@
       },
       "layer": {
         "app/(website)/about/page": "rsc",
+        "app/(website)/blogs/[id]/page": "rsc",
+        "app/(website)/blogs/page": "rsc",
         "app/(website)/cart/page": "rsc",
         "app/(website)/contact/page": "rsc",
         "app/(website)/how-it-works/page": "rsc",
@@ -438,6 +494,18 @@
           "exportedName": "fetchServiceItemsBySubcategory",
           "filename": "src/actions/categories.ts"
         },
+        "app/(website)/blogs/[id]/page": {
+          "moduleId": 66671,
+          "async": false,
+          "exportedName": "fetchServiceItemsBySubcategory",
+          "filename": "src/actions/categories.ts"
+        },
+        "app/(website)/blogs/page": {
+          "moduleId": 43344,
+          "async": false,
+          "exportedName": "fetchServiceItemsBySubcategory",
+          "filename": "src/actions/categories.ts"
+        },
         "app/(website)/cart/page": {
           "moduleId": 62056,
           "async": false,
@@ -501,6 +569,8 @@
       },
       "layer": {
         "app/(website)/about/page": "rsc",
+        "app/(website)/blogs/[id]/page": "rsc",
+        "app/(website)/blogs/page": "rsc",
         "app/(website)/cart/page": "rsc",
         "app/(website)/contact/page": "rsc",
         "app/(website)/how-it-works/page": "rsc",

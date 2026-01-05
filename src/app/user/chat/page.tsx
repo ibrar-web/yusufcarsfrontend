@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChatPage } from "@/components/chat/ChatPage";
 import { Header } from "@/components/header";
-import { BackButton } from "@/components/back-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/utils";
 import { useAppState } from "@/hooks/use-app-state";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet } from "@/utils/apiconfig/http";
 
@@ -75,7 +73,7 @@ const formatTime = (value: string) => {
 };
 
 export default function Chat() {
-  const { handleNavigate, handleBack } = useAppState();
+  const { handleNavigate } = useAppState();
   const searchParams = useSearchParams();
   const router = useRouter();
   const supplierParam = searchParams.get("supplier");
@@ -164,8 +162,7 @@ export default function Chat() {
     const targetId = selectedConversationId ?? conversations[0]?.id;
     return conversations.find((c) => c.id === targetId) ?? conversations[0];
   }, [selectedConversationId, conversations]);
-  const chatSupplierId =
-    supplierParam ?? currentConversation?.id ?? undefined;
+  const chatSupplierId = supplierParam ?? currentConversation?.id ?? undefined;
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -215,9 +212,13 @@ export default function Chat() {
                     )}
                     onClick={() => {
                       setSelectedConversationId(conv.id);
-                      const params = new URLSearchParams(searchParams.toString());
+                      const params = new URLSearchParams(
+                        searchParams.toString()
+                      );
                       params.set("supplier", conv.id);
-                      router.replace(`?${params.toString()}`, { scroll: false });
+                      router.replace(`?${params.toString()}`, {
+                        scroll: false,
+                      });
                     }}
                   >
                     <div className="relative">

@@ -1,5 +1,7 @@
 {
   "/(website)/about/page": "app/(website)/about/page.js",
+  "/(website)/blogs/[id]/page": "app/(website)/blogs/[id]/page.js",
+  "/(website)/blogs/page": "app/(website)/blogs/page.js",
   "/(website)/cart/page": "app/(website)/cart/page.js",
   "/(website)/contact/page": "app/(website)/contact/page.js",
   "/(website)/how-it-works/page": "app/(website)/how-it-works/page.js",
@@ -12,6 +14,7 @@
   "/(website)/supplier-profile/page": "app/(website)/supplier-profile/page.js",
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/admin/blogs/page": "app/admin/blogs/page.js",
   "/admin/categories/page": "app/admin/categories/page.js",
   "/admin/category-items/page": "app/admin/category-items/page.js",
   "/admin/inquiries/page": "app/admin/inquiries/page.js",
@@ -26,6 +29,7 @@
   "/api/service-categories/route": "app/api/service-categories/route.js",
   "/auth/supplier-onboarding/page": "app/auth/supplier-onboarding/page.js",
   "/supplier/analytics/page": "app/supplier/analytics/page.js",
+  "/supplier/blogs/page": "app/supplier/blogs/page.js",
   "/supplier/messages/chat/page": "app/supplier/messages/chat/page.js",
   "/supplier/messages/page": "app/supplier/messages/page.js",
   "/supplier/orders/page": "app/supplier/orders/page.js",

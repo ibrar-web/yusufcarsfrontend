@@ -7,12 +7,10 @@ import {
   Menu,
   X,
   User,
-  FileText,
   MessageSquare,
   Settings,
   LogOut,
   Bell,
-  Package,
   History,
   Aperture,
   Blocks,
@@ -104,7 +102,6 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     userRole,
     handleSignOut,
     openProfileDialog,
-    openTrackOrderDialog,
     handleAuthSuccess,
   } = useAppState();
   const pathname = usePathname() ?? "/";
@@ -403,7 +400,10 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                         History
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem onClick={openProfileDialog} className="cursor-pointer">
+                    <DropdownMenuItem
+                      onClick={openProfileDialog}
+                      className="cursor-pointer"
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>

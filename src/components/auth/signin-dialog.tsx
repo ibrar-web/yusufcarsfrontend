@@ -28,7 +28,7 @@ export function SignInDialog({
   onSignUpClick,
   onSuccess,
   selectedRole,
-  setSelectedRole,
+  // setSelectedRole,
 }: SignInDialogProps) {
   const [formData, setFormData] = useState({
     email: "",

@@ -59,6 +59,9 @@ export type QuoteNotificationsState = QuoteNotificationsPayload | null;
 
 export type Page =
   | "home"
+  | "car-quote"
+  | "vehicle-maintenance"
+  | "marketplace"
   | "request-flow"
   | "parts-selection"
   | "cart"
@@ -82,6 +85,9 @@ export type Page =
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: "/",
+  "car-quote": "/car-quote",
+  "vehicle-maintenance": "/vehicle-maintenance",
+  marketplace: "/marketplace",
   "request-flow": "/request-flow",
   "parts-selection": "/parts-selection",
   cart: "/cart",
@@ -99,7 +105,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   about: "/about",
   contact: "/contact",
   products: "/products",
-  services: "/services",
+  services: "/marketplace",
   notifications: "/notifications",
   history: "/history",
 };

@@ -3,6 +3,7 @@ import { Car, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { pageToPath } from "@/stores/app-store";
 import type { Page } from "@/stores/app-store";
 import type { MouseEvent } from "react";
+import { siteConfig } from "@/lib/seo";
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
@@ -39,10 +40,10 @@ export function Footer({ onNavigate }: FooterProps) {
               <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
                 <Car className="h-6 w-6 text-white" />
               </div>
-              <span className="font-['Inter'] font-bold text-xl text-white">PartsQuote</span>
+              <span className="font-['Inter'] font-bold text-xl text-white">{siteConfig.name}</span>
             </div>
             <p className="font-['Roboto'] text-sm text-gray-400 mb-6 leading-relaxed">
-              Connect with trusted UK car parts suppliers. Get multiple quotes, compare, and choose the best deal.
+              Compare car service quotes, maintenance pricing, and trusted repair providers in one CarClinic dashboard.
             </p>
             <div className="flex gap-3">
               <button className="h-9 w-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
@@ -136,7 +137,7 @@ export function Footer({ onNavigate }: FooterProps) {
 
         <div className="pt-8 border-t border-gray-800">
           <p className="font-['Roboto'] text-sm text-gray-400 text-center">
-            © 2025 PartsQuote. All rights reserved. Registered in England and Wales.
+            © 2025 {siteConfig.name}. All rights reserved. Registered in England and Wales.
           </p>
         </div>
       </div>

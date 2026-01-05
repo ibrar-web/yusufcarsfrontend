@@ -1,15 +1,14 @@
-"use client";
+import { createMetadata } from "@/lib/seo";
+import { PartsSelectionPageClient } from "./parts-selection-page-client";
 
-import { PartsSelectionPage } from "@/page-components/parts-selection";
-import { useAppState } from "@/hooks/use-app-state";
+export const metadata = createMetadata({
+  title: "Browse Car Parts Categories | PartsQuote",
+  description:
+    "Filter OEM or aftermarket parts by system, shortlist sub-components, and send accurate quote requests to trusted UK suppliers.",
+  path: "/parts-selection",
+  keywords: ["car parts catalogue", "PartsQuote categories", "vehicle service selection"],
+});
 
-export default function PartsSelection() {
-  const { handleNavigate, openSignupDialog } = useAppState();
-
-  return (
-    <PartsSelectionPage
-      onNavigate={handleNavigate}
-      onSignupClick={openSignupDialog}
-    />
-  );
+export default function PartsSelectionPage() {
+  return <PartsSelectionPageClient />;
 }

@@ -7,6 +7,8 @@ import { getSessionFromCookie } from "@/actions/session";
 import { SessionHydrator } from "@/components/session-hydrator";
 import { LocalSessionHydrator } from "@/components/local-session-hydrator";
 import { SocketManager } from "@/components/socket-manager";
+import { siteConfig } from "@/lib/seo";
+import { SiteStructuredData } from "@/components/seo/site-structured-data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,8 +24,52 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "PartsQuote - UK Car Parts Marketplace",
-  description: "Get instant quotes for car parts from verified UK suppliers",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: `${siteConfig.name} – ${siteConfig.tagline}`,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  referrer: "origin-when-cross-origin",
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.company, url: siteConfig.url }],
+  creator: siteConfig.company,
+  publisher: siteConfig.company,
+  robots: siteConfig.robots,
+  openGraph: {
+    type: "website",
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} – ${siteConfig.tagline}`,
+    description: siteConfig.description,
+    images: [
+      {
+        url: siteConfig.openGraphImage,
+        width: 1200,
+        height: 630,
+        alt: siteConfig.shortDescription,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: siteConfig.socials.x,
+    site: siteConfig.socials.x,
+    title: `${siteConfig.name} – ${siteConfig.tagline}`,
+    description: siteConfig.description,
+    images: [siteConfig.openGraphImage],
+  },
+  alternates: {
+    canonical: siteConfig.url,
+  },
+  category: "Automotive",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default async function RootLayout({
@@ -40,6 +86,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
+        <SiteStructuredData />
         <SessionHydrator session={session} />
         <LocalSessionHydrator />
         <SocketManager />

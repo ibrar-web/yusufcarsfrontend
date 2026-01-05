@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import {
-  getBlogPostBySlug,
-  getBlogPostMetadata,
-  getBlogSummaries,
-} from "@/data/blog-posts";
+import { getBlogSummaries } from "@/data/blog-posts";
 import { BlogDetailClient } from "../BlogDetailClient";
+import { createMetadata } from "@/lib/seo";
+import { ArticleStructuredData } from "@/components/seo/article-structured-data";
+import { loadBlogPost } from "@/lib/blogs-service";
 
 type BlogDetailPageProps = {
   params: {
@@ -13,52 +10,41 @@ type BlogDetailPageProps = {
   };
 };
 
-export function generateStaticParams() {
-  return getBlogPostMetadata().map((post) => ({ id: post.slug }));
-}
-
-export function generateMetadata({
+export async function generateMetadata({
   params,
-}: BlogDetailPageProps): Metadata {
-  const post = getBlogPostBySlug(params.id);
-  if (!post) {
-    return {
-      title: "Blog not found | PartsQuote",
-    };
-  }
-  const url = `https://www.partsquote.co.uk/blogs/${post.slug}`;
-  return {
+}: BlogDetailPageProps) {
+  const { post } = await loadBlogPost(params.id);
+  const path = `/blogs/${post.slug}`;
+  return createMetadata({
     title: `${post.title} | PartsQuote Blog`,
     description: post.metaDescription,
-    alternates: {
-      canonical: url,
-    },
+    path,
+    keywords: post.tags,
     openGraph: {
-      title: post.title,
-      description: post.metaDescription,
-      url,
       type: "article",
-      images: [
-        {
-          url: post.heroImage,
-          alt: post.title,
-        },
-      ],
+      images: [{ url: post.heroImage, alt: post.title }],
+      publishedTime: new Date(post.date).toISOString(),
+      authors: [post.author],
+      tags: post.tags,
     },
-  };
+    twitter: {
+      images: [post.heroImage],
+    },
+  });
 }
 
-export default function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const post = getBlogPostBySlug(params.id);
-  if (!post) {
-    notFound();
-  }
-
+export default async function BlogDetailPage({
+  params,
+}: BlogDetailPageProps) {
+  const { post } = await loadBlogPost(params.id);
   const trendingArticles = getBlogSummaries()
     .filter((article) => article.slug !== post.slug)
     .slice(0, 6);
 
   return (
-    <BlogDetailClient post={post} trendingArticles={trendingArticles} />
+    <>
+      <ArticleStructuredData post={post} />
+      <BlogDetailClient post={post} trendingArticles={trendingArticles} />
+    </>
   );
 }

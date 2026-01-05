@@ -1,14 +1,18 @@
-import type { Metadata } from "next";
 import { HomePageClient } from "./HomePageClient";
+import { createMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "PartsQuote | UK Car Parts Marketplace",
+export const metadata = createMetadata({
+  title: "Car Service Quotes & Vehicle Maintenance Marketplace | CarClinic",
   description:
-    "Compare quotes from verified UK car parts suppliers, manage orders, and keep your vehicle on the road with PartsQuote.",
-  alternates: {
-    canonical: "https://www.partsquote.co.uk/",
-  },
-};
+    "Compare car service quotes, vehicle maintenance prices, and auto repair options. Get transparent pricing and choose the best service for your car.",
+  path: "/",
+  keywords: [
+    "car service quote",
+    "vehicle maintenance quote",
+    "auto repair quote",
+    "car maintenance marketplace",
+  ],
+});
 
 export default function Home() {
   return <HomePageClient />;

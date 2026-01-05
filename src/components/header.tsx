@@ -3,7 +3,6 @@
 import { Button } from "./ui/button";
 import { cn } from "./ui/utils";
 import {
-  Car,
   Menu,
   X,
   User,
@@ -56,6 +55,7 @@ import { useAppStore, pageToPath } from "@/stores/app-store";
 import { useAppState } from "@/hooks/use-app-state";
 import { UserRole } from "@/utils/api";
 import Link from "next/link";
+import Image from "next/image";
 import {
   loadCartSummary,
   subscribeToCartUpdates,
@@ -307,17 +307,13 @@ export function Header({ sticky = true }: HeaderProps = {}) {
             onClick={(event) => handleNavLink(event, "home")}
             className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group cursor-pointer"
           >
-            <div
-              className={cn(
-                "bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary-hover transition-all duration-300",
-                scrolled ? "h-8 w-8" : "h-10 w-10"
-              )}
-            >
-              <Car
-                className={cn(
-                  "text-white transition-all duration-300 cursor-pointer",
-                  scrolled ? "h-5 w-5" : "h-6 w-6"
-                )}
+            <div className="flex items-center justify-center rounded-lg bg-primary/5 p-1">
+              <Image
+                src="/carclinic-logo.svg"
+                alt={`${siteConfig.name} logo`}
+                width={scrolled ? 32 : 40}
+                height={scrolled ? 32 : 40}
+                priority
               />
             </div>
             <span className="font-['Inter'] font-bold text-xl text-ink">

@@ -41,7 +41,7 @@ const fallbackPostBase: BlogPost = {
 type BlogSource = "api" | "local" | "sample";
 
 type BlogApiResponse = {
-  data?: Partial<BlogPost> | null;
+  data?: (Partial<BlogPost> & { description?: string }) | null;
 };
 
 type BlogDetailResult = {

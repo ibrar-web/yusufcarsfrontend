@@ -85,8 +85,13 @@ const PATH_TO_PAGE: Array<{
   },
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
   {
-    match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
+    // match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
+    match: (path) => path.startsWith("/new-supplier"),
     page: "suppliers",
+  },
+  {
+    match: (path) => path.startsWith("/blogs"),
+    page: "blogs",
   },
   {
     match: (path) => path.startsWith("/parts-selection"),
@@ -180,6 +185,13 @@ export function Header({ sticky = true }: HeaderProps = {}) {
     updateCartSummary();
     const unsubscribe = subscribeToCartUpdates(updateCartSummary);
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const openSignIn = () => setShowSignIn(true);
+    window.addEventListener("request-sign-in", openSignIn);
+    return () => window.removeEventListener("request-sign-in", openSignIn);
   }, []);
 
   const handleRegistrationSubmit = () => {
@@ -296,8 +308,9 @@ export function Header({ sticky = true }: HeaderProps = {}) {
         >
           {/* Logo */}
           <Link
-            href={pageToPath("home")}
-            onClick={(event) => handleNavLink(event, "home")}
+            href={""}
+            // href={pageToPath("home")}
+            // onClick={(event) => handleNavLink(event, "home")}
             className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 group cursor-pointer"
           >
             <div className="flex items-center justify-center rounded-lg bg-primary/5 p-1">
@@ -449,19 +462,21 @@ export function Header({ sticky = true }: HeaderProps = {}) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-              <Button
-                variant="outline"
-                className="rounded-full gap-2 cursor-pointer"
-                onClick={() => navigate("cart")}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Cart
-                {cartItemCount > 0 && (
-                  <span className="ml-1 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
+              {!hasDashboardRole &&
+                <Button
+                  variant="outline"
+                  className="rounded-full gap-2 cursor-pointer"
+                  onClick={() => navigate("cart")}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Cart
+                  {cartItemCount > 0 && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-[#F02801] text-white text-[11px] font-semibold leading-none">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </Button>
+              }
               <Dialog
                 open={showRegistrationDialog}
                 onOpenChange={setShowRegistrationDialog}

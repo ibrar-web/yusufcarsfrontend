@@ -152,7 +152,7 @@ export const authApi = {
       throw new Error("Missing login data from the API.");
     }
 
-    persistAuthSession(payloadData.token, payloadData.user);
+    persistAuthSession(payloadData.token);
     return payloadData.user;
   },
   async loginWithGoogle(payload: GoogleAuthPayload) {
@@ -179,6 +179,6 @@ async function handleGoogleAuth(
     throw new Error("Missing login data from the API.");
   }
 
-  persistAuthSession(payloadData.token, payloadData.user);
+  persistAuthSession(payloadData.token);
   return payloadData.user;
 }

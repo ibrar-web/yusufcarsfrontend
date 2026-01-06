@@ -1,8 +1,8 @@
-import type { LoginUser } from "@/utils/api/types";
+import type { UserRole } from "@/utils/api/types";
 import { environment } from "@/utils/environment";
+import { decodeJwt } from "jose";
 
 const AUTH_TOKEN_KEY = "partsquote_access_token";
-const AUTH_USER_KEY = "partsquote_current_user";
 const COOKIE_NAME = environment.cookies.name;
 
 const isBrowser = typeof window !== "undefined";
@@ -13,28 +13,38 @@ function getStorage() {
 
 export function getStoredAuthToken(): string | null {
   const storage = getStorage();
-  return storage?.getItem(AUTH_TOKEN_KEY) ?? null;
+  const token = storage?.getItem(AUTH_TOKEN_KEY) ?? null;
+  if (!token || isTokenExpired(token)) {
+    clearAuthSession();
+    return null;
+  }
+  return token;
 }
 
-export function getStoredUser(): LoginUser | null {
-  const storage = getStorage();
-  if (!storage) return null;
-  const raw = storage.getItem(AUTH_USER_KEY);
-  if (!raw) return null;
+function isTokenExpired(token: string) {
+  const payload = extractTokenPayload(token);
+  if (!payload) {
+    return true;
+  }
+  if (typeof payload.exp !== "number") {
+    return false;
+  }
+  return payload.exp * 1000 <= Date.now();
+}
 
+function extractTokenPayload(token: string) {
   try {
-    return JSON.parse(raw) as LoginUser;
+    return decodeJwt(token);
   } catch (error) {
-    storage.removeItem(AUTH_USER_KEY);
+    console.error("Failed to decode token", error);
     return null;
   }
 }
 
-export function persistAuthSession(token: string, user: LoginUser) {
+export function persistAuthSession(token: string) {
   const storage = getStorage();
   if (!storage) return;
   storage.setItem(AUTH_TOKEN_KEY, token);
-  storage.setItem(AUTH_USER_KEY, JSON.stringify(user));
   setAuthCookie(token);
 }
 
@@ -42,7 +52,6 @@ export function clearAuthSession() {
   const storage = getStorage();
   if (!storage) return;
   storage.removeItem(AUTH_TOKEN_KEY);
-  storage.removeItem(AUTH_USER_KEY);
   setAuthCookie("");
 }
 
@@ -53,4 +62,27 @@ function setAuthCookie(value: string) {
   const safeValue = value ? value : "";
   const expires = value ? "; max-age=86400" : "; max-age=0";
   document.cookie = `${COOKIE_NAME}=${safeValue}; path=/${expires}`;
+}
+
+type StoredSessionUser = {
+  id?: string;
+  email?: string;
+  role?: UserRole;
+};
+
+export function getStoredUser(): StoredSessionUser | null {
+  const token = getStoredAuthToken();
+  if (!token) return null;
+  const payload = extractTokenPayload(token);
+  if (!payload) return null;
+  const role =
+    typeof payload.role === "string" &&
+    ["user", "supplier", "admin"].includes(payload.role)
+      ? (payload.role as UserRole)
+      : undefined;
+  return {
+    id: typeof payload.sub === "string" ? payload.sub : undefined,
+    email: typeof payload.email === "string" ? payload.email : undefined,
+    role,
+  };
 }

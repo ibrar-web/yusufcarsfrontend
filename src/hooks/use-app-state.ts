@@ -136,8 +136,15 @@ export function useAppState() {
   const authSuccess = useCallback(
     (payload?: LoginUser | UserRole) => {
       handleAuthSuccess(payload);
+      if (
+        typeof payload === "object" &&
+        payload !== null &&
+        payload.role === "supplier"
+      ) {
+        router.replace("/supplier/requests");
+      }
     },
-    [handleAuthSuccess],
+    [handleAuthSuccess, router],
   );
 
   return {

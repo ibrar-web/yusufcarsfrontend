@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { authApi, type LoginUser, type UserRole } from "@/utils/api";
+import { useGoogleIdToken } from "@/hooks/use-google-id-token";
 
 interface SignInDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function SignInDialog({
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isReady: googleReady, requestIdToken } = useGoogleIdToken();
 
   const loginUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +61,30 @@ export function SignInDialog({
     }
   };
 
-  const handleGoogleSignIn = () => {
-    toast.success("Redirecting to Google Sign In...");
-    // In production, this would redirect to Google OAuth
-    setTimeout(() => {
+  const handleGoogleSignIn = async () => {
+    if (!googleReady) {
+      toast.error("Google Sign In is not ready yet. Please try again.");
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const idToken = await requestIdToken();
+      const user = await authApi.loginWithGoogle({
+        idToken,
+        role: selectedRole,
+      });
       toast.success("Signed in with Google!");
       onOpenChange(false);
-      onSuccess?.(selectedRole);
-    }, 1500);
+      onSuccess?.(user);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to sign you in with Google.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -94,6 +112,7 @@ export function SignInDialog({
             onClick={handleGoogleSignIn}
             className="w-full h-12 rounded-xl bg-[#1F1F1F] hover:bg-[#2D2D2D] text-white border-2 border-[#2D2D2D] hover:border-[#3D3D3D] transition-all duration-200 font-['Roboto'] font-medium"
             style={{ fontSize: "15px" }}
+            disabled={!googleReady || isSubmitting}
           >
             <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24">
               <path
@@ -113,7 +132,7 @@ export function SignInDialog({
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            {isSubmitting ? "Connecting..." : "Continue with Google"}
           </Button>
 
           {/* Divider */}

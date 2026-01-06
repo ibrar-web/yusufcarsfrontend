@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Vehicle Maintenance Quotes & Pricing Guide | CarClinic",
+  title: "Vehicle Maintenance Quotes & Pricing Guide | PartsQuote",
   description:
     "Explore vehicle maintenance quotes, service pricing, and repair options. Compare maintenance services and keep your car in top condition.",
   path: "/vehicle-maintenance",
@@ -28,7 +28,7 @@ export default function VehicleMaintenancePage() {
             </h1>
             <p className="font-['Roboto'] text-lg text-[#475569]">
               Compare full-service schedules, quick inspections, and urgent repairs.
-              CarClinic benchmarks thousands of garage and mobile technician prices so
+              PartsQuote benchmarks thousands of garage and mobile technician prices so
               you can keep your vehicle in peak condition year-round.
             </p>
           </div>
@@ -65,7 +65,7 @@ export default function VehicleMaintenancePage() {
           <div className="rounded-2xl border border-dashed border-[#CBD5F5] bg-[#F8FAFC] p-6">
             <p className="font-['Roboto'] text-sm text-[#475569]">
               Download your personalised service calendar, export the PDF to share with
-              any technician, or book directly through CarClinic and track every invoice
+              any technician, or book directly through PartsQuote and track every invoice
               in your dashboard.
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function VehicleMaintenancePage() {
               Save Time and Money on Car Maintenance
             </h2>
             <p className="font-['Roboto'] text-white/80 mb-6">
-              Centralise every quote, invoice, and warranty document inside CarClinic.
+              Centralise every quote, invoice, and warranty document inside PartsQuote.
               Automated reminders ensure you never miss a service, and our support team
               monitors for duplicate charges so your budget stays intact.
             </p>

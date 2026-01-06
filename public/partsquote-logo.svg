@@ -1,0 +1,37 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="partsquoteLogoTitle partsquoteLogoDesc">
+  <title id="partsquoteLogoTitle">PartsQuote Logo</title>
+  <desc id="partsquoteLogoDesc">Interlocking P and Q monogram with warm gradient ring</desc>
+  <defs>
+    <linearGradient id="partsquoteRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B2C" />
+      <stop offset="100%" stop-color="#FFB347" />
+    </linearGradient>
+    <linearGradient id="partsquoteCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#111D2E" />
+      <stop offset="100%" stop-color="#1F2F4A" />
+    </linearGradient>
+    <linearGradient id="partsquoteP" x1="30%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0F6FF" />
+      <stop offset="100%" stop-color="#D7E3FF" />
+    </linearGradient>
+    <linearGradient id="partsquoteTail" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8243" />
+      <stop offset="100%" stop-color="#FFD1A0" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="108" height="108" rx="26" fill="#FFF6EF" />
+  <circle cx="60" cy="60" r="44" fill="none" stroke="url(#partsquoteRing)" stroke-width="10" />
+  <circle cx="60" cy="60" r="34" fill="url(#partsquoteCore)" />
+  <path
+    d="M40 36c0-4.4 3.6-8 8-8h17c15.5 0 28 12.8 28 28.5S80.5 85 65 85h-9v13c0 4.4-3.6 8-8 8s-8-3.6-8-8V36Z"
+    fill="url(#partsquoteP)"
+  />
+  <path
+    d="M62 42h10c9.4 0 17 7.6 17 17s-7.6 17-17 17H62c-4.4 0-8-3.6-8-8V50c0-4.4 3.6-8 8-8Z"
+    fill="#0F172A"
+    opacity="0.28"
+  />
+  <path d="M70 76l18 18" stroke="url(#partsquoteTail)" stroke-width="8" stroke-linecap="round" />
+  <circle cx="62" cy="48" r="9" fill="#1F2F4A" opacity="0.8" />
+  <path d="M34 54c4-14 16.5-24 31-24" stroke="#FFE2C7" stroke-width="4" stroke-linecap="round" opacity="0.7" />
+</svg>

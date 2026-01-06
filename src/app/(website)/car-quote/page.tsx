@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Get a Car Service Quote Online – Compare Prices | CarClinic",
+  title: "Get a Car Service Quote Online – Compare Prices | PartsQuote",
   description:
     "Get an instant car service quote online. Compare vehicle maintenance and auto repair prices from verified service providers.",
   path: "/car-quote",
@@ -36,7 +36,7 @@ const quoteBenefits = [
   },
   {
     title: "No hidden fees",
-    body: "CarClinic freezes every quote for 48 hours. If a provider needs to adjust pricing, you receive an updated estimate to review digitally.",
+    body: "PartsQuote freezes every quote for 48 hours. If a provider needs to adjust pricing, you receive an updated estimate to review digitally.",
   },
   {
     title: "Seamless scheduling",
@@ -57,7 +57,7 @@ export default function CarQuotePage() {
               Get an Instant Car Service Quote
             </h1>
             <p className="font-['Roboto'] text-lg text-[#475569] mb-6">
-              Share your vehicle details once and CarClinic compares labour,
+              Share your vehicle details once and PartsQuote compares labour,
               parts, and inspection fees across vetted garages. No hidden fees,
               surprise mark-ups, or last-minute upsells—just transparent vehicle
               maintenance prices.

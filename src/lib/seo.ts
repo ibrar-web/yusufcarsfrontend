@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const fallbackSiteUrl = "https://www.carclinic.com";
+const fallbackSiteUrl = "https://www.partsquote.co.uk";
 
 const normalizeUrl = (url: string): string =>
   url.endsWith("/") ? url.slice(0, -1) : url;
@@ -19,21 +19,21 @@ const dedupeKeywords = (values: string[] = []): string[] => {
 };
 
 export const siteConfig = {
-  name: "CarClinic",
+  name: "PartsQuote",
   tagline: "Compare Car Service Quotes & Vehicle Maintenance Prices",
   description:
-    "CarClinic helps you compare car service quotes, vehicle maintenance prices, and auto repair services from trusted providers near you.",
-  shortDescription: "Compare car service quotes and maintenance pricing online.",
+    "PartsQuote helps you compare car service quotes, vehicle maintenance prices, and auto repair services from trusted providers near you.",
+  shortDescription: "Compare car service quotes and maintenance pricing online with PartsQuote.",
   url: resolvedSiteUrl,
   locale: "en_GB",
-  company: "CarClinic Ltd",
-  contactEmail: "support@carclinic.com",
+  company: "PartsQuote Ltd",
+  contactEmail: "support@partsquote.co.uk",
   contactPhone: "+44 20 3999 1234",
   headquarters: "London, United Kingdom",
   socials: {
-    x: "@CarClinicHQ",
-    linkedin: "https://www.linkedin.com/company/carclinic",
-    instagram: "https://www.instagram.com/carclinichq",
+    x: "@PartsQuoteHQ",
+    linkedin: "https://www.linkedin.com/company/partsquote",
+    instagram: "https://www.instagram.com/partsquotehq",
   },
   keywords: [
     "car service quote",

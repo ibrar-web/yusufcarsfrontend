@@ -309,7 +309,7 @@ export function Header({ sticky = true }: HeaderProps = {}) {
           >
             <div className="flex items-center justify-center rounded-lg bg-primary/5 p-1">
               <Image
-                src="/carclinic-logo.svg"
+                src="/partsquote-logo.svg"
                 alt={`${siteConfig.name} logo`}
                 width={scrolled ? 32 : 40}
                 height={scrolled ? 32 : 40}

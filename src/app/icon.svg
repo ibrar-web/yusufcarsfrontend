@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="partsquoteIconTitle partsquoteIconDesc">
+  <title id="partsquoteIconTitle">PartsQuote Icon</title>
+  <desc id="partsquoteIconDesc">Rounded monogram badge used as the PartsQuote browser icon</desc>
+  <defs>
+    <linearGradient id="partsquoteIconRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B2C" />
+      <stop offset="100%" stop-color="#FFB347" />
+    </linearGradient>
+    <linearGradient id="partsquoteIconCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#121D30" />
+      <stop offset="100%" stop-color="#1E2F4C" />
+    </linearGradient>
+    <linearGradient id="partsquoteIconMono" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF5FF" />
+      <stop offset="100%" stop-color="#DCE5FF" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="15" fill="#FFF6EE" />
+  <circle cx="32" cy="32" r="22" fill="none" stroke="url(#partsquoteIconRing)" stroke-width="6" />
+  <circle cx="32" cy="32" r="17" fill="url(#partsquoteIconCore)" />
+  <path
+    d="M22 20c0-2.2 1.8-4 4-4h8c10 0 18 8.2 18 18.2S44 52 34 52h-4v6c0 2.2-1.8 4-4 4s-4-1.8-4-4V20Z"
+    fill="url(#partsquoteIconMono)"
+  />
+  <path d="M34.5 37l10 10" stroke="#FFAF79" stroke-width="5" stroke-linecap="round" />
+  <circle cx="34" cy="26" r="5" fill="#1F2F4A" opacity="0.8" />
+</svg>

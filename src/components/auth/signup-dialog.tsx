@@ -23,15 +23,16 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { authApi, type UserRole } from "@/utils/api";
+import { authApi, type LoginUser, type UserRole } from "@/utils/api";
 import { useRouter } from "next/navigation";
+import { useGoogleIdToken } from "@/hooks/use-google-id-token";
 
 interface SignupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignInClick?: () => void;
   setSignupDialogOpen?: (open: boolean) => void;
-  onSuccess?: (role?: UserRole) => void;
+  onSuccess?: (payload?: LoginUser | UserRole) => void;
 }
 
 export function SignupDialog({
@@ -58,6 +59,7 @@ export function SignupDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [accountType, setAccountType] = useState<UserRole>("user");
+  const { isReady: googleReady, requestIdToken } = useGoogleIdToken();
 
   // Password strength checker
   const getPasswordStrength = (password: string) => {
@@ -166,14 +168,49 @@ export function SignupDialog({
     }
   };
 
-  const handleGoogleSignup = () => {
-    toast.success("Redirecting to Google Sign In...");
-    // In production, this would redirect to Google OAuth
-    setTimeout(() => {
+  const handleGoogleSignup = async () => {
+    if (accountType === "supplier") {
+      toast.info("Google sign up is currently available for customers only.");
+      setSignupDialogOpen?.(false);
+      router.push(`/auth/supplier-onboarding`);
+      return;
+    }
+
+    if (!acceptTerms) {
+      setErrors((prev) => ({
+        ...prev,
+        terms: "You must accept the terms and conditions to continue.",
+      }));
+      toast.error("Please accept the terms and conditions to continue.");
+      return;
+    }
+
+    if (!googleReady) {
+      toast.error("Google Sign Up is not ready yet. Please try again.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const idToken = await requestIdToken();
+      const user = await authApi.signupWithGoogle({
+        idToken,
+        role: accountType,
+        marketingOptIn: acceptMarketing,
+      });
       toast.success("Account created with Google!");
+      resetForm();
       onOpenChange(false);
-      onSuccess?.(accountType);
-    }, 1500);
+      onSuccess?.(user);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account with Google right now.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectAccountType = (role: UserRole) => {
@@ -217,6 +254,7 @@ export function SignupDialog({
             variant="outline"
             className="w-full h-12 rounded-xl border-2 border-[#334155] bg-[#1E293B] text-white hover:border-[#475569] hover:bg-[#334155] transition-all duration-200 font-['Roboto'] font-medium"
             style={{ fontSize: "16px", lineHeight: "1.5" }}
+            disabled={!googleReady || isSubmitting}
           >
             <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24">
               <path
@@ -236,7 +274,7 @@ export function SignupDialog({
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            {isSubmitting ? "Connecting..." : "Continue with Google"}
           </Button>
 
           {/* Divider */}

@@ -75,6 +75,8 @@ export const apiRoutes = {
   auth: {
     login: "/auth/login",
     signup: "/auth/register",
+    googleLogin: "/auth/google/login",
+    googleSignup: "/auth/google/register",
     logout: "/auth/logout",
     profile: "/auth/profile",
   },

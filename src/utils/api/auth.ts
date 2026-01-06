@@ -58,6 +58,12 @@ export interface LoginPayload {
   role?: UserRole;
 }
 
+export interface GoogleAuthPayload {
+  idToken: string;
+  role?: UserRole;
+  marketingOptIn?: boolean;
+}
+
 // export interface LoginResponse {
 //   id: string;
 //   email: string;
@@ -149,6 +155,30 @@ export const authApi = {
     persistAuthSession(payloadData.token);
     return payloadData.user;
   },
+  async loginWithGoogle(payload: GoogleAuthPayload) {
+    return handleGoogleAuth(apiRoutes.auth.googleLogin, payload);
+  },
+  async signupWithGoogle(payload: GoogleAuthPayload) {
+    return handleGoogleAuth(apiRoutes.auth.googleSignup, payload);
+  },
 };
 
 export type { LoginUser, UserRole };
+
+async function handleGoogleAuth(
+  endpoint: string,
+  payload: GoogleAuthPayload,
+): Promise<LoginUser> {
+  const response = await apiPost<LoginApiResponse>(
+    endpoint,
+    payload as unknown as Record<string, unknown>,
+  );
+
+  const payloadData = response?.data;
+  if (!payloadData) {
+    throw new Error("Missing login data from the API.");
+  }
+
+  persistAuthSession(payloadData.token, payloadData.user);
+  return payloadData.user;
+}

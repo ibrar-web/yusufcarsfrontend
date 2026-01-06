@@ -85,8 +85,13 @@ const PATH_TO_PAGE: Array<{
   },
   { match: (path) => path.startsWith("/how-it-works"), page: "how-it-works" },
   {
-    match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
+    // match: (path) => path.includes("supplier") && !path.startsWith("/supplier"),
+    match: (path) => path.startsWith("/new-supplier"),
     page: "suppliers",
+  },
+  {
+    match: (path) => path.startsWith("/blogs"),
+    page: "blogs",
   },
   {
     match: (path) => path.startsWith("/parts-selection"),

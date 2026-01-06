@@ -43,7 +43,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <span className="font-['Inter'] font-bold text-xl text-white">{siteConfig.name}</span>
             </div>
             <p className="font-['Roboto'] text-sm text-gray-400 mb-6 leading-relaxed">
-              Compare car service quotes, maintenance pricing, and trusted repair providers in one CarClinic dashboard.
+              Compare car service quotes, maintenance pricing, and trusted repair providers in one {siteConfig.name} dashboard.
             </p>
             <div className="flex gap-3">
               <button className="h-9 w-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">

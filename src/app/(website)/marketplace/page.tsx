@@ -5,7 +5,7 @@ import { ServicesExplorer } from "@/components/services/ServicesExplorer";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Car Maintenance Marketplace – Compare Auto Services | CarClinic",
+  title: "Car Maintenance Marketplace – Compare Auto Services | PartsQuote",
   description:
     "Browse a car maintenance marketplace to compare auto service providers, prices, and customer ratings in one place.",
   path: "/marketplace",
@@ -34,7 +34,7 @@ export default async function MarketplacePage() {
               Car Maintenance & Auto Service Marketplace
             </h1>
             <p className="font-['Roboto'] text-lg text-[#475569] mb-4">
-              Search nearby garages, national chains, or mobile mechanics. CarClinic
+              Search nearby garages, national chains, or mobile mechanics. PartsQuote
               surfaces verified availability, response times, and price ranges so you can
               pick the right service partner in minutes.
             </p>

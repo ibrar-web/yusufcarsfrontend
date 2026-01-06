@@ -33,9 +33,9 @@ export function Footer({ onNavigate }: FooterProps) {
   return (
     <footer className="bg-[#1F2937] text-white border-t border-gray-800">
       <div className="max-w-[1200px] mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
                 <Car className="h-6 w-6 text-white" />
@@ -62,7 +62,7 @@ export function Footer({ onNavigate }: FooterProps) {
           </div>
 
           {/* Company */}
-          <div>
+          <div className="lg:col-span-1">
             <h4 className="font-['Inter'] font-semibold mb-5 text-white">Company</h4>
             <ul className="space-y-3">
               {[
@@ -85,7 +85,7 @@ export function Footer({ onNavigate }: FooterProps) {
           </div>
 
           {/* Support */}
-          <div>
+          <div className="lg:col-span-1">
             <h4 className="font-['Inter'] font-semibold mb-5 text-white">Support</h4>
             <ul className="space-y-3">
               {[
@@ -108,7 +108,7 @@ export function Footer({ onNavigate }: FooterProps) {
           </div>
 
           {/* Legal */}
-          <div>
+          <div className="col-span-2 lg:col-span-1">
             <h4 className="font-['Inter'] font-semibold mb-5 text-white">Legal</h4>
             <ul className="space-y-3">
               <li>

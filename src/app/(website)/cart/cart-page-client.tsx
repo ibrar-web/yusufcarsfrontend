@@ -255,9 +255,9 @@ export function CartPageClient() {
                     {services.map((service, index) => (
                       <div
                         key={service.id ?? `${service.label}-${index}`}
-                        className="flex items-center justify-between rounded-2xl border border-[#E2E8F0] px-5 py-4"
+                        className="flex flex-col gap-4 justify-between rounded-2xl border border-[#E2E8F0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
                       >
-                        <div>
+                        <div className="space-y-1">
                           <p className="font-['Inter'] text-base font-semibold text-[#0F172A]">
                             {service.label}
                           </p>
@@ -272,7 +272,7 @@ export function CartPageClient() {
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                           <Button
                             size="lg"
                             onClick={() => handleQuoteRequest(service)}
@@ -280,7 +280,7 @@ export function CartPageClient() {
                               requestingQuote &&
                               requestingServiceId === service.id
                             }
-                            className="cursor-pointer"
+                            className="cursor-pointer w-full sm:w-auto"
                           >
                             {requestingQuote &&
                             requestingServiceId === service.id
@@ -288,7 +288,7 @@ export function CartPageClient() {
                               : "Request a Quote"}
                           </Button>
                           <button
-                            className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 cursor-pointer"
+                            className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 justify-center cursor-pointer"
                             onClick={() => handleServiceRemove(index)}
                           >
                             <X className="h-4 w-4" />

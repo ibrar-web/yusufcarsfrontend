@@ -141,6 +141,9 @@ export const apiRoutes = {
     }
   },
   admin: {
+    reports: {
+      list: "/admin/reports",
+    },
     users: {
       list: "/admin/users",
       update: (id: string) => `/admin/users/${id}/activate`,

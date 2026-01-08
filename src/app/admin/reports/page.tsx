@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
+  // CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,24 +20,97 @@ import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
   Building2,
-  Calendar,
+  // Calendar,
   CheckCircle,
   Users,
+  // XCircle,
 } from "lucide-react";
-import { adminAbuseReports } from "@/page-components/admin-dashboard/data";
+import { apiGet } from "@/utils/apiconfig/http";
+import { apiRoutes } from "@/utils/apiroutes";
+import { toast } from "sonner";
 
-type Report = (typeof adminAbuseReports)[number];
+type Reporter = {
+  id: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  role?: string | null;
+  status?: string | null;
+  profileImageUrl?: string | null;
+};
+
+type ReportRecord = {
+  id: string;
+  reporter: Reporter;
+  reporterId: string;
+  subject: string;
+  subjectId: string;
+  description: string;
+  status: "open" | "resolved" | string;
+  resolutionNotes?: string | null;
+  assignedAdminId?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+};
+
+type ReportsApiResponse = {
+  statusCode: number;
+  message: string;
+  data: ReportRecord[];
+};
+
+const severityBadge = (status: ReportRecord["status"]) => {
+  const base = "px-3 py-1.5 font-['Roboto']";
+  if (status === "open") return `${base} bg-[#FEE2E2] text-[#7F1D1D] border-[#F02801]`;
+  if (status === "resolved") return `${base} bg-[#DCFCE7] text-[#14532D] border-[#22C55E]`;
+  return `${base} bg-[#DBEAFE] text-[#1E40AF] border-[#3B82F6]`;
+};
 
 export default function AdminReportsPage() {
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [reportReviewDialogOpen, setReportReviewDialogOpen] = useState(false);
+  const [reports, setReports] = useState<ReportRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<ReportRecord | null>(
+    null
+  );
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const severityBadge = (severity: Report["severity"]) => {
-    const base = "px-3 py-1.5 font-['Roboto']";
-    if (severity === "High") return `${base} bg-[#FEE2E2] text-[#7F1D1D] border-[#F02801]`;
-    if (severity === "Medium") return `${base} bg-[#FEF3C7] text-[#92400E] border-[#F59E0B]`;
-    return `${base} bg-[#DBEAFE] text-[#1E40AF] border-[#3B82F6]`;
+  useEffect(() => {
+    let ignore = false;
+    const fetchReports = async () => {
+      setLoading(true);
+      try {
+        const response = await apiGet<ReportsApiResponse>(
+          apiRoutes.admin.reports.list
+        );
+        if (ignore) return;
+        const payload = response?.data ?? [];
+        setReports(payload);
+      } catch (error) {
+        console.error("Failed to load reports", error);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to load reports. Try again."
+        );
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    fetchReports();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const openDialog = (report: ReportRecord) => {
+    setSelectedReport(report);
+    setDialogOpen(true);
   };
+
+  const pendingCount = useMemo(
+    () => reports.filter((report) => report.status === "open").length,
+    [reports]
+  );
 
   return (
     <>
@@ -49,77 +123,84 @@ export default function AdminReportsPage() {
               Abuse Reports
             </h1>
             <p className="text-base md:text-lg text-[#475569] font-['Roboto']">
-              {adminAbuseReports.filter((r) => r.status === "Under Review").length} reports under review
+              {loading
+                ? "Loading latest reports…"
+                : `${pendingCount} reports pending review`}
             </p>
           </div>
         </div>
 
         <Card className="border border-[#E5E7EB] shadow-[0_4px_24px_rgba(15,23,42,0.08)]">
           <CardHeader className="pb-4 border-b border-[#E5E7EB]">
-            <CardTitle className="font-['Inter'] text-[#0F172A]">All Reports</CardTitle>
+            <CardTitle className="font-['Inter'] text-[#0F172A]">
+              All Reports
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {adminAbuseReports.map((report, index) => (
-              <div
-                key={report.id}
-                className={`flex items-center gap-4 px-5 py-4 hover:bg-[#F1F5F9] transition-all ${
-                  index !== adminAbuseReports.length - 1 ? "border-b border-[#E5E7EB]" : ""
-                }`}
-              >
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F1F5F9]">
-                    <AlertTriangle className="h-5 w-5 text-[#64748B]" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-['Inter'] text-[#0F172A]">Report {report.id}</h3>
-                    <span className="text-[#94A3B8] font-['Roboto']">•</span>
-                    <span className="text-[#475569] font-['Roboto']">{report.reportedUser}</span>
-                  </div>
-                  <p className="text-sm text-[#475569] font-['Roboto'] mb-1">{report.reason}</p>
-                  <div className="flex items-center gap-4 text-xs text-[#94A3B8] font-['Roboto']">
-                    <span>Reported by {report.reportedBy}</span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {report.date}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 flex flex-col gap-2 items-end">
-                  <Badge className={severityBadge(report.severity)}>{report.severity}</Badge>
-                  <Badge
-                    className={`font-['Roboto'] px-2 py-0.5 ${
-                      report.status === "Under Review"
-                        ? "bg-[#92400E]/30 text-[#FCD34D] border-[#F59E0B]"
-                        : "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
-                    }`}
-                  >
-                    {report.status}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    className="text-[#F02801] hover:text-[#D22301] font-['Roboto']"
-                    onClick={() => {
-                      setSelectedReport(report);
-                      setReportReviewDialogOpen(true);
-                    }}
-                  >
-                    Review
-                  </Button>
-                </div>
+            {loading ? (
+              <div className="p-6 text-center text-sm text-[#475569]">
+                Loading reports…
               </div>
-            ))}
+            ) : !reports.length ? (
+              <div className="p-6 text-center text-sm text-[#475569]">
+                No reports found.
+              </div>
+            ) : (
+              reports.map((report, index) => (
+                <div
+                  key={report.id}
+                  className={`flex flex-col gap-4 px-6 py-5 hover:bg-[#F1F5F9] transition-all ${
+                    index !== reports.length - 1 ? "border-b border-[#E5E7EB]" : ""
+                  } sm:flex-row sm:items-center sm:justify-between`}
+                >
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F1F5F9]">
+                        <AlertTriangle className="h-5 w-5 text-[#64748B]" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-['Inter'] text-[#0F172A]">
+                          {report.subject} #{report.subjectId.slice(0, 8)}
+                        </h3>
+                        <span className="text-[#94A3B8] font-['Roboto']">•</span>
+                        <p className="text-xs font-['Roboto'] text-[#94A3B8]">
+                          {new Date(report.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-[#475569] font-['Roboto'] line-clamp-2 text-ellipsis">
+                        {report.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 min-w-[150px]">
+                    <Badge className={severityBadge(report.status)}>
+                      {report.status}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      className="text-[#F02801] hover:text-[#D22301] font-['Roboto'] cursor-pointer"
+                      onClick={() => openDialog(report)}
+                    >
+                      Review
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <Dialog open={reportReviewDialogOpen} onOpenChange={setReportReviewDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg border border-[#334155] bg-[#1E293B]">
           <DialogHeader>
-            <DialogTitle className="font-['Inter'] text-white">Report Details</DialogTitle>
+            <DialogTitle className="font-['Inter'] text-white">
+              Report Details
+            </DialogTitle>
             <DialogDescription className="font-['Roboto'] text-[#CBD5E1]">
-              Review abuse report and take appropriate action
+              Review the abuse report and take action
             </DialogDescription>
           </DialogHeader>
           {selectedReport && (
@@ -131,13 +212,17 @@ export default function AdminReportsPage() {
                       <AlertTriangle className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-['Inter'] text-white">{selectedReport.id}</h3>
-                      <p className="text-sm text-[#CBD5E1] font-['Roboto']">{selectedReport.date}</p>
+                      <h3 className="font-['Inter'] text-white">
+                        {selectedReport.subject} report
+                      </h3>
+                      <p className="text-sm text-[#CBD5E1] font-['Roboto']">
+                        {new Date(selectedReport.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                   <Badge
                     className={`font-['Roboto'] px-2 py-0.5 ${
-                      selectedReport.status === "Under Review"
+                      selectedReport.status === "open"
                         ? "bg-[#92400E]/30 text-[#FCD34D] border-[#F59E0B]"
                         : "bg-[#166534]/30 text-[#86EFAC] border-[#22C55E]"
                     }`}
@@ -145,34 +230,54 @@ export default function AdminReportsPage() {
                     {selectedReport.status}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
+                {/* <div className="flex items-center gap-2 text-sm">
                   <span className="font-['Roboto'] text-[#CBD5E1]">Severity:</span>
-                  <Badge className={severityBadge(selectedReport.severity)}>{selectedReport.severity}</Badge>
-                </div>
+                  <Badge className={severityBadge(selectedReport.status)}>
+                    {selectedReport.status}
+                  </Badge>
+                </div> */}
               </div>
               <div className="bg-[#0F172A] p-4 rounded-xl border border-[#334155] space-y-3">
                 <div>
-                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">Reported User</p>
+                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">
+                    Reported User
+                  </p>
                   <div className="flex items-center gap-2 p-2.5 bg-[#1E293B] rounded-lg border border-[#334155]">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#F02801] to-[#D22301] flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#F02801] to-[#D97701] flex items-center justify-center">
                       <Building2 className="h-4 w-4 text-white" />
                     </div>
-                    <p className="font-['Inter'] text-white">{selectedReport.reportedUser}</p>
+                    <p className="font-['Inter'] text-white">
+                      {selectedReport.reporter.firstName}{" "}
+                      {selectedReport.reporter.lastName}
+                    </p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">Reported By</p>
+                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">
+                    Reported Email
+                  </p>
                   <div className="flex items-center gap-2 p-2.5 bg-[#1E293B] rounded-lg border border-[#334155]">
                     <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center">
                       <Users className="h-4 w-4 text-white" />
                     </div>
-                    <p className="font-['Inter'] text-white">{selectedReport.reportedBy}</p>
+                    <p className="font-['Inter'] text-white">
+                      {selectedReport.reporter.email}
+                    </p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">Reason</p>
-                  <div className="p-3 bg-[#1E293B] rounded-lg border border-[#334155]">
-                    <p className="font-['Roboto'] text-[#E2E8F0] leading-relaxed">{selectedReport.reason}</p>
+                  <p className="text-sm text-[#94A3B8] font-['Roboto'] mb-1.5">
+                    Reason
+                  </p>
+                  {/* <div className="p-3 bg-[#1E293B] rounded-lg border border-[#334155] h-[10px] overflow-y-auto">
+                    <p className="font-['Roboto'] text-[#E2E8F0] leading-relaxed">
+                      {selectedReport.description}
+                    </p>
+                  </div> */}
+                  <div className="p-3 bg-[#1E293B] rounded-lg border border-[#334155]" style={{maxHeight: "200px", overflowY: "scroll"}}>
+                    <p className="font-['Roboto'] text-[#E2E8F0] leading-snug break-words">
+                      {selectedReport.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -180,14 +285,14 @@ export default function AdminReportsPage() {
                 <Button
                   variant="outline"
                   className="flex-1 border-[#475569] bg-transparent text-[#CBD5E1] hover:bg-[#334155] hover:text-white font-['Roboto']"
-                  onClick={() => setReportReviewDialogOpen(false)}
+                  onClick={() => setDialogOpen(false)}
                 >
                   Close
                 </Button>
-                {selectedReport.status === "Under Review" && (
+                {selectedReport.status === "open" && (
                   <Button
                     className="flex-1 bg-[#22C55E] hover:bg-[#16A34A] text-white font-['Roboto']"
-                    onClick={() => setReportReviewDialogOpen(false)}
+                    onClick={() => setDialogOpen(false)}
                   >
                     <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                     Resolve

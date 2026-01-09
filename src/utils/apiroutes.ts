@@ -138,6 +138,9 @@ export const apiRoutes = {
     profile: {
       get: "/supplier/profile",
       update: "/supplier/profile",
+    },
+    report: {
+      list: 'supplier/reports',
     }
   },
   admin: {

@@ -70,6 +70,10 @@ const orderStatusConfig: Record<
   in_transit: {
     className: "bg-[#3B82F6] text-white border-0 shadow-sm font-['Roboto']",
     label: "In Transit",
+  },
+  reported: {
+    className: "bg-[#F02801] text-white border-0 shadow-sm font-['Roboto']",
+    label: "Reported",
   }
 };
 

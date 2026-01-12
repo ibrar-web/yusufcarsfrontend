@@ -438,7 +438,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
             </div>
           </div>
           <Dialog open={filterDialogOpen} onOpenChange={handleDialogToggle}>
-            <DialogContent className="sm:max-w-[600px] rounded-[12px] p-0 overflow-hidden">
+            <DialogContent className="w-full max-w-[min(100%,600px)] sm:max-w-[600px] rounded-[12px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
               {previewVehicle ? (
                 <VehicleSummaryCard
                   vehicle={previewVehicle}

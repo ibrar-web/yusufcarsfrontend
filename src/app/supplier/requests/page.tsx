@@ -77,6 +77,7 @@ type QuoteRequestDetails = {
 
 type SupplierQuoteRequestApi = {
   id: string;
+  notificationId?: string;
   supplierId?: string | null;
   requestId?: string | null;
   request?: QuoteRequestDetails | null;
@@ -175,7 +176,7 @@ const normalizeQuoteRequest = (
   const requestPayload: QuoteRequestDetails =
     payload.request ?? ({} as QuoteRequestDetails);
   const requestData: QuoteRequestDetails = {
-    id: requestPayload.id ?? payload.requestId ?? payload.id,
+    id: requestPayload.id ?? payload.notificationId ?? payload.id,
     user: requestPayload.user ?? null,
     registrationNumber: requestPayload.registrationNumber ?? null,
     postcode:

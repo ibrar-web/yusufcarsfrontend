@@ -105,7 +105,8 @@ export default function Chat() {
               item.chat?.supplier?.businessName ||
               item.chat?.supplier?.firstName ||
               "Supplier";
-            const supplierId = item.chat?.supplier?.userId;
+            const supplierId =
+              item.chat?.supplier?.userId ?? item.chat?.supplier?.id;
             if (!supplierId) {
               return acc;
             }

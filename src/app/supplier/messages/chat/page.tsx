@@ -241,7 +241,7 @@ export default function Chat() {
         <div className="flex-1 flex overflow-hidden min-h-0">
           <ChatPage
             onNavigate={handleNavigate}
-            userId={currentConversation?.id}
+            userId={conversationParam ?? currentConversation?.id ?? undefined}
             chatId={currentConversation?.chatId}
             role="supplier"
           />

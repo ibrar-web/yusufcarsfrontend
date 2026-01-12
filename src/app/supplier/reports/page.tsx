@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { apiRoutes } from "@/utils/apiroutes";
 import { apiGet } from "@/utils/apiconfig/http";
 import { MessageSquare, User, Wrench, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type SupplierReportApi = {
     id: string,
@@ -65,6 +66,7 @@ const normalizeReport = (report: SupplierReportApi): supplierReport => {
 
 export default function SupplierQuotesPage() {
 //   const { handleNavigate } = useAppState();
+  const router = useRouter();
   const [reports, setReports] = useState<supplierReport[]>([]);
   const [selectedReportToView, setSelectedReportToView] = useState<supplierReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -302,24 +304,31 @@ export default function SupplierQuotesPage() {
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-4">
-                    {/* <Button
-                        className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white"
-                        onClick={() => {
-                        handleNavigate("chat");
-                        setSelectedReportToView(null);
-                        }}
-                    >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Message Customer
-                    </Button> */}
+                  <Button
+                    className="flex-1 bg-[#F02801] hover:bg-[#D22301] text-white cursor-pointer"
+                    disabled={!selectedReportToView?.buyerId}
+                    onClick={() => {
+                      if (selectedReportToView?.buyerId) {
+                        router.push(
+                          `/supplier/messages/chat?conversation=${encodeURIComponent(
+                            selectedReportToView.buyerId
+                          )}`
+                        );
+                      }
+                      setSelectedReportToView(null);
+                    }}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message Customer
+                  </Button>
 
-                    <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => setSelectedReportToView(null)}
-                    >
-                        Close
-                    </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 cursor-pointer"
+                    onClick={() => setSelectedReportToView(null)}
+                  >
+                    Close
+                  </Button>
                 </div>
             </div>
           )}

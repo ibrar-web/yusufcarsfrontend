@@ -294,6 +294,11 @@ export default function AdminCategoriesPage() {
       const trimmedName = newCategoryName.trim();
       const trimmedSlug = slug.trim();
       const trimmedDescription = newCategoryDescription.trim();
+      const payloadForFallback = {
+        name: trimmedName,
+        slug: trimmedSlug || undefined,
+        description: trimmedDescription || undefined,
+      };
       const payload = newCategoryImage
         ? (() => {
             const multipart = new FormData();
@@ -307,11 +312,7 @@ export default function AdminCategoriesPage() {
             multipart.append("image", newCategoryImage);
             return multipart;
           })()
-        : {
-            name: trimmedName,
-            slug: trimmedSlug || undefined,
-            description: trimmedDescription || undefined,
-          };
+        : payloadForFallback;
       const response = await apiPost<CategoryCreateResponse>(
         apiRoutes.admin.categories.create,
         payload,
@@ -336,7 +337,7 @@ export default function AdminCategoriesPage() {
             typeof crypto !== "undefined" && "randomUUID" in crypto
               ? crypto.randomUUID()
               : `tmp-${Date.now()}`,
-          ...payload,
+          ...payloadForFallback,
         };
       }
 

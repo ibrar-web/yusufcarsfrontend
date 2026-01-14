@@ -4,23 +4,9 @@ import { useState } from "react";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { enquiryVehicle } from "@/actions/dvla";
-import {
-  carMakes,
-  carModels,
-  carYears,
-  engineSizes,
-  fuelTypes,
-} from "@/data/vehicle-options";
 import type { VehicleData } from "@/stores/app-store";
 import type { VehicleEnquiryResponse } from "@/types/dvla";
 import { persistVehicleSelection } from "@/utils/cart-storage";
@@ -42,11 +28,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     "registration"
   );
   const [registrationNumber, setRegistrationNumber] = useState("");
-  const [vehicleMake, setVehicleMake] = useState("");
-  const [vehicleModel, setVehicleModel] = useState("");
-  const [vehicleYear, setVehicleYear] = useState("");
-  const [fuelType, setFuelType] = useState("");
-  const [engineSize, setEngineSize] = useState("");
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [localRequest] = useState(false);
   const [lookupDetails, setLookupDetails] =
@@ -55,14 +36,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     null
   );
 
-  const isSearchDisabled =
-    inputMode === "registration"
-      ? registrationNumber.length < 6
-      : !vehicleMake ||
-        !vehicleModel ||
-        !vehicleYear ||
-        !fuelType ||
-        !engineSize;
+  const isSearchDisabled = registrationNumber.length < 6;
 
   const handleLookup = async () => {
     if (inputMode === "registration") {
@@ -72,7 +46,7 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       }
 
       try {
-        const data = await enquiryVehicle(registrationNumber, vehicleModel);
+        const data = await enquiryVehicle(registrationNumber, "");
         const payload = buildVehiclePayload(data);
         setLookupDetails(data);
         setPreviewVehicle(payload);
@@ -88,17 +62,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       return;
     }
 
-    if (
-      !vehicleMake ||
-      !vehicleModel ||
-      !vehicleYear ||
-      !fuelType ||
-      !engineSize
-    ) {
-      toast.error("Select your vehicle details first.");
-      return;
-    }
-
     const payload = buildVehiclePayload();
     setPreviewVehicle(payload);
     setFilterDialogOpen(true);
@@ -107,7 +70,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const buildVehiclePayload = (
     details: VehicleEnquiryResponse | null = lookupDetails
   ): VehicleData => {
-    const isRegistration = inputMode === "registration";
     const requestType = localRequest ? "local" : "national";
     const lookupYear = details?.yearOfManufacture
       ? String(details.yearOfManufacture)
@@ -123,16 +85,11 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
         registrationNumber || details?.registrationNumber || undefined,
       localRequest,
       requestType,
-      make: isRegistration
-        ? details?.make || undefined
-        : vehicleMake || undefined,
-      // model: isRegistration ? undefined : vehicleModel || undefined,
-      model: vehicleModel,
-      yearOfManufacture: isRegistration ? lookupYear : vehicleYear || undefined,
-      fuelType: isRegistration
-        ? details?.fuelType || undefined
-        : fuelType || undefined,
-      engineSize: isRegistration ? lookupEngine : engineSize || undefined,
+      make: details?.make,
+      model:  undefined,
+      yearOfManufacture: lookupYear,
+      fuelType: details?.fuelType || undefined,
+      engineSize: lookupEngine,
       engineCapacity: details?.engineCapacity,
       co2Emissions: details?.co2Emissions,
       colour: details?.colour,
@@ -162,17 +119,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
       setPreviewVehicle(null);
       // onNavigate("products", undefined, payload);
       onNavigate("services", undefined, payload);
-      return;
-    }
-
-    if (
-      !vehicleMake ||
-      !vehicleModel ||
-      !vehicleYear ||
-      !fuelType ||
-      !engineSize
-    ) {
-      toast.error("Select your vehicle details first.");
       return;
     }
 

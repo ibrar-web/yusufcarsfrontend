@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ArrowLeft,
   Wrench,
+  Plus,
 } from "lucide-react";
 import Masonry from "react-responsive-masonry";
 import {
@@ -48,6 +49,7 @@ export function PartsSelectionPage({
   onNavigate,
   categories,
 }: PartsSelectionPageProps) {
+  console.log("categories", categories);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -97,7 +99,9 @@ export function PartsSelectionPage({
 
   const toggleSubpart = (subpart: string) => {
     setSelectedSubparts((prev) =>
-      prev.includes(subpart) ? prev.filter((s) => s !== subpart) : [...prev, subpart]
+      prev.includes(subpart)
+        ? prev.filter((s) => s !== subpart)
+        : [...prev, subpart]
     );
   };
 
@@ -157,8 +161,7 @@ export function PartsSelectionPage({
         sub.label.toLowerCase().includes(searchQuery.toLowerCase())
       );
     const matchesFilter =
-      activeFilter === "All" ||
-      category.name === activeFilter;
+      activeFilter === "All" || category.name === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -178,10 +181,16 @@ export function PartsSelectionPage({
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-['Inter'] font-semibold text-[#0F172A] mb-3" style={{ fontSize: '32px', lineHeight: '1.3' }}>
+          <h1
+            className="font-['Inter'] font-semibold text-[#0F172A] mb-3"
+            style={{ fontSize: "32px", lineHeight: "1.3" }}
+          >
             Select Your Parts
           </h1>
-          <p className="font-['Roboto'] text-[#64748B]" style={{ fontSize: '16px', lineHeight: '1.5' }}>
+          <p
+            className="font-['Roboto'] text-[#64748B]"
+            style={{ fontSize: "16px", lineHeight: "1.5" }}
+          >
             Pick a category or search by name/part number.
           </p>
         </div>
@@ -196,7 +205,7 @@ export function PartsSelectionPage({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-[52px] pl-14 pr-6 bg-white border border-[#E5E7EB] focus:border-[#EF4444] focus:ring-2 focus:ring-[#EF4444] rounded-[14px] font-['Roboto'] text-[#0F172A] placeholder:text-[#64748B]"
-              style={{ fontSize: '16px' }}
+              style={{ fontSize: "16px" }}
             />
           </div>
         </div>
@@ -275,7 +284,10 @@ export function PartsSelectionPage({
 
                 {/* Title Overlay at Bottom */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
-                  <h3 className="font-['Inter'] font-semibold text-white" style={{ fontSize: '18px', lineHeight: '1.3' }}>
+                  <h3
+                    className="font-['Inter'] font-semibold text-white"
+                    style={{ fontSize: "18px", lineHeight: "1.3" }}
+                  >
                     {category.name}
                   </h3>
                 </div>
@@ -287,7 +299,10 @@ export function PartsSelectionPage({
             <div className="w-20 h-20 rounded-full bg-[#F8FAFC] flex items-center justify-center mx-auto mb-4">
               <Search className="h-10 w-10 text-[#64748B]/40" />
             </div>
-            <h3 className="font-['Inter'] font-semibold text-[#0F172A] mb-2" style={{ fontSize: '20px' }}>
+            <h3
+              className="font-['Inter'] font-semibold text-[#0F172A] mb-2"
+              style={{ fontSize: "20px" }}
+            >
               No parts found
             </h3>
             <p className="font-['Roboto'] text-[#64748B] mb-4">
@@ -336,14 +351,23 @@ export function PartsSelectionPage({
               <div className="flex items-center gap-4 mb-3">
                 <div className="w-14 h-14 rounded-2xl bg-[#1E293B] border border-[#334155] flex items-center justify-center">
                   {selectedCategoryInfo && (
-                    <Wrench className="h-7 w-7 text-[#EF4444]" strokeWidth={2} />
+                    <Wrench
+                      className="h-7 w-7 text-[#EF4444]"
+                      strokeWidth={2}
+                    />
                   )}
                 </div>
                 <div>
-                  <DrawerTitle className="font-['Inter'] font-semibold text-[#0F172A]" style={{ fontSize: '28px', lineHeight: '1.2' }}>
+                  <DrawerTitle
+                    className="font-['Inter'] font-semibold text-[#0F172A]"
+                    style={{ fontSize: "28px", lineHeight: "1.2" }}
+                  >
                     {selectedCategoryInfo?.name} Parts
                   </DrawerTitle>
-                  <DrawerDescription className="font-['Roboto'] text-[#64748B] mt-1" style={{ fontSize: '15px' }}>
+                  <DrawerDescription
+                    className="font-['Roboto'] text-[#64748B] mt-1"
+                    style={{ fontSize: "15px" }}
+                  >
                     Select specific parts or continue to view all options
                   </DrawerDescription>
                 </div>
@@ -354,13 +378,14 @@ export function PartsSelectionPage({
             {selectedSubparts.length > 0 && (
               <div className="mb-6 px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-xl">
                 <p className="font-['Roboto'] text-sm text-[#EF4444] font-medium">
-                  {selectedSubparts.length} part{selectedSubparts.length > 1 ? 's' : ''} selected
+                  {selectedSubparts.length} part
+                  {selectedSubparts.length > 1 ? "s" : ""} selected
                 </p>
               </div>
             )}
 
             {/* Subpart Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {selectedCategoryInfo?.subcategories?.map((subcategory) => {
                 const entries =
                   subcategory.items && subcategory.items.length
@@ -375,9 +400,9 @@ export function PartsSelectionPage({
                         },
                       ];
                 return (
-                  <div key={subcategory.id} className="col-span-full">
+                  <div key={subcategory.id}>
                     <div className="mb-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[#0F172A]">
                         {subcategory.name}
                       </p>
                       {subcategory.description && (
@@ -385,8 +410,9 @@ export function PartsSelectionPage({
                           {subcategory.description}
                         </p>
                       )}
+                      <div className="h-px bg-[#E2E8F0] mt-3" />
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                    <div className="flex flex-col gap-3 mb-6">
                       {entries.map((entry, index) => (
                         <button
                           key={entry.id}
@@ -394,11 +420,16 @@ export function PartsSelectionPage({
                           className={`relative px-4 py-4 rounded-xl font-['Roboto'] text-sm transition-all duration-200 text-left group ${
                             selectedSubparts.includes(entry.id)
                               ? "bg-[#EF4444] text-white shadow-lg shadow-[#EF4444]/25"
-                              : "bg-[#F8FAFC] text-[#0F172A] border border-[#E5E7EB] hover:border-[#EF4444]/50 hover:bg-white"
+                              : "bg-[#F8FAFC] text-[#0F172A] hover:bg-white"
                           }`}
                           style={{ animationDelay: `${index * 0.05}s` }}
                         >
-                          <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-3">
+                            {selectedSubparts.includes(entry.id) ? (
+                              <Check className="h-4 w-4 text-white flex-shrink-0" />
+                            ) : (
+                              <Plus className="h-4 w-4 text-[#0F172A] flex-shrink-0" />
+                            )}
                             <span
                               className={`font-medium ${
                                 selectedSubparts.includes(entry.id)
@@ -408,9 +439,6 @@ export function PartsSelectionPage({
                             >
                               {entry.label}
                             </span>
-                            {selectedSubparts.includes(entry.id) && (
-                              <Check className="h-4 w-4 text-white flex-shrink-0" />
-                            )}
                           </div>
                         </button>
                       ))}
@@ -435,7 +463,7 @@ export function PartsSelectionPage({
                   onClick={() => setDrawerOpen(false)}
                   variant="outline"
                   className="flex-1 h-14 border-2 border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#334155] font-['Roboto'] font-medium rounded-xl transition-all"
-                  style={{ fontSize: '15px' }}
+                  style={{ fontSize: "15px" }}
                 >
                   <ArrowLeft className="mr-2 h-5 w-5" />
                   Close
@@ -443,9 +471,14 @@ export function PartsSelectionPage({
                 <Button
                   onClick={handleContinue}
                   className="flex-1 h-14 bg-[#EF4444] hover:bg-[#DC2626] text-white font-['Roboto'] font-semibold rounded-xl shadow-lg shadow-[#EF4444]/30 hover:shadow-xl hover:shadow-[#EF4444]/40 transition-all hover:scale-[1.02]"
-                  style={{ fontSize: '15px' }}
+                  style={{ fontSize: "15px" }}
                 >
-                  Continue with {selectedSubparts.length > 0 ? `${selectedSubparts.length} part${selectedSubparts.length > 1 ? 's' : ''}` : 'category'}
+                  Continue with{" "}
+                  {selectedSubparts.length > 0
+                    ? `${selectedSubparts.length} part${
+                        selectedSubparts.length > 1 ? "s" : ""
+                      }`
+                    : "category"}
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>

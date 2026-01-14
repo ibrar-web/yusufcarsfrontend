@@ -1,24 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import {
-  Settings,
-  Disc,
-  Wrench,
-  Zap,
-  Car,
-  Armchair,
   Search,
   Check,
   ChevronRight,
   ArrowLeft,
-  Flame,
-  Wind,
-  Gauge,
-  Lightbulb,
-  Cog,
+  Wrench,
 } from "lucide-react";
 import Masonry from "react-responsive-masonry";
 import {
@@ -34,23 +24,29 @@ import {
   persistServicesSelection,
   type CartServiceItem,
 } from "@/utils/cart-storage";
+import type { ServiceCategoryDTO } from "@/actions/categories";
 
 interface PartsSelectionPageProps {
   onNavigate: (page: string) => void;
   onSignupClick?: () => void;
+  categories: ServiceCategoryDTO[];
 }
 
 interface PartCategory {
   id: string;
   name: string;
-  icon: any;
-  image: string;
-  count?: string;
-  subparts: string[];
+  image?: string | null;
+  subcategories: ServiceCategoryDTO["subcategories"];
+  subparts: Array<{
+    id: string;
+    label: string;
+    subcategoryName?: string | null;
+  }>;
 }
 
 export function PartsSelectionPage({
   onNavigate,
+  categories,
 }: PartsSelectionPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
@@ -58,123 +54,44 @@ export function PartsSelectionPage({
   const [selectedSubparts, setSelectedSubparts] = useState<string[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const categories: PartCategory[] = [
-    {
-      id: "engine",
-      name: "Engine",
-      icon: Settings,
-      image: "https://images.unsplash.com/photo-1758381358962-efc41be53986?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBlbmdpbmUlMjBwYXJ0c3xlbnwxfHx8fDE3NTkzMTAxNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "124k",
-      subparts: ["Alternator", "Starter Motor", "Coil Pack", "Spark Plugs", "Timing Belt", "Water Pump", "Head Gasket", "Oil Filter"],
-    },
-    {
-      id: "brakes",
-      name: "Brakes",
-      icon: Disc,
-      image: "https://images.unsplash.com/photo-1613214150384-14921ff659b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBicmFrZSUyMGRpc2N8ZW58MXx8fHwxNzU5MzEwMTc2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "98k",
-      subparts: ["Front Brake Pads", "Rear Brake Pads", "Brake Discs", "Brake Fluid", "Brake Calipers", "Handbrake Cable"],
-    },
-    {
-      id: "suspension",
-      name: "Suspension",
-      icon: Wrench,
-      image: "https://images.unsplash.com/photo-1669136048337-5daa3adef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBzdXNwZW5zaW9ufGVufDF8fHx8MTc1OTIxODgwNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "76k",
-      subparts: ["Shock Absorbers", "Coil Springs", "Suspension Arms", "Anti-Roll Bar", "Suspension Bushes", "Ball Joints"],
-    },
-    {
-      id: "electrical",
-      name: "Electrical",
-      icon: Zap,
-      image: "https://images.unsplash.com/photo-1660594161026-d084068e9787?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBiYXR0ZXJ5JTIwZWxlY3RyaWNhbHxlbnwxfHx8fDE3NTkyMDM1NTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "112k",
-      subparts: ["Battery", "Alternator", "Headlight Bulbs", "Fuses", "Wiring Harness", "Ignition Coil"],
-    },
-    {
-      id: "cooling",
-      name: "Cooling & Heating",
-      icon: Wind,
-      image: "https://images.unsplash.com/photo-1730461747568-7250e49eb50c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjByYWRpYXRvciUyMGNvb2xpbmd8ZW58MXx8fHwxNzU5MzEwMTc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "54k",
-      subparts: ["Radiator", "Thermostat", "Coolant", "Fan Belt", "Heater Core", "AC Compressor"],
-    },
-    {
-      id: "transmission",
-      name: "Transmission",
-      icon: Gauge,
-      image: "https://images.unsplash.com/photo-1616992515884-9f645b0fbb5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjB0cmFuc21pc3Npb24lMjBnZWFyYm94fGVufDF8fHx8MTc1OTIyOTM1MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "42k",
-      subparts: ["Clutch Kit", "Flywheel", "Gearbox Oil", "Drive Shaft", "CV Joint", "Transmission Filter"],
-    },
-    {
-      id: "exhaust",
-      name: "Exhaust",
-      icon: Flame,
-      image: "https://images.unsplash.com/photo-1680674049247-6526e152c694?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBleGhhdXN0JTIwcGlwZXxlbnwxfHx8fDE3NTkyMjQ4Mjl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "38k",
-      subparts: ["Exhaust Manifold", "Catalytic Converter", "Silencer", "Exhaust Pipe", "Lambda Sensor", "DPF Filter"],
-    },
-    {
-      id: "bodywork",
-      name: "Bodywork",
-      icon: Car,
-      image: "https://images.unsplash.com/photo-1733534816908-650eaf9271f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBib2R5JTIwcGFuZWx8ZW58MXx8fHwxNzU5MzEwMTc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "156k",
-      subparts: ["Wing Mirror", "Front Bumper", "Rear Bumper", "Bonnet", "Door Panel", "Windscreen"],
-    },
-    {
-      id: "interior",
-      name: "Interior",
-      icon: Armchair,
-      image: "https://images.unsplash.com/photo-1682858110563-3f609263d418?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBpbnRlcmlvciUyMHNlYXR8ZW58MXx8fHwxNzU5MzEwMTc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "89k",
-      subparts: ["Seats", "Dashboard", "Steering Wheel", "Floor Mats", "Door Handles", "Gear Knob"],
-    },
-    {
-      id: "steering",
-      name: "Steering",
-      icon: Cog,
-      image: "https://images.unsplash.com/photo-1687652076061-2525c077da08?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBzdGVlcmluZyUyMHdoZWVsfGVufDF8fHx8MTc1OTIyNDgzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "32k",
-      subparts: ["Power Steering Pump", "Steering Rack", "Track Rod End", "Steering Column", "Wheel Alignment"],
-    },
-    {
-      id: "wheels",
-      name: "Wheels & Tyres",
-      icon: Disc,
-      image: "https://images.unsplash.com/photo-1684073889639-1eb56d8b0545?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjB3aGVlbCUyMHR5cmV8ZW58MXx8fHwxNzU5MzEwMTc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "102k",
-      subparts: ["Alloy Wheels", "Steel Wheels", "Tyres", "Wheel Nuts", "Hub Caps", "Wheel Bearings"],
-    },
-    {
-      id: "lighting",
-      name: "Lighting",
-      icon: Lightbulb,
-      image: "https://images.unsplash.com/photo-1598586958772-8bf368215c2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBoZWFkbGlnaHR8ZW58MXx8fHwxNzU5MzEwMTgwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      count: "67k",
-      subparts: ["Headlights", "Tail Lights", "Indicator Bulbs", "Fog Lights", "Interior Lights", "LED Strips"],
-    },
-  ];
+  const normalizedCategories = useMemo<PartCategory[]>(() => {
+    return categories.map((category) => {
+      const subcategories = category.subcategories ?? [];
+      const subparts = subcategories.flatMap((subcategory) => {
+        const items = subcategory.items ?? [];
+        if (items.length) {
+          return items.map((item) => ({
+            id: item.id,
+            label: item.name,
+            subcategoryName: subcategory.name,
+          }));
+        }
+        return [
+          {
+            id: subcategory.id,
+            label: subcategory.name,
+            subcategoryName: subcategory.name,
+          },
+        ];
+      });
+      return {
+        id: category.id,
+        name: category.name,
+        image: category.imageUrl || category.imageKey || null,
+        subcategories,
+        subparts,
+      };
+    });
+  }, [categories]);
 
-  const filterOptions = [
-    "All",
-    "Popular",
-    "Engine",
-    "Brakes",
-    "Suspension",
-    "Electrical",
-    "Bodywork",
-    "Interior",
-    "Lighting",
-    "Cooling",
-    "Transmission",
-    "Steering",
-    "Wheels & Tyres",
-  ];
+  const filterOptions = useMemo(() => {
+    const names = normalizedCategories.map((category) => category.name);
+    return ["All", ...names];
+  }, [normalizedCategories]);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    setSelectedSubparts([]);
     setDrawerOpen(true);
   };
 
@@ -191,44 +108,56 @@ export function PartsSelectionPage({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
-  const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
+  const selectedCategoryInfo = normalizedCategories.find(
+    (category) => category.id === selectedCategory
+  );
+  const selectedSubpartsLookup = useMemo(() => {
+    const entries = selectedCategoryInfo?.subparts ?? [];
+    return new Map(entries.map((entry) => [entry.id, entry]));
+  }, [selectedCategoryInfo]);
 
   const buildCartServicesPayload = (): CartServiceItem[] => {
     if (selectedSubparts.length === 0) {
-      if (!selectedCategoryData) {
+      if (!selectedCategoryInfo) {
         return [];
       }
       return [
         {
-          id: slugifyServiceId(selectedCategoryData.id || selectedCategoryData.name),
-          label: selectedCategoryData.name,
-          category: selectedCategoryData.name,
+          id: slugifyServiceId(
+            selectedCategoryInfo.id || selectedCategoryInfo.name
+          ),
+          label: selectedCategoryInfo.name,
+          category: selectedCategoryInfo.name,
         },
       ];
     }
 
-    return selectedSubparts.map((label) => ({
-      id: slugifyServiceId(
-        `${selectedCategoryData?.id ?? selectedCategory ?? "service"}-${label}`,
-      ),
-      label,
-      category: selectedCategoryData?.name ?? undefined,
-    }));
+    return selectedSubparts
+      .map((entryId) => selectedSubpartsLookup.get(entryId))
+      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+      .map((entry) => ({
+        id: entry.id,
+        label: entry.label,
+        category: [selectedCategoryInfo?.name, entry.subcategoryName]
+          .filter(Boolean)
+          .join(" / "),
+      }));
   };
 
   const handleContinue = () => {
     const services = buildCartServicesPayload();
     persistServicesSelection(services);
-    onNavigate("quotes");
+    onNavigate("cart");
   };
 
-  const filteredCategories = categories.filter((category) => {
+  const filteredCategories = normalizedCategories.filter((category) => {
     const matchesSearch =
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.subparts.some((sub) => sub.toLowerCase().includes(searchQuery.toLowerCase()));
+      category.subparts.some((sub) =>
+        sub.label.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     const matchesFilter =
       activeFilter === "All" ||
-      activeFilter === "Popular" ||
       category.name === activeFilter;
     return matchesSearch && matchesFilter;
   });
@@ -319,7 +248,10 @@ export function PartsSelectionPage({
                 {/* Full Card Image */}
                 <div className="absolute inset-0">
                   <ImageWithFallback
-                    src={category.image}
+                    src={
+                      category.image ||
+                      "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=900&q=80"
+                    }
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -328,13 +260,11 @@ export function PartsSelectionPage({
                 </div>
 
                 {/* Badge */}
-                {category.count && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <Badge className="bg-white/90 backdrop-blur-sm text-[#64748B] border border-[#E5E7EB] font-['Roboto'] text-xs px-2.5 py-1">
-                      {category.count}
-                    </Badge>
-                  </div>
-                )}
+                <div className="absolute top-4 right-4 z-10">
+                  <Badge className="bg-white/90 backdrop-blur-sm text-[#64748B] border border-[#E5E7EB] font-['Roboto'] text-xs px-2.5 py-1">
+                    {category.subparts.length} items
+                  </Badge>
+                </div>
 
                 {/* Selected Check */}
                 {selectedCategory === category.id && (
@@ -405,13 +335,13 @@ export function PartsSelectionPage({
             <DrawerHeader className="px-0 pb-8">
               <div className="flex items-center gap-4 mb-3">
                 <div className="w-14 h-14 rounded-2xl bg-[#1E293B] border border-[#334155] flex items-center justify-center">
-                  {selectedCategoryData && (
-                    <selectedCategoryData.icon className="h-7 w-7 text-[#EF4444]" strokeWidth={2} />
+                  {selectedCategoryInfo && (
+                    <Wrench className="h-7 w-7 text-[#EF4444]" strokeWidth={2} />
                   )}
                 </div>
                 <div>
                   <DrawerTitle className="font-['Inter'] font-semibold text-[#0F172A]" style={{ fontSize: '28px', lineHeight: '1.2' }}>
-                    {selectedCategoryData?.name} Parts
+                    {selectedCategoryInfo?.name} Parts
                   </DrawerTitle>
                   <DrawerDescription className="font-['Roboto'] text-[#64748B] mt-1" style={{ fontSize: '15px' }}>
                     Select specific parts or continue to view all options
@@ -431,33 +361,69 @@ export function PartsSelectionPage({
 
             {/* Subpart Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-              {selectedCategoryData?.subparts.map((subpart, index) => (
-                <button
-                  key={subpart}
-                  onClick={() => toggleSubpart(subpart)}
-                  className={`relative px-4 py-4 rounded-xl font-['Roboto'] text-sm transition-all duration-200 text-left group ${
-                    selectedSubparts.includes(subpart)
-                      ? "bg-[#EF4444] text-white shadow-lg shadow-[#EF4444]/25"
-                      : "bg-[#F8FAFC] text-[#0F172A] border border-[#E5E7EB] hover:border-[#EF4444]/50 hover:bg-white"
-                  }`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={`font-medium ${selectedSubparts.includes(subpart) ? 'text-white' : 'text-[#0F172A]'}`}>
-                      {subpart}
-                    </span>
-                    {selectedSubparts.includes(subpart) && (
-                      <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    )}
+              {selectedCategoryInfo?.subcategories?.map((subcategory) => {
+                const entries =
+                  subcategory.items && subcategory.items.length
+                    ? subcategory.items.map((item) => ({
+                        id: item.id,
+                        label: item.name,
+                      }))
+                    : [
+                        {
+                          id: subcategory.id,
+                          label: subcategory.name,
+                        },
+                      ];
+                return (
+                  <div key={subcategory.id} className="col-span-full">
+                    <div className="mb-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+                        {subcategory.name}
+                      </p>
+                      {subcategory.description && (
+                        <p className="text-sm text-[#64748B] mt-1">
+                          {subcategory.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                      {entries.map((entry, index) => (
+                        <button
+                          key={entry.id}
+                          onClick={() => toggleSubpart(entry.id)}
+                          className={`relative px-4 py-4 rounded-xl font-['Roboto'] text-sm transition-all duration-200 text-left group ${
+                            selectedSubparts.includes(entry.id)
+                              ? "bg-[#EF4444] text-white shadow-lg shadow-[#EF4444]/25"
+                              : "bg-[#F8FAFC] text-[#0F172A] border border-[#E5E7EB] hover:border-[#EF4444]/50 hover:bg-white"
+                          }`}
+                          style={{ animationDelay: `${index * 0.05}s` }}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className={`font-medium ${
+                                selectedSubparts.includes(entry.id)
+                                  ? "text-white"
+                                  : "text-[#0F172A]"
+                              }`}
+                            >
+                              {entry.label}
+                            </span>
+                            {selectedSubparts.includes(entry.id) && (
+                              <Check className="h-4 w-4 text-white flex-shrink-0" />
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
 
             {/* View All Link */}
             <div className="flex items-center justify-center mb-8">
               <button className="font-['Roboto'] text-[#EF4444] hover:text-[#DC2626] text-sm font-semibold flex items-center gap-2 px-6 py-3 rounded-xl hover:bg-[#EF4444]/5 transition-all">
-                View all {selectedCategoryData?.name.toLowerCase()} subparts
+                View all {selectedCategoryInfo?.name.toLowerCase()} subparts
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>

@@ -93,10 +93,6 @@ const PATH_TO_PAGE: Array<{
     match: (path) => path.startsWith("/blogs"),
     page: "blogs",
   },
-  {
-    match: (path) => path.startsWith("/parts-selection"),
-    page: "parts-selection",
-  },
   { match: (path) => path.startsWith("/request-flow"), page: "request-flow" },
   { match: (path) => path.startsWith("/cart"), page: "cart" },
   { match: (path) => path.startsWith("/contact"), page: "contact" },

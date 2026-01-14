@@ -48,6 +48,8 @@ export type ServiceCategoryDTO = {
   name: string;
   slug: string;
   description: string | null;
+  imageUrl?: string | null;
+  imageKey?: string | null;
   sortOrder: number;
   subcategories?: ServiceSubcategoryDTO[];
 };
@@ -128,6 +130,8 @@ function mapCategory(
     name: category.name,
     slug: category.slug,
     description: category.description ?? null,
+    imageUrl: category.imageUrl ?? null,
+    imageKey: category.imageKey ?? null,
     sortOrder: category.sortOrder,
     subcategories:
       includeSubcategories && category.subcategories

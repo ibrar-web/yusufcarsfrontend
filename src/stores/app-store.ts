@@ -63,7 +63,6 @@ export type Page =
   | "vehicle-maintenance"
   | "marketplace"
   | "request-flow"
-  | "parts-selection"
   | "cart"
   | "blogs"
   | "quotes"
@@ -89,7 +88,6 @@ export const PAGE_PATHS: Record<Page, string> = {
   "vehicle-maintenance": "/vehicle-maintenance",
   marketplace: "/marketplace",
   "request-flow": "/request-flow",
-  "parts-selection": "/parts-selection",
   cart: "/cart",
   quotes: "/quotes",
   blogs: "/blogs",

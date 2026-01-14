@@ -184,7 +184,7 @@ export function CartPageClient() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => handleNavigate("parts-selection")}
+                      onClick={() => handleNavigate("marketplace")}
                 >
                   Browse Services
                 </Button>
@@ -243,7 +243,7 @@ export function CartPageClient() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleNavigate("parts-selection")}
+                        onClick={() => handleNavigate("marketplace")}
                       >
                         {services.length
                           ? "Add or update services"
@@ -313,7 +313,7 @@ export function CartPageClient() {
                 <Button
                   variant="outline"
                   className="flex-1 min-w-[180px]"
-                  onClick={() => handleNavigate("parts-selection")}
+                  onClick={() => handleNavigate("marketplace")}
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   Update Services

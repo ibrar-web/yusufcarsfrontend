@@ -5,6 +5,8 @@ export interface ServiceCategoryEntity {
   name: string;
   slug: string;
   description: string | null;
+  imageUrl?: string | null;
+  imageKey?: string | null;
   sortOrder: number;
   subcategories?: ServiceSubcategoryEntity[];
 }
@@ -46,6 +48,14 @@ export const ServiceCategorySchema = new EntitySchema<ServiceCategoryEntity>({
       unique: true,
     },
     description: {
+      type: "text",
+      nullable: true,
+    },
+    imageUrl: {
+      type: "text",
+      nullable: true,
+    },
+    imageKey: {
       type: "text",
       nullable: true,
     },

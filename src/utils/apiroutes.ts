@@ -3,7 +3,7 @@ export type AppRouteGroup = "website" | "user" | "supplier" | "admin";
 export const websiteRoutes = [
   "/",
   "/request-flow",
-  "/parts-selection",
+  "/marketplace",
   "/supplier-profile",
   "/supplier-onboarding",
   "/how-it-works",

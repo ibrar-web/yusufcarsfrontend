@@ -393,12 +393,7 @@ export function PartsSelectionPage({
                         id: item.id,
                         label: item.name,
                       }))
-                    : [
-                        {
-                          id: subcategory.id,
-                          label: subcategory.name,
-                        },
-                      ];
+                    : [];
                 return (
                   <div key={subcategory.id}>
                     <div className="mb-3">

@@ -48,6 +48,7 @@ interface AdminCategory {
   name: string;
   slug?: string;
   description?: string | null;
+  image?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -127,6 +128,10 @@ export default function AdminCategoriesPage() {
   const [editingName, setEditingName] = useState("");
   const [editingSlug, setEditingSlug] = useState("");
   const [editingDescription, setEditingDescription] = useState("");
+  const [editingImage, setEditingImage] = useState<File | null>(null);
+  const [editingImagePreview, setEditingImagePreview] = useState<string | null>(
+    null
+  );
   const [newCategoryName, setNewCategoryName] = useState("");
   const [slug, setSlug] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
@@ -185,6 +190,8 @@ export default function AdminCategoriesPage() {
     setEditingName(category.name);
     setEditingSlug(category?.slug ?? "");
     setEditingDescription(category.description ?? "");
+    setEditingImage(null);
+    setEditingImagePreview(category.image ?? null);
     setEditDialogOpen(true);
   };
 
@@ -197,24 +204,57 @@ export default function AdminCategoriesPage() {
     if (!selectedCategory) return;
     setIsSaving(true);
     try {
-      const payload = {
-        name: editingName?.trim(),
-        slug: editingSlug?.trim(),
-        description: editingDescription?.trim() || undefined,
+      const trimmedName = editingName?.trim();
+      const trimmedSlug = editingSlug?.trim();
+      const trimmedDescription = editingDescription?.trim();
+      const updatedFields = {
+        name: trimmedName,
+        slug: trimmedSlug || undefined,
+        description: trimmedDescription || undefined,
       };
+      const payload = editingImage
+        ? (() => {
+            const multipart = new FormData();
+            multipart.append("name", trimmedName);
+            if (trimmedSlug) {
+              multipart.append("slug", trimmedSlug);
+            }
+            if (trimmedDescription) {
+              multipart.append("description", trimmedDescription);
+            }
+            multipart.append("image", editingImage);
+            return multipart;
+          })()
+        : updatedFields;
       await apiPatch(
         apiRoutes.admin.categories.update(selectedCategory.id),
-        payload
+        payload,
+        editingImage
+          ? { headers: { "Content-Type": "multipart/form-data" } }
+          : undefined
       );
       setCategories((prev) =>
         prev.map((category) =>
           category.id === selectedCategory.id
-            ? { ...category, ...payload }
+            ? {
+                ...category,
+                ...updatedFields,
+                image: editingImage
+                  ? editingImagePreview ?? category.image
+                  : category.image,
+              }
             : category
         )
       );
       toast.success("Category updated successfully");
       setEditDialogOpen(false);
+      setEditingImage(null);
+      setEditingImagePreview((prev) => {
+        if (prev && prev.startsWith("blob:")) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to update category"
@@ -339,6 +379,31 @@ export default function AdminCategoriesPage() {
       return previewUrl;
     });
   };
+
+  const handleEditingImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    setEditingImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    setEditingImagePreview((prev) => {
+      if (prev && prev.startsWith("blob:")) {
+        URL.revokeObjectURL(prev);
+      }
+      return previewUrl;
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (editingImagePreview && editingImagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(editingImagePreview);
+      }
+    };
+  }, [editingImagePreview]);
 
   useEffect(() => {
     return () => {
@@ -542,7 +607,21 @@ export default function AdminCategoriesPage() {
       </Card>
 
 
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      <Dialog
+        open={editDialogOpen}
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) {
+            setEditingImage(null);
+            setEditingImagePreview((prev) => {
+              if (prev && prev.startsWith("blob:")) {
+                URL.revokeObjectURL(prev);
+              }
+              return null;
+            });
+          }
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-['Inter'] text-xl text-[#0F172A]">
@@ -583,6 +662,25 @@ export default function AdminCategoriesPage() {
                 placeholder="Short description (optional)"
                 className="min-h-[120px]"
               />
+            </div>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Category image
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleEditingImageChange}
+              />
+              {editingImagePreview && (
+                <div className="mt-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                  <img
+                    src={editingImagePreview}
+                    alt="Selected category preview"
+                    className="h-32 w-full rounded-lg object-cover"
+                  />
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter className="mt-4">

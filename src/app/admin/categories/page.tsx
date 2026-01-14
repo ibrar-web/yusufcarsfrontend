@@ -139,11 +139,6 @@ export default function AdminCategoriesPage() {
     async () => {
       setIsLoading(true);
       try {
-        // const params = {
-        //   page: requestedPage,
-        //   pageSize: requestedPageSize,
-        //   search: debouncedSearch || undefined,
-        // };
         const response = await apiGet<CategoriesResponse>(
           apiRoutes.admin.categories.list
           // ,
@@ -151,15 +146,7 @@ export default function AdminCategoriesPage() {
         );
         const payload = response?.data?.data ?? response?.data ?? response;
         const normalized = normalizeCategories(payload ?? []);
-        // const total =
-        //   response?.data?.meta?.total ??
-        //   response?.meta?.total ??
-        //   response?.total ??
-        //   normalized.length;
         setCategories(normalized);
-        // setTotalCategories(total);
-        // setPage(requestedPage);
-        // setPageSize(requestedPageSize);
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : "Failed to load categories"

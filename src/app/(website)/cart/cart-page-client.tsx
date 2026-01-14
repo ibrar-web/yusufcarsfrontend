@@ -69,13 +69,6 @@ export function CartPageClient() {
     handleNavigate("products", undefined, vehicle);
   };
 
-  // const slugifyServiceName = (value: string) =>
-  //   value
-  //     .trim()
-  //     .toLowerCase()
-  //     .replace(/[^a-z0-9]+/g, "-")
-  //     .replace(/(^-|-$)+/g, "");
-
   const buildQuoteRequestPayload = (
     vehicleData: NonNullable<CartSummary["vehicle"]>,
     serviceList: CartSummary["services"],
@@ -84,12 +77,6 @@ export function CartPageClient() {
     if (!serviceList || !serviceList.length) {
       throw new Error("Add at least one service to proceed.");
     }
-
-    console.log({ serviceList });
-
-    // const services = serviceList.map((service) =>
-    //   slugifyServiceName(service.id),
-    // );
 
     const services = serviceList.find((ser) => ser?.id === service?.id)?.id;
 

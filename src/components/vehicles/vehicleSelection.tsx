@@ -11,10 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { enquiryVehicle } from "@/actions/dvla";
 import {
@@ -54,7 +51,9 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
   const [localRequest] = useState(false);
   const [lookupDetails, setLookupDetails] =
     useState<VehicleEnquiryResponse | null>(null);
-  const [previewVehicle, setPreviewVehicle] = useState<VehicleData | null>(null);
+  const [previewVehicle, setPreviewVehicle] = useState<VehicleData | null>(
+    null
+  );
 
   const isSearchDisabled =
     inputMode === "registration"
@@ -105,7 +104,9 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
     setFilterDialogOpen(true);
   };
 
-  const buildVehiclePayload = (details: VehicleEnquiryResponse | null = lookupDetails): VehicleData => {
+  const buildVehiclePayload = (
+    details: VehicleEnquiryResponse | null = lookupDetails
+  ): VehicleData => {
     const isRegistration = inputMode === "registration";
     const requestType = localRequest ? "local" : "national";
     const lookupYear = details?.yearOfManufacture
@@ -216,20 +217,6 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                 >
                   Registration
                 </button>
-                {/* <button
-                  onClick={() => {
-                    setInputMode("manual");
-                    setLookupDetails(null);
-                  }}
-                  className={`px-6 py-3 rounded-full font-['Roboto'] font-semibold transition-all duration-300 ${
-                    inputMode === "manual"
-                      ? "bg-[#F02801] text-white shadow-lg shadow-[#F02801]/30"
-                      : "bg-[#94A3B8] text-white shadow-md"
-                  }`}
-                  style={{ fontSize: "15px" }}
-                >
-                  Manual
-                </button> */}
               </div>
               <div
                 className="relative backdrop-blur-xl rounded-[24px] p-8 lg:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.16)] border border-white/40"
@@ -267,167 +254,11 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                         style={{ letterSpacing: "0.2em" }}
                       />
                     </div>
-                    {/* <div>
-                      <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
-                        Your Postcode
-                      </label>
-                      <Input
-                        type="text"
-                        value={postcode}
-                        onChange={(e) => {
-                          const value = e.target.value
-                            .toUpperCase()
-                            .replace(/[^A-Z0-9\s]/g, "");
-                          setPostcode(value);
-                        }}
-                        placeholder="E.G. SW1A 1AA"
-                        maxLength={8}
-                        className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
-                      />
-                    </div> */}
-                    {/* <div>
-                      <label className="block mb-3 font-['Roboto'] text-[#475569] text-sm">
-                        Model
-                      </label>
-                      <Input
-                        type="text"
-                        value={vehicleModel}
-                        onChange={(e) => {
-                          // const value = e.target.value
-                          //   .toUpperCase()
-                          //   .replace(/[^A-Z0-9\s]/g, "");
-                          setVehicleModel(e.target.value);
-                        }}
-                        placeholder="Model"
-                        // maxLength={8}
-                        className="h-14 text-[16px] text-center rounded-2xl border-2 border-[#CBD5E1] bg-white hover:border-[#94A3B8] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] uppercase placeholder:text-[#94A3B8]"
-                      />
-                    </div> */}
+
                     <Button
                       onClick={handleLookup}
                       disabled={isSearchDisabled}
                       className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40 cursor-pointer"
-                      style={{ fontSize: "16px" }}
-                    >
-                      FILTER
-                    </Button>
-                  </div>
-                )}
-                {inputMode === "manual" && (
-                  <div className="space-y-6">
-                    <div>
-                      <Select
-                        value={vehicleMake}
-                        onValueChange={(value) => {
-                          setVehicleMake(value);
-                          setVehicleModel("");
-                        }}
-                      >
-                        <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                          <SelectValue placeholder="Select Maker" />
-                        </SelectTrigger>
-                        <SelectContent className="font-['Roboto']">
-                          {carMakes.map((make) => (
-                            <SelectItem
-                              key={make}
-                              value={make}
-                              className="text-[18px]"
-                            >
-                              {make}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Select
-                        value={vehicleModel}
-                        onValueChange={setVehicleModel}
-                        disabled={!vehicleMake}
-                      >
-                        <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100">
-                          <SelectValue placeholder="Select Model" />
-                        </SelectTrigger>
-                        <SelectContent className="font-['Roboto']">
-                          {vehicleMake &&
-                            carModels[vehicleMake]?.map((model) => (
-                              <SelectItem
-                                key={model}
-                                value={model}
-                                className="text-[18px]"
-                              >
-                                {model}
-                              </SelectItem>
-                            ))}
-                          {vehicleMake && !carModels[vehicleMake] && (
-                            <SelectItem value="other" className="text-[18px]">
-                              Other Models
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Select
-                        value={vehicleYear}
-                        onValueChange={setVehicleYear}
-                      >
-                        <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                          <SelectValue placeholder="Select Year" />
-                        </SelectTrigger>
-                        <SelectContent className="font-['Roboto'] max-h-[300px]">
-                          {carYears.map((year) => (
-                            <SelectItem
-                              key={year}
-                              value={year}
-                              className="text-[18px]"
-                            >
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Select value={fuelType} onValueChange={setFuelType}>
-                        <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                          <SelectValue placeholder="Select Fuel Type" />
-                        </SelectTrigger>
-                        <SelectContent className="font-['Roboto']">
-                          {fuelTypes.map((fuel) => (
-                            <SelectItem
-                              key={fuel}
-                              value={fuel}
-                              className="text-[18px]"
-                            >
-                              {fuel}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Select value={engineSize} onValueChange={setEngineSize}>
-                        <SelectTrigger className="h-20 text-[18px] rounded-2xl border-2 border-[#FECACA] bg-white hover:border-[#FCA5A5] focus:border-[#F02801] focus:ring-4 focus:ring-[#F02801]/20 transition-all duration-200 font-['Roboto'] text-[#0F172A]">
-                          <SelectValue placeholder="Select Engine Size" />
-                        </SelectTrigger>
-                        <SelectContent className="font-['Roboto']">
-                          {engineSizes.map((size) => (
-                            <SelectItem
-                              key={size}
-                              value={size}
-                              className="text-[18px]"
-                            >
-                              {size}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      onClick={handleLookup}
-                      disabled={isSearchDisabled}
-                      className="w-full h-16 rounded-full font-['Roboto'] font-bold bg-gradient-to-r from-[#F02801] to-[#FF5C39] hover:from-[#D22301] hover:to-[#F02801] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider shadow-lg shadow-[#F02801]/30 hover:shadow-xl hover:shadow-[#F02801]/40"
                       style={{ fontSize: "16px" }}
                     >
                       FILTER
@@ -451,7 +282,8 @@ export function VehicleSelection({ onNavigate }: VehicleSelectionProps) {
                     No vehicle selected
                   </h3>
                   <p className="font-['Roboto'] text-[#475569]">
-                    Enter your vehicle details first so we can display them here.
+                    Enter your vehicle details first so we can display them
+                    here.
                   </p>
                 </div>
               )}

@@ -11,7 +11,6 @@ import {
   removeVehicleFromCart,
   removeServiceByIndex,
   persistServicesSelection,
-  serviceObj,
 } from "@/utils/cart-storage";
 import { useAppState } from "@/hooks/use-app-state";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -22,16 +21,13 @@ import { apiRoutes } from "@/utils/apiroutes";
 type ExtendedError = Error & { status?: number };
 
 export function CartPageClient() {
-  const { handleNavigate } = useAppState();
+  const { handleNavigate, isAuthenticated } = useAppState();
   const [cartSummary, setCartSummary] = useState<CartSummary>({
     vehicle: null,
     services: [],
   });
   const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
   const [requestingQuote, setRequestingQuote] = useState(false);
-  const [requestingServiceId, setRequestingServiceId] = useState<string | null>(
-    null
-  );
 
   useEffect(() => {
     const updateSummary = () => setCartSummary(loadCartSummary());
@@ -71,14 +67,21 @@ export function CartPageClient() {
 
   const buildQuoteRequestPayload = (
     vehicleData: NonNullable<CartSummary["vehicle"]>,
-    serviceList: CartSummary["services"],
-    service: serviceObj
+    serviceList: CartSummary["services"]
   ) => {
     if (!serviceList || !serviceList.length) {
       throw new Error("Add at least one service to proceed.");
     }
 
-    const services = serviceList.find((ser) => ser?.id === service?.id)?.id;
+    const services = serviceList
+      .map((service) => service?.id || service?.label)
+      .filter((service): service is string =>
+        Boolean(service && service.trim())
+      );
+
+    if (!services.length) {
+      throw new Error("Add at least one service to proceed.");
+    }
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
@@ -104,7 +107,7 @@ export function CartPageClient() {
     };
   };
 
-  const handleQuoteRequest = async (service: serviceObj) => {
+  const handleQuoteRequest = async () => {
     if (!vehicle) {
       toast.error("Add your vehicle before requesting a quote.");
       return;
@@ -113,17 +116,20 @@ export function CartPageClient() {
       toast.error("Add at least one service.");
       return;
     }
+    if (!isAuthenticated) {
+      toast.error("Please sign in before requesting a quote.");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("request-sign-in"));
+      }
+      return;
+    }
 
     setRequestingQuote(true);
-    setRequestingServiceId(service.id);
     try {
-      const payload = buildQuoteRequestPayload(vehicle, services, service);
+      const payload = buildQuoteRequestPayload(vehicle, services);
       await apiPost(apiRoutes.user.quote.requestQuote, payload);
       toast.success("Quote request submitted.");
-      const remainingServices = services.filter(
-        (entry) => entry.id !== service.id
-      );
-      persistServicesSelection(remainingServices);
+      persistServicesSelection([]);
       refreshSummary();
     } catch (error) {
       const err = error as ExtendedError;
@@ -139,7 +145,6 @@ export function CartPageClient() {
       );
     } finally {
       setRequestingQuote(false);
-      setRequestingServiceId(null);
     }
   };
 
@@ -230,68 +235,72 @@ export function CartPageClient() {
                       </span>
                     )}
                   </div>
+                  <div className="mt-6 border-t border-[#E2E8F0] pt-5 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
+                        Services requested
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleNavigate("parts-selection")}
+                      >
+                        {services.length
+                          ? "Add or update services"
+                          : "Add services"}
+                      </Button>
+                    </div>
+                    {services.length > 0 ? (
+                      <div className="space-y-3 flex flex-col gap-3 rounded-2xl border border-[#E2E8F0] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        {services.map((service, index) => (
+                          <div
+                            key={service.id ?? `${service.label}-${index}`}
+                            className="flex flex-col gap-3 rounded-2xl border border-[#E2E8F0] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                          >
+                            <div className="space-y-1">
+                              <p className="font-['Inter'] text-base font-semibold text-[#0F172A]">
+                                {service.label}
+                              </p>
+                              {service.category && (
+                                <p className="font-['Roboto'] text-sm text-[#64748B]">
+                                  {service.category}
+                                </p>
+                              )}
+                              {service.notes && (
+                                <p className="font-['Roboto'] text-xs text-[#94A3B8]">
+                                  {service.notes}
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 justify-center cursor-pointer"
+                              onClick={() => handleServiceRemove(index)}
+                            >
+                              <X className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="rounded-2xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 text-sm text-[#475569]">
+                        Add at least one service so suppliers know what to quote
+                        for.
+                      </p>
+                    )}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        size="lg"
+                        onClick={handleQuoteRequest}
+                        disabled={requestingQuote || services.length === 0}
+                        className="w-full sm:w-auto"
+                      >
+                        {requestingQuote ? "Requesting…" : "Submit request"}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">
-                  Services requested
-                </p>
-                {services.length > 0 ? (
-                  <div className="mt-4 space-y-3">
-                    {services.map((service, index) => (
-                      <div
-                        key={service.id ?? `${service.label}-${index}`}
-                        className="flex flex-col gap-4 justify-between rounded-2xl border border-[#E2E8F0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
-                      >
-                        <div className="space-y-1">
-                          <p className="font-['Inter'] text-base font-semibold text-[#0F172A]">
-                            {service.label}
-                          </p>
-                          {service.category && (
-                            <p className="font-['Roboto'] text-sm text-[#64748B]">
-                              {service.category}
-                            </p>
-                          )}
-                          {service.notes && (
-                            <p className="font-['Roboto'] text-xs text-[#94A3B8]">
-                              {service.notes}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                          <Button
-                            size="lg"
-                            onClick={() => handleQuoteRequest(service)}
-                            disabled={
-                              requestingQuote &&
-                              requestingServiceId === service.id
-                            }
-                            className="cursor-pointer w-full sm:w-auto"
-                          >
-                            {requestingQuote &&
-                            requestingServiceId === service.id
-                              ? "Requesting…"
-                              : "Request a Quote"}
-                          </Button>
-                          <button
-                            className="text-sm font-semibold text-[#F02801] hover:text-[#D22301] flex items-center gap-1 justify-center cursor-pointer"
-                            onClick={() => handleServiceRemove(index)}
-                          >
-                            <X className="h-4 w-4" />
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-4 rounded-2xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 text-sm text-[#475569]">
-                    Add at least one service so suppliers know what to quote
-                    for.
-                  </p>
-                )}
-              </div>
 
               {/* <div className="flex flex-wrap gap-3 pt-4">
                 <Button

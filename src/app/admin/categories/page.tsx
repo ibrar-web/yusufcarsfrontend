@@ -130,6 +130,10 @@ export default function AdminCategoriesPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [slug, setSlug] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [newCategoryImage, setNewCategoryImage] = useState<File | null>(null);
+  const [newCategoryImagePreview, setNewCategoryImagePreview] = useState<
+    string | null
+  >(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -247,14 +251,33 @@ export default function AdminCategoriesPage() {
     }
     setIsCreating(true);
     try {
-      const payload = {
-        name: newCategoryName.trim(),
-        slug: slug,
-        description: newCategoryDescription.trim() || undefined,
-      };
+      const trimmedName = newCategoryName.trim();
+      const trimmedSlug = slug.trim();
+      const trimmedDescription = newCategoryDescription.trim();
+      const payload = newCategoryImage
+        ? (() => {
+            const multipart = new FormData();
+            multipart.append("name", trimmedName);
+            if (trimmedSlug) {
+              multipart.append("slug", trimmedSlug);
+            }
+            if (trimmedDescription) {
+              multipart.append("description", trimmedDescription);
+            }
+            multipart.append("image", newCategoryImage);
+            return multipart;
+          })()
+        : {
+            name: trimmedName,
+            slug: trimmedSlug || undefined,
+            description: trimmedDescription || undefined,
+          };
       const response = await apiPost<CategoryCreateResponse>(
         apiRoutes.admin.categories.create,
-        payload
+        payload,
+        newCategoryImage
+          ? { headers: { "Content-Type": "multipart/form-data" } }
+          : undefined
       );
       let createdCategory: AdminCategory | undefined;
       if (response && typeof response === "object") {
@@ -282,6 +305,13 @@ export default function AdminCategoriesPage() {
       setNewCategoryName("");
       setSlug("");
       setNewCategoryDescription("");
+      setNewCategoryImage(null);
+      setNewCategoryImagePreview((prev) => {
+        if (prev && prev.startsWith("blob:")) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
       setCreateDialogOpen(false);
       toast.success("Category created");
     } catch (error) {
@@ -292,6 +322,31 @@ export default function AdminCategoriesPage() {
       setIsCreating(false);
     }
   };
+
+  const handleNewCategoryImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    setNewCategoryImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    setNewCategoryImagePreview((prev) => {
+      if (prev && prev.startsWith("blob:")) {
+        URL.revokeObjectURL(prev);
+      }
+      return previewUrl;
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (newCategoryImagePreview && newCategoryImagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(newCategoryImagePreview);
+      }
+    };
+  }, [newCategoryImagePreview]);
 
   // const handlePageChange = (nextPage: number) => {
   //   fetchCategories({ requestedPage: nextPage, requestedPageSize: pageSize });
@@ -619,6 +674,25 @@ export default function AdminCategoriesPage() {
                 className="min-h-[120px]"
               />
             </div>
+            <div>
+              <p className="text-sm text-[#475569] font-['Roboto'] mb-1">
+                Category image
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleNewCategoryImageChange}
+              />
+              {newCategoryImagePreview && (
+                <div className="mt-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                  <img
+                    src={newCategoryImagePreview}
+                    alt="Selected category preview"
+                    className="h-32 w-full rounded-lg object-cover"
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <DialogFooter className="mt-4">
             <Button variant="ghost" className="cursor-pointer" onClick={() => {
@@ -626,6 +700,13 @@ export default function AdminCategoriesPage() {
               setNewCategoryName("");
               setSlug("");
               setNewCategoryDescription("");
+              setNewCategoryImage(null);
+              setNewCategoryImagePreview((prev) => {
+                if (prev && prev.startsWith("blob:")) {
+                  URL.revokeObjectURL(prev);
+                }
+                return null;
+              });
             }}>
               Cancel
             </Button>

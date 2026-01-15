@@ -62,7 +62,7 @@ type SupplierProfile = {
     email: string;
     fullName: string;
     role: string;
-    isActive: boolean;
+    status?: UserStatus;
     suspensionReason?: string | null;
     createdAt: string;
     postCode?: string | null;
@@ -78,6 +78,13 @@ type ApiResponse = {
   message?: string;
   data?: SupplierProfile | { data?: SupplierProfile };
 };
+
+export enum UserStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
+  DELETED = "deleted",
+}
 
 export default function AdminSupplierProfilePage() {
   const searchParams = useSearchParams();
@@ -149,8 +156,16 @@ export default function AdminSupplierProfilePage() {
 
   const contactEmail = profile?.user?.email ?? "N/A";
   const phoneNumber = profile?.phone ?? "N/A";
-  const isActive = profile?.user?.isActive ?? false;
-  const derivedStatus = isActive ? "Active" : "Inactive";
+  const status =
+    profile?.user?.status ?? UserStatus.INACTIVE;
+  const derivedStatus =
+    status === UserStatus.ACTIVE
+      ? "Active"
+      : status === UserStatus.SUSPENDED
+        ? "Suspended"
+        : status === UserStatus.DELETED
+          ? "Deleted"
+          : "Inactive";
   const approvalStatusRaw = profile?.approvalStatus ?? "pending";
   const approvalStatusLabel = approvalStatusRaw
     .replace(/_/g, " ")
@@ -206,6 +221,16 @@ export default function AdminSupplierProfilePage() {
       : approvalStatusRaw === "rejected"
         ? "bg-[#FEE2E2] text-[#7F1D1D] border-0"
         : "bg-[#FEF9C3] text-[#92400E] border-0";
+  const statusBadgeClass =
+    status === UserStatus.ACTIVE
+      ? "bg-[#DCFCE7] text-[#166534] border-0"
+      : status === UserStatus.SUSPENDED
+        ? "bg-[#FEE2E2] text-[#7F1D1D] border-0"
+        : status === UserStatus.DELETED
+          ? "bg-[#E2E8F0] text-[#475569] border-0"
+          : "bg-[#FEF9C3] text-[#92400E] border-0";
+  const canToggleStatus = status !== UserStatus.DELETED;
+  const isStatusActive = status === UserStatus.ACTIVE;
 
   const openActionModal = (
     type: "approve" | "reject" | "suspend" | "activate"
@@ -333,11 +358,7 @@ export default function AdminSupplierProfilePage() {
               </div>
               <div className="flex items-center gap-3">
                 <Badge
-                  className={`px-3 py-1 font-['Roboto'] ${
-                    derivedStatus === "Active"
-                      ? "bg-[#DCFCE7] text-[#166534] border-0"
-                      : "bg-[#FEE2E2] text-[#7F1D1D] border-0"
-                  }`}
+                  className={`px-3 py-1 font-['Roboto'] ${statusBadgeClass}`}
                 >
                   {derivedStatus}
                 </Badge>
@@ -523,14 +544,18 @@ export default function AdminSupplierProfilePage() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Button
-              className={
-                isActive
-                  ? "bg-[#EF4444] hover:bg-[#DC2626] text-white sm:w-auto"
-                  : "bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto"
+              className={`${
+                isStatusActive
+                  ? "bg-[#EF4444] hover:bg-[#DC2626]"
+                  : "bg-[#22C55E] hover:bg-[#16A34A]"
+              } text-white sm:w-auto`}
+              onClick={() =>
+                canToggleStatus &&
+                openActionModal(isStatusActive ? "suspend" : "activate")
               }
-              onClick={() => openActionModal(isActive ? "suspend" : "activate")}
+              disabled={!canToggleStatus}
             >
-              {isActive ? "Suspend Supplier" : "Activate Supplier"}
+              {isStatusActive ? "Suspend Supplier" : "Activate Supplier"}
             </Button>
             <Button
               className="bg-[#22C55E] hover:bg-[#16A34A] text-white sm:w-auto"

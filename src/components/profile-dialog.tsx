@@ -9,7 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { User, Mail, MapPin, Camera } from "lucide-react";
+import { User, Mail, MapPin, Camera, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { apiGet, apiPut } from "@/utils/apiconfig/http";
 import { apiRoutes } from "@/utils/apiroutes";
@@ -24,6 +24,7 @@ type ProfileFormData = {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   postCode: string;
   image?: File | null;
 };
@@ -33,6 +34,7 @@ type UserProfileApiResponse = {
     firstName?: string;
     lastName?: string;
     email?: string;
+    phone?: string;
     postCode?: string;
     profileImageUrl?: string;
   };
@@ -43,6 +45,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     firstName: "John",
     lastName: "Smith",
     email: "john@example.com",
+    phone: "",
     postCode: "B1 1BD",
     image: undefined,
   });
@@ -70,6 +73,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           firstName: payload.firstName ?? "",
           lastName: payload.lastName ?? "",
           email: payload.email ?? "",
+          phone: payload.phone ?? "",
           postCode: payload.postCode ?? "",
         }));
         if (payload.profileImageUrl) {
@@ -132,7 +136,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     fileInputRef.current?.click();
   };
 
-  const handleAvatarInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setFormData((prev) => ({ ...prev, image: file }));
@@ -199,12 +205,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   )}
                 </Avatar>
                 <div className="flex-1">
-                  <p className="text-sm text-[#475569]">
-                  {formData.image?.name}
-                  </p>
-                  <p className="text-xs text-[#94A3B8]">
-                    JPG, PNG up to 5MB
-                  </p>
+                  <p className="text-xs text-[#94A3B8]">JPG, PNG up to 5MB</p>
                 </div>
                 <button
                   type="button"
@@ -225,7 +226,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   max="1.2"
                   step="0.05"
                   value={avatarScale}
-                  onChange={(event) => setAvatarScale(Number(event.target.value))}
+                  onChange={(event) =>
+                    setAvatarScale(Number(event.target.value))
+                  }
                   className="w-full h-1 rounded-full accent-[#F02801] cursor-pointer"
                 />
               </div>
@@ -309,6 +312,29 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   disabled
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="profile-phone"
+                className="font-['Roboto'] text-[#0F172A]"
+                style={{ fontSize: "14px" }}
+              >
+                Phone
+              </Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+                <Input
+                  id="profile-phone"
+                  type="tel"
+                  placeholder="07123 456789"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
                   }
                   className="pl-10 h-12 rounded-xl border-2 border-[#E5E7EB] focus:border-[#F02801] font-['Roboto']"
                 />
